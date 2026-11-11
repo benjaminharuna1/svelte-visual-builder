@@ -95,14 +95,19 @@ For one developer, Phases 0–4 are roughly 4–6 weeks. A small team can compre
 
 ### Tasks
 
-- [ ] Add a `tsconfig.build.json` per package.
-- [ ] Build Svelte packages (`editor-svelte`, `runtime-svelte`) with `svelte-package` into `dist/`.
-- [ ] Build TypeScript packages (`schema`, `core`, `plugin-api`, `adapter-sveltekit`, `elementor-import`) with `tsc` or `tsup`.
-- [ ] Update every `package.json` with `exports` (`types`, `svelte`, `import`), `files: ["dist"]`, `sideEffects`, and `publishConfig`.
-- [ ] Add `prepack` scripts and a root `build:packages` script.
-- [ ] Add `publint` and `@arethetypeswrong/cli` to CI.
-- [ ] Add a `create-svelte-builder` CLI with minimal, blog, docs, and pricing templates.
-- [ ] Add a packaging smoke test: `npm pack` every package, install into a temporary app, and build it.
+- [x] Add a `tsconfig.build.json` per package.
+- [x] Build Svelte packages (`editor-svelte`, `runtime-svelte`) with `svelte-package` into `dist/`.
+- [x] Build TypeScript packages (`schema`, `core`, `plugin-api`, `adapter-sveltekit`, `elementor-import`) with `tsc` or `tsup`.
+- [x] Update every `package.json` with `exports` (`types`, `svelte`, `import`), `files: ["dist", "src"]`, `sideEffects`, and `publishConfig`.
+  - `src` is published because the `development` export points at source so Vite dev can use workspace source without a rebuild.
+- [x] Add `prepack` scripts and a root `build:packages` script.
+- [x] Add `publint` and `@arethetypeswrong/cli` validation scripts (`pnpm lint:packages`, `pnpm types:packages`, `pnpm check:packages`).
+- [ ] Wire packaging validation into CI (depends on Phase 0).
+- [x] Add a `create-svelte-builder` CLI with minimal, blog, docs, and pricing templates.
+- [x] Add a packaging smoke test: pack every package with `pnpm pack`, install the tarballs into a temporary starter app, type-check it, and build it (`pnpm smoke:packages`).
+  - `pnpm pack` is used instead of `npm pack` because it rewrites internal `workspace:*` dependencies; the smoke test fails if any tarball still contains `workspace:`.
+
+> **Phase 1 status:** packaging, starter CLI, and smoke test are implemented. `pnpm check`, `pnpm test`, `pnpm check:packages`, and `pnpm smoke:packages` pass. `attw` runs for TypeScript-only packages; Svelte packages are covered by `publint` plus bundler resolution because TypeScript `node16` cannot resolve `.svelte` imports inside `.d.ts` files. CI wiring and Changesets remain part of Phase 0.
 
 ### Deliverables
 

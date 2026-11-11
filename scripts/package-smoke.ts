@@ -19,9 +19,13 @@ const packageDirectories = [
 function run( command: string, args: string[], cwd: string ) {
 	console.log( `\n> ${ command } ${ args.join( ' ' ) }` );
 	console.log( `  ${ cwd }` );
+	const env = { ...process.env };
+	delete env.npm_config_allow_scripts;
+	delete env.NPM_CONFIG_ALLOW_SCRIPTS;
 	return new Promise<void>( ( resolve, reject ) => {
 		const child = spawn( command, args, {
 			cwd,
+			env,
 			stdio: 'inherit',
 			shell: process.platform === 'win32',
 		} );

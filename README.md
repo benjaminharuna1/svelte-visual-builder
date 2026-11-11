@@ -121,6 +121,7 @@ packages/
   editor-svelte        Svelte editor UI, controller, import, AI, media, SDK helpers
   elementor-import     Elementor JSON conversion
   adapter-sveltekit    SvelteKit integration helpers
+  create-svelte-builder  Scaffold a SvelteKit starter (minimal, blog, docs, pricing)
 ```
 
 The reference studio ships with an open-source homepage fixture at `apps/reference-studio/src/lib/server/fixtures/deepseek-homepage.builder.json`, wired as the default `/` page in the demo seed.
@@ -146,6 +147,21 @@ pnpm check
 pnpm test
 pnpm test:e2e
 ```
+
+Validate published packages:
+
+```bash
+pnpm check:packages
+pnpm smoke:packages
+```
+
+Scaffold a new SvelteKit app outside this monorepo:
+
+```bash
+pnpm create svelte-builder my-site --template minimal
+```
+
+Available templates: `minimal`, `blog`, `docs`, and `pricing`.
 
 Run the embedding validation gate:
 

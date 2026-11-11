@@ -13,6 +13,14 @@ function matchesAnyNodeModule( normalizedId: string, packageNames: string[] ) {
 	return packageNames.some( ( packageName ) => normalizedId.includes( `/node_modules/${ packageName }` ) );
 }
 
+function matchesBuilderModule( normalizedId: string, packageName: string, moduleName: string ) {
+	return matchesBuilderSource( normalizedId, packageName )
+		&& (
+			normalizedId.includes( `/src/lib/${ moduleName }.ts` )
+			|| normalizedId.includes( `/dist/lib/${ moduleName }.js` )
+		);
+}
+
 export function createBuilderManualChunks( isSsrBuild: boolean ) {
 	if ( isSsrBuild ) {
 		return undefined;
@@ -22,11 +30,8 @@ export function createBuilderManualChunks( isSsrBuild: boolean ) {
 		const normalizedId = toNormalizedId( id );
 
 		if (
-			matchesBuilderSource( normalizedId, 'editor-svelte' )
-			&& (
-				normalizedId.includes( '/src/lib/ai.ts' )
-				|| normalizedId.includes( '/src/lib/ai-tools.ts' )
-			)
+			matchesBuilderModule( normalizedId, 'editor-svelte', 'ai' )
+			|| matchesBuilderModule( normalizedId, 'editor-svelte', 'ai-tools' )
 		) {
 			return 'builder-ai';
 		}

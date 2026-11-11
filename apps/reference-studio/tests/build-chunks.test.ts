@@ -13,6 +13,8 @@ describe( 'reference studio build chunking', () => {
 		expect( INITIAL_CLIENT_CHUNK_BUDGET_BYTES ).toBe( 350 * 1024 );
 
 		expect( manualChunks?.( 'C:\\repo\\packages\\editor-svelte\\src\\lib\\BuilderCanvas.svelte' ) ).toBe( 'builder-editor' );
+		expect( manualChunks?.( 'C:\\repo\\packages\\editor-svelte\\src\\lib\\ai.ts' ) ).toBe( 'builder-ai' );
+		expect( manualChunks?.( 'C:\\repo\\packages\\editor-svelte\\dist\\lib\\ai-tools.js' ) ).toBe( 'builder-ai' );
 		expect( manualChunks?.( 'C:\\repo\\packages\\adapter-sveltekit\\src\\index.ts' ) ).toBeUndefined();
 		expect( manualChunks?.( 'C:\\repo\\node_modules\\@tiptap\\core\\dist\\index.js' ) ).toBe( 'vendor-richtext' );
 		expect( manualChunks?.( 'C:\\repo\\node_modules\\bits-ui\\dist\\index.js' ) ).toBe( 'vendor-shell' );
