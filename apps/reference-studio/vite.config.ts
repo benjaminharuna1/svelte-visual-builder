@@ -48,6 +48,9 @@ function builderChunkEnvironmentPlugin() {
 
 export default defineConfig( {
 	plugins: [ builderChunkEnvironmentPlugin(), initialChunkBudgetPlugin(), sveltekit() ],
+	ssr: {
+		noExternal: [ /^@builder\// ],
+	},
 	server: {
 		port: 5173,
 	},
