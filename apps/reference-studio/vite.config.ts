@@ -5,7 +5,11 @@ import { createBuilderManualChunks, INITIAL_CLIENT_CHUNK_BUDGET_BYTES } from './
 function initialChunkBudgetPlugin() {
 	return {
 		name: 'builder-initial-chunk-budget',
-		generateBundle( _: unknown, bundle: Record<string, { type: string; fileName: string; code?: string; isDynamicEntry?: boolean }> ) {
+		generateBundle( this: { environment: { name: string } }, _: unknown, bundle: Record<string, { type: string; fileName: string; code?: string; isDynamicEntry?: boolean }> ) {
+			if ( this.environment.name !== 'client' ) {
+				return;
+			}
+
 			if ( !Object.keys( bundle ).some( ( fileName ) => fileName.includes( '_app/immutable/' ) ) ) {
 				return;
 			}

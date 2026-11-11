@@ -6,7 +6,7 @@ import {
 	positionOptions,
 	type BuilderControlFieldDefinition,
 	type BuilderControlSectionDefinition,
-} from './control-family-helpers.ts';
+} from './control-family-helpers.js';
 
 export interface FormDataPopupParitySectionStack {
 	styleSections: BuilderControlSectionDefinition[];

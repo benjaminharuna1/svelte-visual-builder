@@ -3,7 +3,7 @@ import { getCanvasGeometryKey } from '@builder/core';
 
 import type { BuilderNode } from '@builder/schema';
 
-import { createDropIntent, createDropRuleContext, evaluateDropRule, type BuilderDragDescriptor } from './drop-rules';
+import { createDropIntent, createDropRuleContext, evaluateDropRule, type BuilderDragDescriptor } from './drop-rules.js';
 
 const MIN_INSERTION_ZONE_SIZE = 32;
 const MAX_INSERTION_ZONE_SIZE = 56;

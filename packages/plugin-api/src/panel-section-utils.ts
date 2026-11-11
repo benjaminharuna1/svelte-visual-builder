@@ -1,4 +1,4 @@
-import type { BuilderFieldDefinition, BuilderPanelSectionDefinition, BuilderPanelSectionTab } from './index.ts';
+import type { BuilderFieldDefinition, BuilderPanelSectionDefinition, BuilderPanelSectionTab } from './index.js';
 
 type SelectOption = string | { label: string; value: string };
 

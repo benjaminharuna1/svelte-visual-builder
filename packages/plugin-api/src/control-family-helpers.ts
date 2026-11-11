@@ -3,7 +3,7 @@ import type {
 	BuilderFieldType,
 	BuilderPanelSectionDefinition,
 	BuilderPanelSectionTab,
-} from './index.ts';
+} from './index.js';
 import {
 	createChooseField,
 	createChoosePrimitive,
@@ -49,7 +49,7 @@ import {
 	type BuilderSwitcherControlPrimitive,
 	type BuilderTabsControlPrimitive,
 	type BuilderUrlControlPrimitive,
-} from './control-primitives.ts';
+} from './control-primitives.js';
 
 export type BuilderControlFamilyTab = Extract<BuilderPanelSectionTab, 'style' | 'advanced'>;
 

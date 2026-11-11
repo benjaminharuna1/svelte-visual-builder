@@ -36,8 +36,8 @@ import {
 	areTransientDragStatesEqual,
 	type BuilderTransientDragPointer,
 	type BuilderTransientDragState,
-} from './transient-drag';
-import { configureInteractionCore } from './interaction-core';
+} from './transient-drag.js';
+import { configureInteractionCore } from './interaction-core.js';
 import {
 	commitTemplateImportReview,
 	importHtmlIntoProject,
@@ -47,8 +47,8 @@ import {
 	type TemplateImportOptions,
 	type TemplateImportResult,
 	type TemplateImportReviewResult,
-} from './template-import';
-import type { HtmlImportPayload } from './html-import';
+} from './template-import.js';
+import type { HtmlImportPayload } from './html-import.js';
 import {
 	createBrowserAiSettingsAdapter,
 	createDefaultAiSessionState,
@@ -60,7 +60,7 @@ import {
 	type BuilderAiSettingsAdapter,
 	type BuilderAiToolCall,
 	type BuilderAiToolExecutionResult,
-} from './ai-core';
+} from './ai-core.js';
 import {
 	createBrowserLocalMediaAdapter,
 	createMediaDiagnostics,
@@ -74,7 +74,7 @@ import {
 	type BuilderMediaAssetMetadata,
 	type BuilderMediaDiagnostic,
 	type BuilderMediaOptions,
-} from './media';
+} from './media.js';
 
 interface BuilderAiCompositionContext {
 	activeDocument: BuilderDocument;
@@ -684,8 +684,8 @@ export function createBuilderEditor( project: BuilderPackage, options: CreateBui
 			if ( !settings.baseUrl.trim() || !settings.model.trim() ) {
 				throw new Error( 'AI endpoint and model are required before running the assistant.' );
 			}
-			const { createAiSystemPrompt, runBuilderAiAgent } = await import( './ai' );
-			const { createBuilderAiToolExecutor } = await import( './ai-tools' );
+			const { createAiSystemPrompt, runBuilderAiAgent } = await import( './ai.js' );
+			const { createBuilderAiToolExecutor } = await import( './ai-tools.js' );
 			const contextDocument = getAiCompositionContext( engine.getState() ).primaryDocument;
 			const allowCreateInEdit = mode === 'edit' && contextDocument.root.length === 0 && hasExplicitAiCreateIntent( prompt );
 			const toolExecutor = createBuilderAiToolExecutor( {

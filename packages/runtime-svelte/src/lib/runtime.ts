@@ -21,7 +21,7 @@ import type {
 import type { Component, Snippet } from 'svelte';
 import { createDefaultBuilderRegistry } from '@builder/plugin-api';
 import { createStyleSet } from '@builder/schema';
-import { BUILDER_RUNTIME_BASE_STYLES } from './runtime-base-styles';
+import { BUILDER_RUNTIME_BASE_STYLES } from './runtime-base-styles.js';
 
 export interface BuilderRuntimeOptions {
 	project: BuilderPackage;

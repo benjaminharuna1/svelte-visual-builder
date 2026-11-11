@@ -12,8 +12,8 @@ import type {
 	VariableDefinition,
 } from '@builder/schema';
 import { BuilderDocumentSchema, BuilderPackageSchema, BuilderNodeSchema, parseBuilderPackage, slugify } from '@builder/schema';
-import { importHtmlPackage, type HtmlImportPayload } from './html-import';
-import { mergeMediaCatalog, normalizeMediaAsset } from './media';
+import { importHtmlPackage, type HtmlImportPayload } from './html-import.js';
+import { mergeMediaCatalog, normalizeMediaAsset } from './media.js';
 
 export type TemplateImportSource = 'builder-package' | 'elementor' | 'html';
 export type TemplateImportDestination = 'library' | 'active-page' | 'new-page';

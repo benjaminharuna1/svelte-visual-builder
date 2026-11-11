@@ -7,6 +7,14 @@
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "dev": "pnpm --filter @builder/reference-studio dev",
+    "build": "pnpm build:packages",
+    "build:packages": "pnpm -r --filter \"./packages/*\" run build",
+    "clean:packages": "pnpm -r --filter \"./packages/*\" run clean",
+    "lint:packages": "pnpm -r --filter \"./packages/*\" exec publint --strict",
+    "types:packages": "pnpm exec attw --pack packages/schema --profile esm-only && pnpm exec attw --pack packages/core --profile esm-only && pnpm exec attw --pack packages/plugin-api --profile esm-only && pnpm exec attw --pack packages/elementor-import --profile esm-only && pnpm exec attw --pack packages/adapter-sveltekit --profile esm-only",
+    "check:packages": "pnpm build:packages && pnpm lint:packages && pnpm types:packages",
+    "smoke:packages": "tsx scripts/package-smoke.ts",
+    "precheck": "pnpm build:packages",
     "check": "tsc --noEmit -p tsconfig.packages.json && pnpm --filter @builder/reference-studio check",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -15,6 +23,7 @@
     "release:validate": "tsx scripts/run-release-validation.ts"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@playwright/test": "^1.55.0",
     "@sveltejs/adapter-auto": "^4.0.0",
     "@sveltejs/kit": "^2.20.7",
@@ -28,6 +37,7 @@
     "prettier": "^3.5.3",
     "prettier-plugin-svelte": "^3.4.0",
     "prisma": "^6.6.0",
+    "publint": "^0.3.25",
     "svelte": "^5.38.7",
     "svelte-check": "^4.1.7",
     "tslib": "^2.8.1",

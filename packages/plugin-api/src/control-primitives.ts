@@ -1,4 +1,4 @@
-import type { BuilderFieldDefinition, BuilderFieldType } from './index.ts';
+import type { BuilderFieldDefinition, BuilderFieldType } from './index.js';
 
 export type BuilderControlStateTab = 'normal' | 'hover' | 'active' | 'focus' | 'disabled';
 export type BuilderControlPrimitiveKind =

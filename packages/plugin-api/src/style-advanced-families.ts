@@ -9,8 +9,8 @@ import {
 	positionOptions,
 	typographyTransformOptions,
 	visibilityOptions,
-} from './control-family-helpers.ts';
-import type { BuilderControlFamilyDefinition, BuilderControlSectionDefinition } from './control-family-helpers.ts';
+} from './control-family-helpers.js';
+import type { BuilderControlFamilyDefinition, BuilderControlSectionDefinition } from './control-family-helpers.js';
 import {
 	createChooseField,
 	createColorField,
@@ -22,7 +22,7 @@ import {
 	createSliderField,
 	createSwitcherField,
 	createTabsField,
-} from './control-primitives.ts';
+} from './control-primitives.js';
 
 const backgroundTypeOptions = [
 	{ label: 'Classic', value: 'classic' },

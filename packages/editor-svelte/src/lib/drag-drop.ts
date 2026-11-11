@@ -1,8 +1,8 @@
 import type { BuilderEngineState, DropTarget } from '@builder/core';
 
-import type { BuilderDragDescriptor } from './drop-rules';
-import { resolveCanvasDropTarget } from './canvas';
-import type { BuilderTransientDragPointer } from './transient-drag';
+import type { BuilderDragDescriptor } from './drop-rules.js';
+import { resolveCanvasDropTarget } from './canvas.js';
+import type { BuilderTransientDragPointer } from './transient-drag.js';
 
 export interface BuilderDndData {
 	kind: 'builder';

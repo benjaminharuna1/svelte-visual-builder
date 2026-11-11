@@ -1,6 +1,6 @@
-import { advancedSection, numberField, selectField, styleSection, textField, toggleField } from '../panel-section-utils.ts';
-import { compactChoiceField, compactChoiceOption } from './compact-controls.ts';
-import { createSelectPrimitive } from '../control-family-helpers.ts';
+import { advancedSection, numberField, selectField, styleSection, textField, toggleField } from '../panel-section-utils.js';
+import { compactChoiceField, compactChoiceOption } from './compact-controls.js';
+import { createSelectPrimitive } from '../control-family-helpers.js';
 
 const flexDirectionOptions = [
 	compactChoiceOption( 'Row', 'row', 'flex-row' ),

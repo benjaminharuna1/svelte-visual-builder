@@ -13,8 +13,8 @@ import type {
 } from '@builder/plugin-api';
 import { applyBuilderHostExtension, createDefaultBuilderRegistry } from '@builder/plugin-api';
 import type { BuilderRuntimeComponentMap } from '@builder/runtime-svelte';
-import type { BuilderAiSettings, BuilderAiSettingsAdapter } from './ai-core';
-import { createBuilderEditor, type BuilderEditorController, type BuilderEditorFeatures, type BuilderEditorLifecycleHooks, type CreateBuilderEditorOptions } from './editor';
+import type { BuilderAiSettings, BuilderAiSettingsAdapter } from './ai-core.js';
+import { createBuilderEditor, type BuilderEditorController, type BuilderEditorFeatures, type BuilderEditorLifecycleHooks, type CreateBuilderEditorOptions } from './editor.js';
 
 export interface BuilderHostSdkDefinition {
 	extension?: BuilderHostExtensionDefinition;

@@ -1,9 +1,9 @@
-import { createChooseField } from '../control-family-helpers.ts';
+import { createChooseField } from '../control-family-helpers.js';
 import type {
 	BuilderChooseControlPrimitive,
 	BuilderControlFieldDefinition,
 	BuilderControlOption,
-} from '../control-family-helpers.ts';
+} from '../control-family-helpers.js';
 
 export type CompactChoiceConfig = Omit<BuilderChooseControlPrimitive, 'kind' | 'fieldType' | 'options'> & {
 	fieldType?: BuilderChooseControlPrimitive['fieldType'];

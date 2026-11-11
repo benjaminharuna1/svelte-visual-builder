@@ -8,6 +8,7 @@ import {
 	type BuilderDocument,
 	type BuilderNode,
 	type BuilderPackage,
+	type ComponentInstancePolicy,
 	type DocumentRevision,
 } from '@builder/schema';
 import { importElementorPackage, type ElementorImportWarning } from '@builder/elementor-import';
@@ -59,6 +60,14 @@ function markPublished<T extends BuilderDocument>( document: T ): T {
 	document.status = 'published';
 	return document;
 }
+
+const defaultInstancePolicy: ComponentInstancePolicy = {
+	allowDetach: true,
+	allowRelink: true,
+	allowStyleOverrides: false,
+	allowClassOverrides: false,
+	allowVisibilityOverrides: false,
+};
 
 function createSurfaceCardStyle( accent = '#d7deec' ) {
 	return createStyleSet( {
@@ -260,6 +269,7 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			},
 		],
 		libraryGroup: 'marketing',
+		instancePolicy: defaultInstancePolicy,
 	};
 	heroComponent.meta = {
 		flows: [ 'component-master', 'component-instance', 'safe-overrides' ],
@@ -315,6 +325,7 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			},
 		],
 		libraryGroup: 'metrics',
+		instancePolicy: defaultInstancePolicy,
 	};
 	statComponent.meta = {
 		flows: [ 'component-master', 'component-instance', 'metrics' ],
@@ -373,6 +384,7 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			},
 		],
 		libraryGroup: 'storytelling',
+		instancePolicy: defaultInstancePolicy,
 	};
 	featureSpotlightComponent.meta = {
 		flows: [ 'component-master', 'component-instance', 'campaigns' ],
@@ -1423,9 +1435,10 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			label: 'Site editor rail',
 			conditionGroups: [
 				{
+					id: 'site-editor-condition',
 					operator: 'and',
 					rules: [
-						{ source: 'query', path: 'siteEditor', operator: 'exists' },
+						{ id: 'site-editor-rule', source: 'query', path: 'siteEditor', operator: 'exists', values: [] },
 					],
 				},
 			],
@@ -1479,9 +1492,10 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			label: 'Single post',
 			conditionGroups: [
 				{
+					id: 'blog-route-condition',
 					operator: 'and',
 					rules: [
-						{ source: 'route', path: 'pathname', operator: 'startsWith', value: '/blog' },
+						{ id: 'blog-route-rule', source: 'route', path: 'pathname', operator: 'startsWith', value: '/blog', values: [] },
 					],
 				},
 			],
@@ -1527,9 +1541,10 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			label: 'Newsletter popup',
 			conditionGroups: [
 				{
+					id: 'popup-preview-condition',
 					operator: 'and',
 					rules: [
-						{ source: 'query', path: 'preview', operator: 'equals', value: '1' },
+						{ id: 'popup-preview-rule', source: 'query', path: 'preview', operator: 'equals', value: '1', values: [] },
 					],
 				},
 			],
@@ -1543,9 +1558,10 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 			label: 'Theme preview modal',
 			conditionGroups: [
 				{
+					id: 'modal-preview-condition',
 					operator: 'and',
 					rules: [
-						{ source: 'query', path: 'modal', operator: 'equals', value: '1' },
+						{ id: 'modal-preview-rule', source: 'query', path: 'modal', operator: 'equals', value: '1', values: [] },
 					],
 				},
 			],
@@ -1556,11 +1572,11 @@ export function createDemoStudioData( options: CreateDemoStudioDataOptions = {} 
 	] );
 
 	project.designSystem.variables.push(
-		{ id: 'brand', name: 'brand', label: 'Brand', kind: 'color', value: '#2563eb' },
-		{ id: 'radius-xl', name: 'radius-xl', label: 'Radius XL', kind: 'radius', value: '24px' },
-		{ id: 'surface-bg', name: 'surface-bg', label: 'Surface background', kind: 'color', value: '#f8fafc' },
-		{ id: 'space-section', name: 'space-section', label: 'Section spacing', kind: 'spacing', value: '2rem' },
-		{ id: 'rail-width', name: 'rail-width', label: 'Editor rail width', kind: 'size', value: '320px' },
+		{ id: 'brand', name: 'brand', label: 'Brand', kind: 'color', value: '#2563eb', source: 'manual', meta: {} },
+		{ id: 'radius-xl', name: 'radius-xl', label: 'Radius XL', kind: 'radius', value: '24px', source: 'manual', meta: {} },
+		{ id: 'surface-bg', name: 'surface-bg', label: 'Surface background', kind: 'color', value: '#f8fafc', source: 'manual', meta: {} },
+		{ id: 'space-section', name: 'space-section', label: 'Section spacing', kind: 'spacing', value: '2rem', source: 'manual', meta: {} },
+		{ id: 'rail-width', name: 'rail-width', label: 'Editor rail width', kind: 'size', value: '320px', source: 'manual', meta: {} },
 	);
 
 	project.designSystem.classes.push( {

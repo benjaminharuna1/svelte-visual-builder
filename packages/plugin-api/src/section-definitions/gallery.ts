@@ -1,5 +1,5 @@
-import { styleSection, selectField, textField } from '../panel-section-utils.ts';
-import { compactChoiceField, compactChoiceOption } from './compact-controls.ts';
+import { styleSection, selectField, textField } from '../panel-section-utils.js';
+import { compactChoiceField, compactChoiceOption } from './compact-controls.js';
 
 export function createGalleryPanelSections() {
 	return [

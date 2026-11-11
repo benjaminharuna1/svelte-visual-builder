@@ -16,4 +16,4 @@ export { default as GlobalsPanelShell } from './GlobalsPanelShell.svelte';
 export { default as HistoryPanelShell } from './HistoryPanelShell.svelte';
 export { default as MenuPanel } from './MenuPanel.svelte';
 export { default as RevisionWorkflowPanel } from './RevisionWorkflowPanel.svelte';
-export type { PanelRailTool, PanelTabItem, PanelTileGroup, PanelTileItem, PanelTone } from './panel-types';
+export type { PanelRailTool, PanelTabItem, PanelTileGroup, PanelTileItem, PanelTone } from './panel-types.js';

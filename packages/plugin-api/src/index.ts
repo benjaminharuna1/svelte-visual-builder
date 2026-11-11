@@ -12,7 +12,7 @@ import {
 	textareaField,
 	toggleField,
 	urlField,
-} from './panel-section-utils.ts';
+} from './panel-section-utils.js';
 import {
 	createAccordionPanelSections,
 	createCarouselPanelSections,
@@ -23,7 +23,7 @@ import {
 	createMenuPanelSections,
 	createTabsPanelSections,
 	createTogglePanelSections,
-} from './section-definitions/index.ts';
+} from './section-definitions/index.js';
 import {
 	createChoosePrimitive,
 	createColorPrimitive,
@@ -35,12 +35,12 @@ import {
 	createUrlPrimitive,
 	type BuilderControlPrimitive,
 	type BuilderControlOption,
-} from './control-family-helpers.ts';
+} from './control-family-helpers.js';
 
-export * from './control-family-helpers.ts';
-export * from './panel-section-utils.ts';
-export * from './section-definitions/index.ts';
-export * from './style-advanced-families.ts';
+export * from './control-family-helpers.js';
+export * from './panel-section-utils.js';
+export * from './section-definitions/index.js';
+export * from './style-advanced-families.js';
 
 import { createDocument, createNode, createStyleSet, StyleSetSchema, styleStateTargets } from '@builder/schema';
 import type {
@@ -60,14 +60,14 @@ import {
 	createImageParityMetadata,
 	createParagraphParityMetadata,
 	createTextEditorParityMetadata,
-} from './text-media-parity.ts';
+} from './text-media-parity.js';
 import {
 	createCompatParityPanelSections,
 	createFormFieldParityPanelSections,
 	createFormParityPanelSections,
 	createLoopParityPanelSections,
 	createPopupRootParityPanelSections,
-} from './panel-section-presets.ts';
+} from './panel-section-presets.js';
 
 export {
 	createCompatParityPanelSections,
@@ -75,7 +75,7 @@ export {
 	createFormParityPanelSections,
 	createLoopParityPanelSections,
 	createPopupRootParityPanelSections,
-} from './panel-section-presets.ts';
+} from './panel-section-presets.js';
 
 export type BuilderElementCategory = 'layout' | 'content' | 'media' | 'interactive' | 'data' | 'form' | 'legacy';
 export type BuilderFieldType = 'text' | 'rich-text' | 'textarea' | 'url' | 'select' | 'toggle' | 'number' | 'image' | 'token' | 'json';

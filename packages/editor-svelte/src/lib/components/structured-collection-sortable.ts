@@ -1,7 +1,7 @@
 import type { JsonValue } from '@builder/schema';
 import { arrayMove } from '@dnd-kit/sortable';
 
-import type { StructuredCollectionKind } from '../structured-content';
+import type { StructuredCollectionKind } from '../structured-content.js';
 
 let structuredCollectionInstanceSeed = 0;
 let structuredCollectionRowSeed = 0;

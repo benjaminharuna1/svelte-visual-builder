@@ -15,11 +15,11 @@ export interface SvelteKitBuilderAdapterOptions {
 	label?: string;
 }
 
-export interface SvelteKitBuilderIntegrationOptions {
+export interface SvelteKitBuilderIntegrationOptions<Project = unknown> {
 	id?: string;
 	label?: string;
 	extension?: BuilderHostExtensionDefinition;
-	persistence?: BuilderHostPersistenceAdapter;
+	persistence?: BuilderHostPersistenceAdapter<Project>;
 	media?: BuilderHostMediaAdapter;
 	permissions?: BuilderHostPermissionAdapter;
 	aiSettings?: {
@@ -31,7 +31,7 @@ export interface SvelteKitBuilderIntegrationOptions {
 	routePreview?: BuilderRoutePreviewContextAdapter;
 }
 
-export interface SvelteKitBuilderIntegration {
+export interface SvelteKitBuilderIntegration<Project = unknown> {
 	extension?: BuilderHostExtensionDefinition;
 	adapter: BuilderHostAdapter;
 	editor: {
@@ -41,7 +41,7 @@ export interface SvelteKitBuilderIntegration {
 			previewContext?: BindingProviderContext;
 		};
 		persistence: {
-			host?: BuilderHostPersistenceAdapter;
+			host?: BuilderHostPersistenceAdapter<Project>;
 		};
 		media: {
 			adapter?: BuilderHostMediaAdapter;
@@ -84,12 +84,12 @@ export function createSvelteKitBuilderAdapter( options: SvelteKitBuilderAdapterO
 	};
 }
 
-export function createSvelteKitBuilderIntegration( options: SvelteKitBuilderIntegrationOptions = {} ): SvelteKitBuilderIntegration {
+export function createSvelteKitBuilderIntegration<Project = unknown>( options: SvelteKitBuilderIntegrationOptions<Project> = {} ): SvelteKitBuilderIntegration<Project> {
 	const adapter = options.extension?.adapter ?? createSvelteKitBuilderAdapter( {
 		id: options.id,
 		label: options.label,
 	} );
-	const persistence = options.persistence ?? options.extension?.persistence;
+	const persistence = options.persistence ?? options.extension?.persistence as BuilderHostPersistenceAdapter<Project> | undefined;
 	const media = options.media ?? options.extension?.media;
 	const permissions = options.permissions ?? options.extension?.permissions;
 	const aiSettings = options.aiSettings ?? options.extension?.aiSettings;

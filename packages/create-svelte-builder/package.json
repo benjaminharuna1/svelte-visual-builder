@@ -1,0 +1,26 @@
+{
+  "name": "create-svelte-builder",
+  "version": "0.2.8",
+  "description": "Scaffold a SvelteKit app powered by the Svelte Visual Builder.",
+  "type": "module",
+  "bin": {
+    "create-svelte-builder": "./bin/create-svelte-builder.js"
+  },
+  "files": [
+    "bin",
+    "template"
+  ],
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "builder",
+    "scaffold"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

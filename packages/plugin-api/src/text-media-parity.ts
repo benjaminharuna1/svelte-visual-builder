@@ -5,7 +5,7 @@ import type {
 	BuilderPanelSectionDefinition,
 	BuilderStyleContract,
 	BuilderStylePropertyDefinition,
-} from './index.ts';
+} from './index.js';
 
 export interface TextMediaParityMetadata {
 	styleContract: BuilderStyleContract;

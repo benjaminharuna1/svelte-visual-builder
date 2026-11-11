@@ -4,7 +4,7 @@ import type { BuilderDocument, BuilderNode, ClassDefinition, HtmlAttribute, Json
 import { ClassDefinitionSchema, VariableDefinitionSchema, createNode } from '@builder/schema';
 import type { BuilderRegistry } from '@builder/plugin-api';
 
-import type { BuilderAiToolCall, BuilderAiToolDefinition, BuilderAiToolExecutionResult } from './ai';
+import type { BuilderAiToolCall, BuilderAiToolDefinition, BuilderAiToolExecutionResult } from './ai.js';
 
 export interface BuilderAiToolExecutorOptions {
 	engine: BuilderEngine;
@@ -1137,7 +1137,7 @@ async function importHtmlNodes( args: Record<string, unknown> ): Promise<Builder
 		throw new Error( `Low detail generation: ${ quality.summary } Regenerate with a complete semantic section containing heading, body copy, CTA/media or layout structure, and usable CSS.` );
 	}
 	const payload = css ? `<!doctype html><html><head><title>${ escapeHtml( title ) }</title><style>${ css }</style></head><body>${ html }</body></html>` : html;
-	const { importHtmlPackage } = await import( './html-import' );
+	const { importHtmlPackage } = await import( './html-import.js' );
 	const result = importHtmlPackage( { html: payload, sourceName: title } );
 	const document = result.project.documents.find( ( entry ) => entry.kind === 'library-item' );
 	if ( !document?.root.length ) {

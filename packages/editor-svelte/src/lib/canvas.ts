@@ -1,7 +1,7 @@
 import type { BuilderEngineState, BuilderRect, DropTarget } from '@builder/core';
 import type { BreakpointDefinition } from '@builder/schema';
 
-import { resolveInteractionCoreDropTarget } from './interaction-core';
+import { resolveInteractionCoreDropTarget } from './interaction-core.js';
 
 const previewViewportWidths = {
 	desktop: 1280,

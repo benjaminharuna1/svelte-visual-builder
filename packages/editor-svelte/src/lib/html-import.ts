@@ -1,7 +1,7 @@
 import type { BuilderNode, BuilderPackage, HtmlAttribute, JsonValue, MediaAsset, StyleSet } from '@builder/schema';
 import { createBuilderPackage, createDocument, createNode, createStyleSet, slugify } from '@builder/schema';
-import type { TemplateImportDiagnostic } from './template-import';
-import { mergeMediaCatalog, normalizeMediaAsset } from './media';
+import type { TemplateImportDiagnostic } from './template-import.js';
+import { mergeMediaCatalog, normalizeMediaAsset } from './media.js';
 
 export interface HtmlImportPayload {
 	html: string;

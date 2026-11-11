@@ -39,7 +39,7 @@
 		const editorModule = await import( '@builder/editor-svelte' );
 		canvasComponent = editorModule.BuilderCanvas;
 
-		const integration = createSvelteKitBuilderIntegration( {
+		const integration = createSvelteKitBuilderIntegration<BuilderPackage>( {
 			previewContext,
 			permissions: readPermissions(),
 			persistence: {

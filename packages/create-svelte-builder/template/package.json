@@ -1,0 +1,32 @@
+{
+  "name": "{{projectName}}",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "dependencies": {
+    "@builder/adapter-sveltekit": "^0.2.8",
+    "@builder/editor-svelte": "^0.2.8",
+    "@builder/plugin-api": "^0.2.8",
+    "@builder/runtime-svelte": "^0.2.8",
+    "@builder/schema": "^0.2.8",
+    "svelte": "^5.38.7"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "^4.0.0",
+    "@sveltejs/kit": "^2.20.7",
+    "@sveltejs/vite-plugin-svelte": "^5.1.0",
+    "@types/node": "^24.6.0",
+    "svelte-check": "^4.1.7",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
