@@ -5,22 +5,26 @@ import { createBuilderManualChunks, INITIAL_CLIENT_CHUNK_BUDGET_BYTES } from './
 function initialChunkBudgetPlugin() {
 	return {
 		name: 'builder-initial-chunk-budget',
-		generateBundle( this: { environment: { name: string } }, _: unknown, bundle: Record<string, { type: string; fileName: string; code?: string; isDynamicEntry?: boolean }> ) {
-			if ( this.environment.name !== 'client' ) {
+		generateBundle(
+			this: { environment: { name: string } },
+			_: unknown,
+			bundle: Record<string, { type: string; fileName: string; code?: string; isDynamicEntry?: boolean }>,
+		) {
+			if (this.environment.name !== 'client') {
 				return;
 			}
 
-			if ( !Object.keys( bundle ).some( ( fileName ) => fileName.includes( '_app/immutable/' ) ) ) {
+			if (!Object.keys(bundle).some((fileName) => fileName.includes('_app/immutable/'))) {
 				return;
 			}
 
-			const oversized = Object.values( bundle )
-				.filter( ( chunk ) => chunk.type === 'chunk' && chunk.fileName.endsWith( '.js' ) && !chunk.isDynamicEntry )
-				.filter( ( chunk ) => ( chunk.code?.length ?? 0 ) > INITIAL_CLIENT_CHUNK_BUDGET_BYTES );
+			const oversized = Object.values(bundle)
+				.filter((chunk) => chunk.type === 'chunk' && chunk.fileName.endsWith('.js') && !chunk.isDynamicEntry)
+				.filter((chunk) => (chunk.code?.length ?? 0) > INITIAL_CLIENT_CHUNK_BUDGET_BYTES);
 
-			if ( oversized.length ) {
+			if (oversized.length) {
 				throw new Error(
-					`Initial client chunk budget exceeded (${ INITIAL_CLIENT_CHUNK_BUDGET_BYTES } bytes): ${ oversized.map( ( chunk ) => `${ chunk.fileName }=${ chunk.code?.length ?? 0 }` ).join( ', ' ) }`,
+					`Initial client chunk budget exceeded (${INITIAL_CLIENT_CHUNK_BUDGET_BYTES} bytes): ${oversized.map((chunk) => `${chunk.fileName}=${chunk.code?.length ?? 0}`).join(', ')}`,
 				);
 			}
 		},
@@ -28,12 +32,12 @@ function initialChunkBudgetPlugin() {
 }
 
 function builderChunkEnvironmentPlugin() {
-	const clientManualChunks = createBuilderManualChunks( false );
+	const clientManualChunks = createBuilderManualChunks(false);
 
 	return {
 		name: 'builder-chunk-environment',
-		configEnvironment( name: string ) {
-			if ( name !== 'client' || !clientManualChunks ) {
+		configEnvironment(name: string) {
+			if (name !== 'client' || !clientManualChunks) {
 				return;
 			}
 
@@ -50,12 +54,12 @@ function builderChunkEnvironmentPlugin() {
 	};
 }
 
-export default defineConfig( {
-	plugins: [ builderChunkEnvironmentPlugin(), initialChunkBudgetPlugin(), sveltekit() ],
+export default defineConfig({
+	plugins: [builderChunkEnvironmentPlugin(), initialChunkBudgetPlugin(), sveltekit()],
 	ssr: {
-		noExternal: [ /^@builder\// ],
+		noExternal: [/^@builder\//],
 	},
 	server: {
 		port: 5173,
 	},
-} );
+});

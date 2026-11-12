@@ -1,37 +1,37 @@
 {
-  "name": "@builder/runtime-svelte",
-  "version": "0.2.8",
-  "license": "MIT",
-  "type": "module",
-  "svelte": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
-      "svelte": "./dist/index.js",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist",
-    "src"
-  ],
-  "sideEffects": false,
-  "scripts": {
-    "build": "svelte-package -i src -o dist",
-    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
-    "prepack": "pnpm run build"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "@builder/core": "workspace:*",
-    "@builder/plugin-api": "workspace:*",
-    "@builder/schema": "workspace:*",
-    "@builder/security": "workspace:*",
-    "svelte": "^5.38.7"
-  }
+	"name": "@builder/runtime-svelte",
+	"version": "0.2.8",
+	"license": "MIT",
+	"type": "module",
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"development": "./src/index.ts",
+			"svelte": "./dist/index.js",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"src"
+	],
+	"sideEffects": false,
+	"scripts": {
+		"build": "svelte-package -i src -o dist",
+		"clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+		"prepack": "pnpm run build"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"@builder/core": "workspace:*",
+		"@builder/plugin-api": "workspace:*",
+		"@builder/schema": "workspace:*",
+		"@builder/security": "workspace:*",
+		"svelte": "^5.38.7"
+	}
 }

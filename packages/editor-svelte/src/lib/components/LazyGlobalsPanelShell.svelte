@@ -5,25 +5,25 @@
 	let LoadedGlobalsPanelShell: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './GlobalsPanelShell.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./GlobalsPanelShell.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedGlobalsPanelShell = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let title = 'Globals';
 	export let subtitle = 'Classes, variables, theme styles, and shared design system controls.';
@@ -35,7 +35,7 @@
 	export let bodyPadding = 'var(--builder-shell-space-10)';
 	export let bodyGap = 'var(--builder-shell-space-10)';
 	export let bodyScrollable = true;
-	export let onChangeTab: ( tabId: string ) => void = () => {};
+	export let onChangeTab: (tabId: string) => void = () => {};
 </script>
 
 {#if LoadedGlobalsPanelShell}

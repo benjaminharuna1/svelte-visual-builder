@@ -1,0 +1,11 @@
+node_modules
+dist
+.svelte-kit
+coverage
+playwright-report
+test-results
+references
+screenshots
+pnpm-lock.yaml
+package-lock.json
+CHANGELOG.md

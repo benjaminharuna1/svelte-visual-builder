@@ -41,11 +41,11 @@
 	let state: BuilderEngineState = sharedState ?? editor.engine.getState();
 	let insertType = 'container';
 	let unsubscribe = () => {};
-	let currentNodes: BuilderNode[] = nodes ?? getActiveDocument( state ).root;
-	const availableElements = [ ...editor.registry.elements.values() ];
+	let currentNodes: BuilderNode[] = nodes ?? getActiveDocument(state).root;
+	const availableElements = [...editor.registry.elements.values()];
 	let projectDocuments = state.project.documents;
-	let componentDocumentsById = buildComponentDocumentsById( projectDocuments );
-	let activeDocument = getActiveDocument( state );
+	let componentDocumentsById = buildComponentDocumentsById(projectDocuments);
+	let activeDocument = getActiveDocument(state);
 	let selectedNode: BuilderNode | undefined;
 	let selectedComponentDocument: BuilderDocument | undefined;
 	let dockRight = false;
@@ -58,150 +58,158 @@
 	let navigatorVirtualizerSignature = '';
 	let navigatorVirtualizerCleanup = () => {};
 
-	$: if ( sharedState ) state = sharedState;
-	$: if ( state.project.documents !== projectDocuments ) {
+	$: if (sharedState) state = sharedState;
+	$: if (state.project.documents !== projectDocuments) {
 		projectDocuments = state.project.documents;
-		componentDocumentsById = buildComponentDocumentsById( projectDocuments );
+		componentDocumentsById = buildComponentDocumentsById(projectDocuments);
 	}
-	$: activeDocument = getActiveDocument( state );
+	$: activeDocument = getActiveDocument(state);
 	$: currentNodes = nodes ?? activeDocument.root;
-	$: selectedNode = state.ui.selectedNodeIds[ 0 ] ? editor.getActiveDocumentCache().nodeById.get( state.ui.selectedNodeIds[ 0 ] ) : undefined;
+	$: selectedNode = state.ui.selectedNodeIds[0]
+		? editor.getActiveDocumentCache().nodeById.get(state.ui.selectedNodeIds[0])
+		: undefined;
 	$: selectedComponentDocument = state.ui.componentEditing.componentDocumentId
-		? componentDocumentsById.get( state.ui.componentEditing.componentDocumentId )
+		? componentDocumentsById.get(state.ui.componentEditing.componentDocumentId)
 		: selectedNode?.type === 'component-instance'
-			? componentDocumentsById.get( String( selectedNode?.props.componentId ?? '' ) )
+			? componentDocumentsById.get(String(selectedNode?.props.componentId ?? ''))
 			: undefined;
 	$: dockRight = docked || resolveNavigatorDockSide() === 'right';
 	$: showResizeAffordance = resolveResizeAffordance();
 	$: navigatorVirtualizationEnabled = depth === 0 && !dockRight && editor.features.navigatorVirtualization;
-	$: navigatorVirtualRows = navigatorVirtualizationEnabled ? buildNavigatorVirtualRows( currentNodes, 1 ) : [];
-	$: navigatorVirtualRowsHeight = navigatorVirtualRows.reduce( ( total, row ) => total + estimateNavigatorVirtualRowSize( row ), 0 );
+	$: navigatorVirtualRows = navigatorVirtualizationEnabled ? buildNavigatorVirtualRows(currentNodes, 1) : [];
+	$: navigatorVirtualRowsHeight = navigatorVirtualRows.reduce(
+		(total, row) => total + estimateNavigatorVirtualRowSize(row),
+		0,
+	);
 	$: syncNavigatorVirtualizerOptions();
 
-	onMount( () => {
-		if ( depth > 0 ) {
+	onMount(() => {
+		if (depth > 0) {
 			return;
 		}
 
-		unsubscribe = editor.subscribeSelector( ( nextState ) => nextState, ( nextState ) => {
-			state = nextState;
-		}, areNavigatorStatesEqual, 'navigator' );
+		unsubscribe = editor.subscribeSelector(
+			(nextState) => nextState,
+			(nextState) => {
+				state = nextState;
+			},
+			areNavigatorStatesEqual,
+			'navigator',
+		);
 
-		const virtualizerStore = createVirtualizer<HTMLElement, HTMLLIElement>( {
+		const virtualizerStore = createVirtualizer<HTMLElement, HTMLLIElement>({
 			count: navigatorVirtualRows.length,
 			getScrollElement: () => navigatorScrollElement,
-			estimateSize: ( index ) => {
-				const row = navigatorVirtualRows[ index ];
-				return row ? estimateNavigatorVirtualRowSize( row ) : 90;
+			estimateSize: (index) => {
+				const row = navigatorVirtualRows[index];
+				return row ? estimateNavigatorVirtualRowSize(row) : 90;
 			},
 			enabled: navigatorVirtualizationEnabled,
 			indexAttribute: 'data-index',
 			overscan: 8,
-		} );
+		});
 
-		navigatorVirtualizerCleanup = virtualizerStore.subscribe( ( next ) => {
+		navigatorVirtualizerCleanup = virtualizerStore.subscribe((next) => {
 			navigatorVirtualizer = next;
 			syncNavigatorVirtualizerOptions();
-		} );
+		});
 
 		return () => {
 			unsubscribe();
 			navigatorVirtualizerCleanup();
 		};
-	} );
+	});
 
-	function selectNode( nodeId: string ) {
-		editor.dispatch( { type: 'document/ui/select-node', nodeId } );
+	function selectNode(nodeId: string) {
+		editor.dispatch({ type: 'document/ui/select-node', nodeId });
 	}
 
 	function syncNavigatorVirtualizerOptions() {
-		if ( depth > 0 || !navigatorVirtualizer ) {
+		if (depth > 0 || !navigatorVirtualizer) {
 			return;
 		}
 
-		const nextSignature = `${ navigatorVirtualizationEnabled ? '1' : '0' }:${ navigatorScrollElement ? '1' : '0' }:${ navigatorVirtualRows.map( ( row ) => row.key ).join( '|' ) }`;
-		if ( nextSignature === navigatorVirtualizerSignature ) {
+		const nextSignature = `${navigatorVirtualizationEnabled ? '1' : '0'}:${navigatorScrollElement ? '1' : '0'}:${navigatorVirtualRows.map((row) => row.key).join('|')}`;
+		if (nextSignature === navigatorVirtualizerSignature) {
 			return;
 		}
 
 		navigatorVirtualizerSignature = nextSignature;
-		navigatorVirtualizer.setOptions( {
+		navigatorVirtualizer.setOptions({
 			count: navigatorVirtualizationEnabled ? navigatorVirtualRows.length : 0,
 			enabled: navigatorVirtualizationEnabled,
 			getScrollElement: () => navigatorScrollElement,
-			estimateSize: ( index ) => {
-				const row = navigatorVirtualRows[ index ];
-				return row ? estimateNavigatorVirtualRowSize( row ) : 90;
+			estimateSize: (index) => {
+				const row = navigatorVirtualRows[index];
+				return row ? estimateNavigatorVirtualRowSize(row) : 90;
 			},
-			getItemKey: ( index ) => navigatorVirtualRows[ index ]?.key ?? index,
+			getItemKey: (index) => navigatorVirtualRows[index]?.key ?? index,
 			indexAttribute: 'data-index',
 			overscan: 8,
-		} );
+		});
 	}
 
-	function buildComponentDocumentsById( documents: BuilderDocument[] ) {
-		return new Map( documents
-			.filter( ( document ) => document.kind === 'component' )
-			.map( ( document ) => [ document.id, document ] ) );
+	function buildComponentDocumentsById(documents: BuilderDocument[]) {
+		return new Map(
+			documents.filter((document) => document.kind === 'component').map((document) => [document.id, document]),
+		);
 	}
 
-	function openNodeContextMenu( node: BuilderNode, event: MouseEvent, targetSlot?: string ) {
+	function openNodeContextMenu(node: BuilderNode, event: MouseEvent, targetSlot?: string) {
 		event.preventDefault();
-		selectNode( node.id );
-		editor.openContextMenu( {
+		selectNode(node.id);
+		editor.openContextMenu({
 			x: event.clientX,
 			y: event.clientY,
 			targetKind: 'navigator-node',
 			documentId: activeDocument.id,
 			nodeId: node.id,
 			slot: targetSlot,
-		} );
+		});
 	}
 
-	function insertNode( targetParentId?: string, targetSlot?: string ) {
-		const definition = editor.registry.elements.get( insertType );
-		if ( !definition ) {
+	function insertNode(targetParentId?: string, targetSlot?: string) {
+		const definition = editor.registry.elements.get(insertType);
+		if (!definition) {
 			return;
 		}
 
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/elements/create',
 			parentId: targetParentId,
 			slot: targetSlot,
 			node: definition.createDefaultNode(),
-		} );
+		});
 	}
 
-	function moveNode( nodeId: string, direction: -1 | 1 ) {
-		selectNode( nodeId );
-		editor.moveSelectedNodeBy( direction );
+	function moveNode(nodeId: string, direction: -1 | 1) {
+		selectNode(nodeId);
+		editor.moveSelectedNodeBy(direction);
 	}
 
-	function canAcceptChildren( node: BuilderNode ): boolean {
-		const definition = editor.registry.elements.get( node.type );
-		return Boolean( definition?.runtime.acceptsChildren || Object.keys( node.slots ).length );
+	function canAcceptChildren(node: BuilderNode): boolean {
+		const definition = editor.registry.elements.get(node.type);
+		return Boolean(definition?.runtime.acceptsChildren || Object.keys(node.slots).length);
 	}
 
-	function resolvePreferredSlot( node: BuilderNode ): string | undefined {
-		const definition = editor.registry.elements.get( node.type );
-		if ( definition?.runtime.acceptsChildren ) {
+	function resolvePreferredSlot(node: BuilderNode): string | undefined {
+		const definition = editor.registry.elements.get(node.type);
+		if (definition?.runtime.acceptsChildren) {
 			return undefined;
 		}
 
-		return Object.keys( node.slots )[ 0 ];
+		return Object.keys(node.slots)[0];
 	}
 
-	function moveNodeToSiblingIndex( nodeId: string, targetIndex: number ) {
-		const location = editor.getActiveDocumentCache().locationById.get( nodeId );
-		if ( !location ) {
+	function moveNodeToSiblingIndex(nodeId: string, targetIndex: number) {
+		const location = editor.getActiveDocumentCache().locationById.get(nodeId);
+		if (!location) {
 			return;
 		}
 
-		const resolvedTargetIndex = targetIndex > location.index
-			? targetIndex + 1
-			: Math.max( 0, targetIndex );
+		const resolvedTargetIndex = targetIndex > location.index ? targetIndex + 1 : Math.max(0, targetIndex);
 
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/ui/start-drag',
 			session: {
 				kind: 'move',
@@ -213,8 +221,8 @@
 				label: location.node.name ?? location.node.type,
 				pointer: { x: 0, y: 0 },
 			},
-		} );
-		editor.dispatch( {
+		});
+		editor.dispatch({
 			type: 'document/ui/set-drop-target',
 			target: {
 				documentId: state.activeDocumentId,
@@ -225,142 +233,142 @@
 				targetNodeId: nodeId,
 				rect: ZERO_RECT,
 			},
-		} );
-		editor.dispatch( { type: 'document/ui/commit-drag' } );
-		selectNode( nodeId );
+		});
+		editor.dispatch({ type: 'document/ui/commit-drag' });
+		selectNode(nodeId);
 	}
 
-	function moveNodeToBoundary( nodeId: string, siblings: BuilderNode[], target: 'start' | 'end' ) {
-		moveNodeToSiblingIndex( nodeId, target === 'start' ? 0 : siblings.length );
+	function moveNodeToBoundary(nodeId: string, siblings: BuilderNode[], target: 'start' | 'end') {
+		moveNodeToSiblingIndex(nodeId, target === 'start' ? 0 : siblings.length);
 	}
 
-	function indentNode( node: BuilderNode, siblings: BuilderNode[], index: number ) {
-		if ( index <= 0 ) {
+	function indentNode(node: BuilderNode, siblings: BuilderNode[], index: number) {
+		if (index <= 0) {
 			return;
 		}
 
-		const previousSibling = siblings[ index - 1 ];
-		if ( !previousSibling || !canAcceptChildren( previousSibling ) ) {
+		const previousSibling = siblings[index - 1];
+		if (!previousSibling || !canAcceptChildren(previousSibling)) {
 			return;
 		}
 
-		const targetSlot = resolvePreferredSlot( previousSibling );
-		const nextIndex = targetSlot
-			? previousSibling.slots[ targetSlot ]?.length ?? 0
-			: previousSibling.children.length;
+		const targetSlot = resolvePreferredSlot(previousSibling);
+		const nextIndex = targetSlot ? (previousSibling.slots[targetSlot]?.length ?? 0) : previousSibling.children.length;
 
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/elements/move',
 			nodeId: node.id,
 			targetParentId: previousSibling.id,
 			targetSlot,
 			index: nextIndex,
-		} );
-		selectNode( node.id );
+		});
+		selectNode(node.id);
 	}
 
-	function outdentNode( nodeId: string ) {
+	function outdentNode(nodeId: string) {
 		const cache = editor.getActiveDocumentCache();
-		const location = cache.locationById.get( nodeId );
-		if ( !location?.parentId ) {
+		const location = cache.locationById.get(nodeId);
+		if (!location?.parentId) {
 			return;
 		}
 
-		const parentLocation = cache.locationById.get( location.parentId );
-		if ( !parentLocation ) {
+		const parentLocation = cache.locationById.get(location.parentId);
+		if (!parentLocation) {
 			return;
 		}
 
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/elements/move',
 			nodeId,
 			targetParentId: parentLocation.parentId,
 			targetSlot: parentLocation.slot,
 			index: parentLocation.index + 1,
-		} );
-		selectNode( nodeId );
+		});
+		selectNode(nodeId);
 	}
 
-	function getSlotEntries( targetNode: BuilderNode ): Array<{ slotName: string; slotNodes: BuilderNode[] }> {
-		return Object.entries( targetNode.slots as Record<string, BuilderNode[]> )
-			.map( ( [ slotName, slotNodes ] ) => ( {
+	function getSlotEntries(targetNode: BuilderNode): Array<{ slotName: string; slotNodes: BuilderNode[] }> {
+		return Object.entries(targetNode.slots as Record<string, BuilderNode[]>)
+			.map(([slotName, slotNodes]) => ({
 				slotName,
 				slotNodes: slotNodes as BuilderNode[],
-			} ) )
-			.filter( ( entry ) => entry.slotNodes.length > 0 );
+			}))
+			.filter((entry) => entry.slotNodes.length > 0);
 	}
 
 	function openSelectedComponentMaster() {
-		if ( !selectedComponentDocument ) {
+		if (!selectedComponentDocument) {
 			return;
 		}
 
-		editor.openDocument( selectedComponentDocument.id, {
+		editor.openDocument(selectedComponentDocument.id, {
 			mode: 'component-master',
 			pathname: state.ui.preview.pathname,
 			query: state.ui.preview.query,
 			source: 'manual',
-		} );
+		});
 	}
 
-	function resolveNodeComponentDocument( node: BuilderNode ) {
+	function resolveNodeComponentDocument(node: BuilderNode) {
 		return node.type === 'component-instance'
-			? state.project.documents.find( ( document ) => document.id === String( node.props.componentId ?? '' ) && document.kind === 'component' )
+			? state.project.documents.find(
+					(document) => document.id === String(node.props.componentId ?? '') && document.kind === 'component',
+				)
 			: undefined;
 	}
 
-	function openNodeComponentMaster( node: BuilderNode ) {
-		const componentDocument = resolveNodeComponentDocument( node );
-		if ( !componentDocument ) {
+	function openNodeComponentMaster(node: BuilderNode) {
+		const componentDocument = resolveNodeComponentDocument(node);
+		if (!componentDocument) {
 			return;
 		}
 
-		editor.openDocument( componentDocument.id, {
+		editor.openDocument(componentDocument.id, {
 			mode: 'component-master',
 			pathname: state.ui.preview.pathname,
 			query: state.ui.preview.query,
 			source: 'manual',
-		} );
+		});
 	}
 
-	function asRecord( value: unknown ): LooseRecord | undefined {
-		if ( !value || typeof value !== 'object' || Array.isArray( value ) ) {
+	function asRecord(value: unknown): LooseRecord | undefined {
+		if (!value || typeof value !== 'object' || Array.isArray(value)) {
 			return undefined;
 		}
 
 		return value as LooseRecord;
 	}
 
-	function asString( value: unknown ): string | undefined {
-		if ( typeof value === 'string' && value.trim() ) {
+	function asString(value: unknown): string | undefined {
+		if (typeof value === 'string' && value.trim()) {
 			return value.trim();
 		}
 
-		if ( typeof value === 'number' ) {
-			return String( value );
+		if (typeof value === 'number') {
+			return String(value);
 		}
 
 		return undefined;
 	}
 
-	function asBoolean( value: unknown ): boolean | undefined {
+	function asBoolean(value: unknown): boolean | undefined {
 		return typeof value === 'boolean' ? value : undefined;
 	}
 
-	function prettifyLabel( value: string ): string {
+	function prettifyLabel(value: string): string {
 		return value
-			.split( /[-_]/g )
-			.filter( Boolean )
-			.map( ( part ) => part.charAt( 0 ).toUpperCase() + part.slice( 1 ) )
-			.join( ' ' );
+			.split(/[-_]/g)
+			.filter(Boolean)
+			.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+			.join(' ');
 	}
 
 	function getDocumentDescriptor(): string {
-		return `${prettifyLabel( activeDocument.kind )} / ${activeDocument.title}`;
+		return `${prettifyLabel(activeDocument.kind)} / ${activeDocument.title}`;
 	}
 
 	function getModeDescriptor(): string {
-		return `${prettifyLabel( state.ui.mode )} mode`;
+		return `${prettifyLabel(state.ui.mode)} mode`;
 	}
 
 	function getPreviewDescriptor(): string {
@@ -368,80 +376,83 @@
 		return state.ui.preview.slot ? `${path} / ${state.ui.preview.slot}` : path;
 	}
 
-	function formatSlotLabel( slotName: string ): string {
-		return prettifyLabel( slotName );
+	function formatSlotLabel(slotName: string): string {
+		return prettifyLabel(slotName);
 	}
 
 	function resolveNavigatorDockSide(): 'left' | 'right' {
 		const uiState = state.ui as unknown as LooseRecord;
-		const navigatorState = asRecord( uiState.navigator );
-		const panelLayout = asRecord( uiState.panelLayout );
-		const previewState = asRecord( uiState.preview );
-		const documentMeta = asRecord( activeDocument.meta );
-		const side = asString( navigatorState?.dock )
-			?? asString( navigatorState?.side )
-			?? asString( panelLayout?.navigatorDock )
-			?? asString( panelLayout?.navigatorSide )
-			?? asString( previewState?.navigatorDock )
-			?? asString( documentMeta?.navigatorDock )
-			?? asString( documentMeta?.navigatorSide );
+		const navigatorState = asRecord(uiState.navigator);
+		const panelLayout = asRecord(uiState.panelLayout);
+		const previewState = asRecord(uiState.preview);
+		const documentMeta = asRecord(activeDocument.meta);
+		const side =
+			asString(navigatorState?.dock) ??
+			asString(navigatorState?.side) ??
+			asString(panelLayout?.navigatorDock) ??
+			asString(panelLayout?.navigatorSide) ??
+			asString(previewState?.navigatorDock) ??
+			asString(documentMeta?.navigatorDock) ??
+			asString(documentMeta?.navigatorSide);
 
 		return side === 'right' ? 'right' : 'left';
 	}
 
 	function resolveResizeAffordance(): boolean {
 		const uiState = state.ui as unknown as LooseRecord;
-		const navigatorState = asRecord( uiState.navigator );
-		const panelLayout = asRecord( uiState.panelLayout );
-		const documentMeta = asRecord( activeDocument.meta );
+		const navigatorState = asRecord(uiState.navigator);
+		const panelLayout = asRecord(uiState.panelLayout);
+		const documentMeta = asRecord(activeDocument.meta);
 
 		return Boolean(
-			asBoolean( navigatorState?.resizable )
-			?? asBoolean( navigatorState?.showResizeHandle )
-			?? asBoolean( panelLayout?.navigatorResizable )
-			?? asBoolean( panelLayout?.resizeNavigator )
-			?? asBoolean( documentMeta?.navigatorResizable ),
+			asBoolean(navigatorState?.resizable) ??
+			asBoolean(navigatorState?.showResizeHandle) ??
+			asBoolean(panelLayout?.navigatorResizable) ??
+			asBoolean(panelLayout?.resizeNavigator) ??
+			asBoolean(documentMeta?.navigatorResizable),
 		);
 	}
 
 	const navigatorNodeActions: NavigatorNodeRowActions = {
 		onSelect: selectNode,
 		onOpenContextMenu: openNodeContextMenu,
-		onMove: ( node, direction ) => moveNode( node.id, direction ),
-		onMoveToBoundary: ( node, siblings, target ) => moveNodeToBoundary( node.id, siblings, target ),
+		onMove: (node, direction) => moveNode(node.id, direction),
+		onMoveToBoundary: (node, siblings, target) => moveNodeToBoundary(node.id, siblings, target),
 		onIndent: indentNode,
-		onOutdent: ( node ) => outdentNode( node.id ),
-		onDuplicate: ( node, targetParentId, targetSlot ) => editor.dispatch( {
-			type: 'document/elements/duplicate',
-			nodeId: node.id,
-			targetParentId,
-			targetSlot,
-		} ),
-		onDelete: ( node ) => editor.dispatch( { type: 'document/elements/delete', nodeId: node.id } ),
+		onOutdent: (node) => outdentNode(node.id),
+		onDuplicate: (node, targetParentId, targetSlot) =>
+			editor.dispatch({
+				type: 'document/elements/duplicate',
+				nodeId: node.id,
+				targetParentId,
+				targetSlot,
+			}),
+		onDelete: (node) => editor.dispatch({ type: 'document/elements/delete', nodeId: node.id }),
 		onInsertNode: insertNode,
 		onOpenMaster: openNodeComponentMaster,
 	};
 
-	function getNavigatorVirtualRowStyle( start: number, size: number ) {
+	function getNavigatorVirtualRowStyle(start: number, size: number) {
 		return `position:absolute; inset-inline:0; top:0; width:100%; transform:translateY(${start}px); height:${size}px;`;
 	}
 
-	function areNavigatorStatesEqual( left: BuilderEngineState, right: BuilderEngineState ) {
-		return left.project === right.project
-			&& left.activeDocumentId === right.activeDocumentId
-			&& left.ui.selectedNodeIds.join( '|' ) === right.ui.selectedNodeIds.join( '|' )
-			&& left.ui.dragSession === right.ui.dragSession
-			&& left.ui.dropTarget === right.ui.dropTarget
-			&& left.ui.componentEditing.context === right.ui.componentEditing.context
-			&& left.ui.componentEditing.componentDocumentId === right.ui.componentEditing.componentDocumentId
-			&& left.ui.preview.pathname === right.ui.preview.pathname
-			&& left.ui.preview.query === right.ui.preview.query
-			&& left.ui.preview.slot === right.ui.preview.slot
-			&& left.ui.mode === right.ui.mode
-			&& left.ui.shell.navigatorMode === right.ui.shell.navigatorMode
-			&& left.ui.shell.navigatorOpen === right.ui.shell.navigatorOpen;
+	function areNavigatorStatesEqual(left: BuilderEngineState, right: BuilderEngineState) {
+		return (
+			left.project === right.project &&
+			left.activeDocumentId === right.activeDocumentId &&
+			left.ui.selectedNodeIds.join('|') === right.ui.selectedNodeIds.join('|') &&
+			left.ui.dragSession === right.ui.dragSession &&
+			left.ui.dropTarget === right.ui.dropTarget &&
+			left.ui.componentEditing.context === right.ui.componentEditing.context &&
+			left.ui.componentEditing.componentDocumentId === right.ui.componentEditing.componentDocumentId &&
+			left.ui.preview.pathname === right.ui.preview.pathname &&
+			left.ui.preview.query === right.ui.preview.query &&
+			left.ui.preview.slot === right.ui.preview.slot &&
+			left.ui.mode === right.ui.mode &&
+			left.ui.shell.navigatorMode === right.ui.shell.navigatorMode &&
+			left.ui.shell.navigatorOpen === right.ui.shell.navigatorOpen
+		);
 	}
-
 </script>
 
 {#if depth === 0}
@@ -452,35 +463,49 @@
 		class:navigator--resizable={showResizeAffordance}
 	>
 		<div class="navigator__header">
-			<button type="button" id="elementor-navigator__toggle-all" aria-label="Expand all elements" title="Expand all elements">
+			<button
+				type="button"
+				id="elementor-navigator__toggle-all"
+				aria-label="Expand all elements"
+				title="Expand all elements"
+			>
 				<EditorShellIcon name="expand" title="Expand all elements" />
 			</button>
 			<h2 id="elementor-navigator__header__title">Structure</h2>
-			<button type="button" id="elementor-navigator__close" aria-label="Close structure" title="Close structure" onclick={() => editor.toggleNavigator( false )}>
+			<button
+				type="button"
+				id="elementor-navigator__close"
+				aria-label="Close structure"
+				title="Close structure"
+				onclick={() => editor.toggleNavigator(false)}
+			>
 				<EditorShellIcon name="close" title="Close structure" />
 			</button>
 		</div>
 
 		<div class="navigator__elements builder-shell-scrollbar" bind:this={navigatorScrollElement}>
 			{#if navigatorVirtualizationEnabled && navigatorVirtualizer}
-				<ul class="navigator__tree navigator__tree--root navigator__tree--virtual" style={`height:${navigatorVirtualizer?.getTotalSize() ?? navigatorVirtualRowsHeight}px;`}>
+				<ul
+					class="navigator__tree navigator__tree--root navigator__tree--virtual"
+					style={`height:${navigatorVirtualizer?.getTotalSize() ?? navigatorVirtualRowsHeight}px;`}
+				>
 					{#each navigatorVirtualizer?.getVirtualItems() ?? [] as virtualItem (virtualItem.key)}
-						{@const row = navigatorVirtualRows[ virtualItem.index ]}
+						{@const row = navigatorVirtualRows[virtualItem.index]}
 						{#if row?.kind === 'node'}
 							<NavigatorNodeRow
-								row={row}
+								{row}
 								selectedNodeIds={state.ui.selectedNodeIds}
-								componentDocumentTitle={resolveNodeComponentDocument( row.node )?.title}
+								componentDocumentTitle={resolveNodeComponentDocument(row.node)?.title}
 								actions={navigatorNodeActions}
 								documentId={state.activeDocumentId}
 								virtualizer={navigatorVirtualizer}
-								style={getNavigatorVirtualRowStyle( virtualItem.start, virtualItem.size )}
+								style={getNavigatorVirtualRowStyle(virtualItem.start, virtualItem.size)}
 							/>
 						{:else if row?.kind === 'slot'}
 							<NavigatorSlotRow
-								row={row}
+								{row}
 								virtualizer={navigatorVirtualizer}
-								style={getNavigatorVirtualRowStyle( virtualItem.start, virtualItem.size )}
+								style={getNavigatorVirtualRowStyle(virtualItem.start, virtualItem.size)}
 							/>
 						{/if}
 					{/each}
@@ -500,11 +525,11 @@
 	</div>
 {:else}
 	{#each currentNodes as node, nodeIndex (node.id)}
-		{@const nodeRow = createNavigatorNodeRow( node, nodeIndex, depth, currentNodes, parentId, slot )}
+		{@const nodeRow = createNavigatorNodeRow(node, nodeIndex, depth, currentNodes, parentId, slot)}
 		<NavigatorNodeRow
 			row={nodeRow}
 			selectedNodeIds={state.ui.selectedNodeIds}
-			componentDocumentTitle={resolveNodeComponentDocument( node )?.title}
+			componentDocumentTitle={resolveNodeComponentDocument(node)?.title}
 			actions={navigatorNodeActions}
 			documentId={state.activeDocumentId}
 			virtualizer={undefined}
@@ -515,10 +540,10 @@
 				</ul>
 			{/if}
 
-			{#each getSlotEntries( node ) as slotEntry (slotEntry.slotName)}
+			{#each getSlotEntries(node) as slotEntry (slotEntry.slotName)}
 				<div class="navigator__slot">
 					<div class="navigator__slot-header">
-						<div class="navigator__slot-label">{formatSlotLabel( slotEntry.slotName )}</div>
+						<div class="navigator__slot-label">{formatSlotLabel(slotEntry.slotName)}</div>
 					</div>
 					<ul class="navigator__tree navigator__tree--slot">
 						<BuilderNavigator
@@ -606,7 +631,9 @@
 		background: transparent;
 		color: var(--builder-shell-text);
 		cursor: pointer;
-		transition: background 140ms ease, color 140ms ease;
+		transition:
+			background 140ms ease,
+			color 140ms ease;
 		border-radius: 0;
 	}
 

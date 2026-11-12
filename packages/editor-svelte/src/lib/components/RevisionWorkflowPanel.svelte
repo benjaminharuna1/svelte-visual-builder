@@ -16,41 +16,41 @@
 	export let publishDisabledReason = 'Publishing is disabled by this host.';
 	export let onSaveDraft: () => void = () => {};
 	export let onPublish: () => void = () => {};
-	export let onTogglePanel: ( open?: boolean ) => void = () => {};
-	export let onSelectRevision: ( revisionId?: string ) => void = () => {};
-	export let onRestoreRevision: ( revisionId: string ) => Promise<void> | void = () => {};
+	export let onTogglePanel: (open?: boolean) => void = () => {};
+	export let onSelectRevision: (revisionId?: string) => void = () => {};
+	export let onRestoreRevision: (revisionId: string) => Promise<void> | void = () => {};
 
 	let restoring = false;
 
-	const formatter = new Intl.DateTimeFormat( undefined, {
+	const formatter = new Intl.DateTimeFormat(undefined, {
 		month: 'short',
 		day: 'numeric',
 		hour: 'numeric',
 		minute: '2-digit',
-	} );
+	});
 
-	$: if ( !selectedRevisionId || !revisions.some( ( revision ) => revision.id === selectedRevisionId ) ) {
-		onSelectRevision( revisions[ 0 ]?.id );
+	$: if (!selectedRevisionId || !revisions.some((revision) => revision.id === selectedRevisionId)) {
+		onSelectRevision(revisions[0]?.id);
 	}
 
-	$: selectedRevision = revisions.find( ( revision ) => revision.id === selectedRevisionId );
+	$: selectedRevision = revisions.find((revision) => revision.id === selectedRevisionId);
 
-	function formatTime( value: string | undefined ) {
-		if ( !value ) {
+	function formatTime(value: string | undefined) {
+		if (!value) {
 			return 'Not yet';
 		}
 
-		return formatter.format( new Date( value ) );
+		return formatter.format(new Date(value));
 	}
 
 	async function restoreSelectedRevision() {
-		if ( !selectedRevisionId ) {
+		if (!selectedRevisionId) {
 			return;
 		}
 
 		restoring = true;
 		try {
-			await onRestoreRevision( selectedRevisionId );
+			await onRestoreRevision(selectedRevisionId);
 		} finally {
 			restoring = false;
 		}
@@ -70,30 +70,53 @@
 				</div>
 			</div>
 			<div class="revision-panel__header-actions">
-				<span class={`builder-shell-badge revision-panel__save-state revision-panel__save-state--${saveState}`}>{saveState}</span>
-				<button class="builder-shell-button builder-shell-button--dark revision-panel__toggle" type="button" onclick={() => onTogglePanel( !panelOpen )}>{panelOpen ? 'Hide' : 'Show'}</button>
+				<span class={`builder-shell-badge revision-panel__save-state revision-panel__save-state--${saveState}`}
+					>{saveState}</span
+				>
+				<button
+					class="builder-shell-button builder-shell-button--dark revision-panel__toggle"
+					type="button"
+					onclick={() => onTogglePanel(!panelOpen)}>{panelOpen ? 'Hide' : 'Show'}</button
+				>
 			</div>
 		</div>
 
 		<div class="revision-panel__summary">
 			<div class="revision-panel__metric builder-shell-card">
 				<span>Draft</span>
-				<strong>{formatTime( session?.lastDraftAt )}</strong>
+				<strong>{formatTime(session?.lastDraftAt)}</strong>
 			</div>
 			<div class="revision-panel__metric builder-shell-card">
 				<span>Autosave</span>
-				<strong>{formatTime( session?.lastAutosaveAt )}</strong>
+				<strong>{formatTime(session?.lastAutosaveAt)}</strong>
 			</div>
 			<div class="revision-panel__metric builder-shell-card">
 				<span>Published</span>
-				<strong>{formatTime( session?.lastPublishedAt )}</strong>
+				<strong>{formatTime(session?.lastPublishedAt)}</strong>
 			</div>
 		</div>
 
 		<div class="revision-panel__actions">
-			<button class="builder-shell-button builder-shell-button--dark revision-panel__action revision-panel__action--draft" type="button" disabled={!canSaveDraft} title={canSaveDraft ? 'Save Draft' : saveDraftDisabledReason} onclick={onSaveDraft}>Save Draft</button>
-			<button class="builder-shell-button builder-shell-button--dark revision-panel__publish" type="button" disabled={!canPublish} title={canPublish ? 'Publish' : publishDisabledReason} onclick={onPublish}>Publish</button>
-			<button class="builder-shell-button revision-panel__action revision-panel__action--restore" type="button" disabled={!selectedRevisionId || restoring} onclick={restoreSelectedRevision}>
+			<button
+				class="builder-shell-button builder-shell-button--dark revision-panel__action revision-panel__action--draft"
+				type="button"
+				disabled={!canSaveDraft}
+				title={canSaveDraft ? 'Save Draft' : saveDraftDisabledReason}
+				onclick={onSaveDraft}>Save Draft</button
+			>
+			<button
+				class="builder-shell-button builder-shell-button--dark revision-panel__publish"
+				type="button"
+				disabled={!canPublish}
+				title={canPublish ? 'Publish' : publishDisabledReason}
+				onclick={onPublish}>Publish</button
+			>
+			<button
+				class="builder-shell-button revision-panel__action revision-panel__action--restore"
+				type="button"
+				disabled={!selectedRevisionId || restoring}
+				onclick={restoreSelectedRevision}
+			>
 				{restoring ? 'Restoring...' : 'Restore Selected'}
 			</button>
 		</div>
@@ -102,7 +125,7 @@
 			<div class="revision-panel__selected builder-shell-card">
 				<span>Selected revision</span>
 				<strong>{selectedRevision.label}</strong>
-				<small>{selectedRevision.kind} | {formatTime( selectedRevision.createdAt )}</small>
+				<small>{selectedRevision.kind} | {formatTime(selectedRevision.createdAt)}</small>
 			</div>
 		{/if}
 
@@ -114,11 +137,11 @@
 							type="button"
 							class:selected={revision.id === selectedRevisionId}
 							class="revision-panel__item builder-shell-card"
-							onclick={() => onSelectRevision( revision.id )}
+							onclick={() => onSelectRevision(revision.id)}
 						>
 							<div>
 								<strong>{revision.label}</strong>
-								<small>{formatTime( revision.createdAt )}</small>
+								<small>{formatTime(revision.createdAt)}</small>
 							</div>
 							<span class="builder-shell-badge builder-shell-badge--neutral">{revision.kind}</span>
 						</button>
@@ -250,7 +273,7 @@
 
 	.revision-panel__summary {
 		display: grid;
-		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--builder-shell-space-8);
 	}
 
@@ -276,7 +299,7 @@
 
 	.revision-panel__actions {
 		display: grid;
-		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--builder-shell-space-8);
 	}
 

@@ -1,12 +1,12 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
-export default defineConfig( {
-	plugins: [ sveltekit() ],
+export default defineConfig({
+	plugins: [sveltekit()],
 	ssr: {
-		noExternal: [ /^@builder\// ],
+		noExternal: [/^@builder\//],
 	},
 	server: {
 		port: 5173,
 	},
-} );
+});

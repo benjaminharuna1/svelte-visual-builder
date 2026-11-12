@@ -1,0 +1,64 @@
+name: Bug report
+description: Report a reproducible problem in the builder packages, demo apps, or tooling.
+title: '[Bug]: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not include secrets or exploit details in a public issue. See `SECURITY.md` for private vulnerability reporting.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Package or workspace version, plus the affected package names.
+      placeholder: '0.2.8, @builder/editor-svelte'
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Editor
+        - Runtime renderer
+        - Schema or core
+        - Import (HTML, Elementor, templates)
+        - Persistence, media, or adapters
+        - AI
+        - Tooling, CI, or packaging
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide minimal steps, a repository, or a failing test.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Node, pnpm, browser, and OS versions.
+      placeholder: 'Node 22.14, pnpm 9.12, Chrome 140, Windows 11'
+    validations:
+      required: true

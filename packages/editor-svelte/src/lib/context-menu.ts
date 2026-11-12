@@ -39,8 +39,10 @@ export interface BuilderContextMenuAnchorReference {
 	getBoundingClientRect: () => DOMRect;
 }
 
-export function createContextMenuAnchorReference( anchor?: BuilderContextMenuAnchor ): BuilderContextMenuAnchorReference | undefined {
-	if ( !anchor ) {
+export function createContextMenuAnchorReference(
+	anchor?: BuilderContextMenuAnchor,
+): BuilderContextMenuAnchorReference | undefined {
+	if (!anchor) {
 		return undefined;
 	}
 
@@ -65,11 +67,11 @@ export function resolveBuilderContextMenuGroups(
 	registry: BuilderRegistry,
 ): BuilderContextMenuGroup[] {
 	const menuState = state.ui.contextMenu;
-	if ( !menuState.open ) {
+	if (!menuState.open) {
 		return [];
 	}
 
-	if ( menuState.targetKind === 'canvas-root' ) {
+	if (menuState.targetKind === 'canvas-root') {
 		return [
 			{
 				id: 'insert',
@@ -81,32 +83,28 @@ export function resolveBuilderContextMenuGroups(
 			},
 			{
 				id: 'clipboard',
-				items: [
-					{ id: 'paste', label: 'Paste' },
-				],
+				items: [{ id: 'paste', label: 'Paste' }],
 			},
 		];
 	}
 
-	const target = resolveContextMenuTarget( state, registry );
-	if ( !target.node ) {
+	const target = resolveContextMenuTarget(state, registry);
+	if (!target.node) {
 		return [];
 	}
 
 	const structureItems: BuilderContextMenuAction[] = [];
-	if ( target.acceptsChildren ) {
-		structureItems.push( { id: 'add-child', label: 'Add Child' } );
+	if (target.acceptsChildren) {
+		structureItems.push({ id: 'add-child', label: 'Add Child' });
 	}
-	if ( target.node.type === 'component-instance' ) {
-		structureItems.push( { id: 'open-master', label: 'Open Master' } );
+	if (target.node.type === 'component-instance') {
+		structureItems.push({ id: 'open-master', label: 'Open Master' });
 	}
 
 	return [
 		{
 			id: 'edit',
-			items: [
-				{ id: 'edit', label: 'Edit' },
-			],
+			items: [{ id: 'edit', label: 'Edit' }],
 		},
 		{
 			id: 'clipboard',
@@ -117,19 +115,17 @@ export function resolveBuilderContextMenuGroups(
 				{ id: 'duplicate', label: 'Duplicate' },
 			],
 		},
-		...( structureItems.length
+		...(structureItems.length
 			? [
-				{
-					id: 'structure',
-					items: structureItems,
-				},
-			]
-			: [] ),
+					{
+						id: 'structure',
+						items: structureItems,
+					},
+				]
+			: []),
 		{
 			id: 'destructive',
-			items: [
-				{ id: 'delete', label: 'Delete', tone: 'danger' },
-			],
+			items: [{ id: 'delete', label: 'Delete', tone: 'danger' }],
 		},
 	];
 }
@@ -139,25 +135,25 @@ export function resolveContextMenuTarget(
 	registry: BuilderRegistry,
 ): BuilderContextMenuResolvedTarget {
 	const targetDocument = state.ui.contextMenu.documentId
-		? state.project.documents.find( ( document ) => document.id === state.ui.contextMenu.documentId )
+		? state.project.documents.find((document) => document.id === state.ui.contextMenu.documentId)
 		: undefined;
 	const nodeId = state.ui.contextMenu.nodeId;
-	if ( !nodeId ) {
+	if (!nodeId) {
 		return {
 			acceptsChildren: false,
 		};
 	}
 
-	const document = targetDocument ?? getActiveDocument( state );
-	const node = getNodeById( document.root, nodeId );
-	const location = getNodeLocation( document.root, nodeId );
-	const definition = node ? registry.elements.get( node.type ) : undefined;
-	const slotIds = node ? Object.keys( node.slots ) : [];
+	const document = targetDocument ?? getActiveDocument(state);
+	const node = getNodeById(document.root, nodeId);
+	const location = getNodeLocation(document.root, nodeId);
+	const definition = node ? registry.elements.get(node.type) : undefined;
+	const slotIds = node ? Object.keys(node.slots) : [];
 
 	return {
 		node,
 		location,
-		preferredSlot: definition?.runtime.acceptsChildren ? undefined : slotIds[ 0 ],
-		acceptsChildren: Boolean( definition?.runtime.acceptsChildren || slotIds.length ),
+		preferredSlot: definition?.runtime.acceptsChildren ? undefined : slotIds[0],
+		acceptsChildren: Boolean(definition?.runtime.acceptsChildren || slotIds.length),
 	};
 }

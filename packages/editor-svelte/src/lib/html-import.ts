@@ -1,6 +1,11 @@
 import type { BuilderNode, BuilderPackage, HtmlAttribute, JsonValue, MediaAsset, StyleSet } from '@builder/schema';
 import { createBuilderPackage, createDocument, createNode, createStyleSet, slugify } from '@builder/schema';
-import { sanitizeBuilderAttributes, sanitizeBuilderCss, sanitizeBuilderHtml, sanitizeBuilderUrl } from '@builder/security';
+import {
+	sanitizeBuilderAttributes,
+	sanitizeBuilderCss,
+	sanitizeBuilderHtml,
+	sanitizeBuilderUrl,
+} from '@builder/security';
 import type { TemplateImportDiagnostic } from './template-import.js';
 import { mergeMediaCatalog, normalizeMediaAsset } from './media.js';
 
@@ -15,43 +20,55 @@ export interface HtmlImportResult {
 	parityGaps: TemplateImportDiagnostic[];
 }
 
-const CONTAINER_TAGS = new Set( [ 'main', 'section', 'article', 'header', 'footer', 'nav', 'aside', 'div' ] );
-const RICH_HTML_TAGS = new Set( [ 'ul', 'ol', 'table', 'dl', 'pre', 'blockquote' ] );
-const FALLBACK_HTML_TAGS = new Set( [ 'iframe', 'video', 'audio', 'canvas', 'svg', 'picture', 'form', 'input', 'textarea', 'select', 'button' ] );
-const DROPPED_TAGS = new Set( [ 'script', 'noscript', 'template', 'style', 'link', 'meta', 'title' ] );
+const CONTAINER_TAGS = new Set(['main', 'section', 'article', 'header', 'footer', 'nav', 'aside', 'div']);
+const RICH_HTML_TAGS = new Set(['ul', 'ol', 'table', 'dl', 'pre', 'blockquote']);
+const FALLBACK_HTML_TAGS = new Set([
+	'iframe',
+	'video',
+	'audio',
+	'canvas',
+	'svg',
+	'picture',
+	'form',
+	'input',
+	'textarea',
+	'select',
+	'button',
+]);
+const DROPPED_TAGS = new Set(['script', 'noscript', 'template', 'style', 'link', 'meta', 'title']);
 
-export function importHtmlPackage( payload: HtmlImportPayload ): HtmlImportResult {
+export function importHtmlPackage(payload: HtmlImportPayload): HtmlImportResult {
 	const sourceName = payload.sourceName?.trim() || 'Imported HTML';
 	const html = payload.html.trim();
-	if ( !html ) {
-		throw new Error( 'Paste HTML before importing.' );
+	if (!html) {
+		throw new Error('Paste HTML before importing.');
 	}
-	if ( typeof DOMParser === 'undefined' ) {
-		throw new Error( 'HTML import requires a browser DOM parser.' );
+	if (typeof DOMParser === 'undefined') {
+		throw new Error('HTML import requires a browser DOM parser.');
 	}
 
 	const parser = new DOMParser();
-	const parsed = parser.parseFromString( html, 'text/html' );
-	const parserError = parsed.querySelector( 'parsererror' );
-	if ( parserError ) {
-		throw new Error( 'The pasted HTML could not be parsed.' );
+	const parsed = parser.parseFromString(html, 'text/html');
+	const parserError = parsed.querySelector('parsererror');
+	if (parserError) {
+		throw new Error('The pasted HTML could not be parsed.');
 	}
 
 	const warnings: TemplateImportDiagnostic[] = [];
 	const parityGaps: TemplateImportDiagnostic[] = [];
-	const styles = [ ...parsed.querySelectorAll( 'style' ) ].map( ( element ) => element.textContent ?? '' ).filter( Boolean );
-	const stylesheet = styles.join( '\n\n' );
-	const bodyChildren = [ ...parsed.body.childNodes ];
-	const roots = importChildNodes( bodyChildren, warnings, parityGaps, stylesheet );
-	if ( !roots.length ) {
-		throw new Error( 'The pasted HTML did not contain importable body content.' );
+	const styles = [...parsed.querySelectorAll('style')].map((element) => element.textContent ?? '').filter(Boolean);
+	const stylesheet = styles.join('\n\n');
+	const bodyChildren = [...parsed.body.childNodes];
+	const roots = importChildNodes(bodyChildren, warnings, parityGaps, stylesheet);
+	if (!roots.length) {
+		throw new Error('The pasted HTML did not contain importable body content.');
 	}
 
-	const title = resolveDocumentTitle( parsed, roots, sourceName );
-	const document = createDocument( 'library-item', title, slugify( title ) || 'imported-html' );
+	const title = resolveDocumentTitle(parsed, roots, sourceName);
+	const document = createDocument('library-item', title, slugify(title) || 'imported-html');
 	const rootId = crypto.randomUUID();
 	document.root = [
-		createNode( {
+		createNode({
 			id: rootId,
 			type: 'container',
 			props: {
@@ -62,19 +79,19 @@ export function importHtmlPackage( payload: HtmlImportPayload ): HtmlImportResul
 				direction: 'column',
 				width: '100%',
 			},
-			styles: createStyleSet( {
+			styles: createStyleSet({
 				base: {
 					width: '100%',
 				},
-				customCss: scopeImportedCss( stylesheet, warnings, parityGaps ),
-			} ),
+				customCss: scopeImportedCss(stylesheet, warnings, parityGaps),
+			}),
 			children: roots,
 			meta: {
 				imported: true,
 				importSource: 'html',
 				importSourceName: sourceName,
 			},
-		} ),
+		}),
 	];
 	document.meta = {
 		importSource: 'html',
@@ -82,8 +99,8 @@ export function importHtmlPackage( payload: HtmlImportPayload ): HtmlImportResul
 		originalDocumentKind: 'html',
 	};
 
-	const project = createBuilderPackage( sourceName, [ document ] );
-	project.media = collectHtmlMediaAssets( parsed, roots, stylesheet );
+	const project = createBuilderPackage(sourceName, [document]);
+	project.media = collectHtmlMediaAssets(parsed, roots, stylesheet);
 
 	return {
 		project,
@@ -92,294 +109,355 @@ export function importHtmlPackage( payload: HtmlImportPayload ): HtmlImportResul
 	};
 }
 
-function importChildNodes( nodes: Node[], warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[], stylesheet = '' ): BuilderNode[] {
+function importChildNodes(
+	nodes: Node[],
+	warnings: TemplateImportDiagnostic[],
+	parityGaps: TemplateImportDiagnostic[],
+	stylesheet = '',
+): BuilderNode[] {
 	const output: BuilderNode[] = [];
-	for ( const node of nodes ) {
-		if ( node.nodeType === Node.TEXT_NODE ) {
+	for (const node of nodes) {
+		if (node.nodeType === Node.TEXT_NODE) {
 			const text = node.textContent?.trim();
-			if ( text ) {
-				output.push( createTextNode( text, 'paragraph' ) );
+			if (text) {
+				output.push(createTextNode(text, 'paragraph'));
 			}
 			continue;
 		}
-		if ( node.nodeType !== Node.ELEMENT_NODE ) {
+		if (node.nodeType !== Node.ELEMENT_NODE) {
 			continue;
 		}
-		const imported = importElementNode( node as Element, warnings, parityGaps, stylesheet );
-		if ( imported ) {
-			output.push( imported );
+		const imported = importElementNode(node as Element, warnings, parityGaps, stylesheet);
+		if (imported) {
+			output.push(imported);
 		}
 	}
 	return output;
 }
 
-function importElementNode( element: Element, warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[], stylesheet = '' ): BuilderNode | undefined {
+function importElementNode(
+	element: Element,
+	warnings: TemplateImportDiagnostic[],
+	parityGaps: TemplateImportDiagnostic[],
+	stylesheet = '',
+): BuilderNode | undefined {
 	const tag = element.tagName.toLowerCase();
-	if ( DROPPED_TAGS.has( tag ) ) {
-		if ( tag === 'script' ) {
-			addDiagnostic( warnings, parityGaps, 'unsupported-html-script', 'Script tags are not imported or executed.', 'unsupported', 'script' );
+	if (DROPPED_TAGS.has(tag)) {
+		if (tag === 'script') {
+			addDiagnostic(
+				warnings,
+				parityGaps,
+				'unsupported-html-script',
+				'Script tags are not imported or executed.',
+				'unsupported',
+				'script',
+			);
 		}
-		if ( tag === 'link' ) {
-			const href = element.getAttribute( 'href' );
-			if ( href ) {
-				addDiagnostic( warnings, parityGaps, 'external-html-asset', `External HTML asset was preserved as a diagnostic only: ${ href }`, 'info', 'link[href]' );
+		if (tag === 'link') {
+			const href = element.getAttribute('href');
+			if (href) {
+				addDiagnostic(
+					warnings,
+					parityGaps,
+					'external-html-asset',
+					`External HTML asset was preserved as a diagnostic only: ${href}`,
+					'info',
+					'link[href]',
+				);
 			}
 		}
 		return undefined;
 	}
 
-	if ( /^h[1-6]$/.test( tag ) ) {
-		return createNode( {
+	if (/^h[1-6]$/.test(tag)) {
+		return createNode({
 			id: crypto.randomUUID(),
 			type: 'heading',
 			props: {
-				text: sanitizeBuilderHtml( element.innerHTML.trim() || element.textContent?.trim() || 'Heading', { profile: 'inline' } ),
+				text: sanitizeBuilderHtml(element.innerHTML.trim() || element.textContent?.trim() || 'Heading', {
+					profile: 'inline',
+				}),
 				level: tag,
 			},
-			attributes: extractAttributes( element ),
-			styles: createImportedElementStyleSet( element, stylesheet ),
-			meta: createHtmlNodeMeta( tag ),
-		} );
+			attributes: extractAttributes(element),
+			styles: createImportedElementStyleSet(element, stylesheet),
+			meta: createHtmlNodeMeta(tag),
+		});
 	}
 
-	if ( tag === 'p' ) {
-		return createNode( {
+	if (tag === 'p') {
+		return createNode({
 			id: crypto.randomUUID(),
 			type: 'paragraph',
 			props: {
-				text: sanitizeBuilderHtml( element.innerHTML.trim() || element.textContent?.trim() || '', { profile: 'inline' } ),
+				text: sanitizeBuilderHtml(element.innerHTML.trim() || element.textContent?.trim() || '', { profile: 'inline' }),
 			},
-			attributes: extractAttributes( element ),
-			styles: createImportedElementStyleSet( element, stylesheet ),
-			meta: createHtmlNodeMeta( tag ),
-		} );
+			attributes: extractAttributes(element),
+			styles: createImportedElementStyleSet(element, stylesheet),
+			meta: createHtmlNodeMeta(tag),
+		});
 	}
 
-	if ( tag === 'img' ) {
-		return createNode( {
+	if (tag === 'img') {
+		return createNode({
 			id: crypto.randomUUID(),
 			type: 'image',
 			props: {
-				src: sanitizeBuilderUrl( element.getAttribute( 'src' ) ?? '' ),
-				alt: element.getAttribute( 'alt' ) ?? '',
+				src: sanitizeBuilderUrl(element.getAttribute('src') ?? ''),
+				alt: element.getAttribute('alt') ?? '',
 			},
-			attributes: extractAttributes( element, [ 'src', 'alt' ] ),
-			styles: createImportedElementStyleSet( element, stylesheet ),
-			meta: createHtmlNodeMeta( tag ),
-		} );
+			attributes: extractAttributes(element, ['src', 'alt']),
+			styles: createImportedElementStyleSet(element, stylesheet),
+			meta: createHtmlNodeMeta(tag),
+		});
 	}
 
-	if ( tag === 'a' && isButtonLikeAnchor( element ) ) {
-		return createNode( {
+	if (tag === 'a' && isButtonLikeAnchor(element)) {
+		return createNode({
 			id: crypto.randomUUID(),
 			type: 'button',
 			props: {
-				text: sanitizeBuilderHtml( element.innerHTML.trim() || element.textContent?.trim() || 'Button', { profile: 'inline' } ),
-				href: sanitizeBuilderUrl( element.getAttribute( 'href' ) ?? '#' ) || '#',
+				text: sanitizeBuilderHtml(element.innerHTML.trim() || element.textContent?.trim() || 'Button', {
+					profile: 'inline',
+				}),
+				href: sanitizeBuilderUrl(element.getAttribute('href') ?? '#') || '#',
 			},
-			attributes: extractAttributes( element, [ 'href' ] ),
-			styles: createImportedElementStyleSet( element, stylesheet ),
-			meta: createHtmlNodeMeta( tag ),
-		} );
+			attributes: extractAttributes(element, ['href']),
+			styles: createImportedElementStyleSet(element, stylesheet),
+			meta: createHtmlNodeMeta(tag),
+		});
 	}
 
-	if ( CONTAINER_TAGS.has( tag ) ) {
-		const children = importChildNodes( [ ...element.childNodes ], warnings, parityGaps, stylesheet );
-		const layout = resolveImportedHtmlContainerLayout( element, tag, stylesheet );
-		return createNode( {
+	if (CONTAINER_TAGS.has(tag)) {
+		const children = importChildNodes([...element.childNodes], warnings, parityGaps, stylesheet);
+		const layout = resolveImportedHtmlContainerLayout(element, tag, stylesheet);
+		return createNode({
 			id: crypto.randomUUID(),
 			type: 'container',
 			layout,
-			attributes: extractAttributes( element ),
-			styles: createImportedElementStyleSet( element, stylesheet ),
+			attributes: extractAttributes(element),
+			styles: createImportedElementStyleSet(element, stylesheet),
 			children,
-			meta: createHtmlNodeMeta( tag ),
-		} );
+			meta: createHtmlNodeMeta(tag),
+		});
 	}
 
-	if ( RICH_HTML_TAGS.has( tag ) || FALLBACK_HTML_TAGS.has( tag ) || tag.includes( '-' ) ) {
-		addDiagnostic( warnings, parityGaps, 'html-fallback-node', `HTML <${ tag }> was imported as an editable HTML node.`, 'unsupported', tag );
-		return createHtmlFallbackNode( element, tag, stylesheet );
+	if (RICH_HTML_TAGS.has(tag) || FALLBACK_HTML_TAGS.has(tag) || tag.includes('-')) {
+		addDiagnostic(
+			warnings,
+			parityGaps,
+			'html-fallback-node',
+			`HTML <${tag}> was imported as an editable HTML node.`,
+			'unsupported',
+			tag,
+		);
+		return createHtmlFallbackNode(element, tag, stylesheet);
 	}
 
-	if ( hasOnlyInlineContent( element ) ) {
-		return createNode( {
+	if (hasOnlyInlineContent(element)) {
+		return createNode({
 			id: crypto.randomUUID(),
 			type: 'paragraph',
 			props: {
 				text: element.innerHTML.trim() || element.textContent?.trim() || '',
 			},
-			attributes: extractAttributes( element ),
-			styles: createImportedElementStyleSet( element, stylesheet ),
-			meta: createHtmlNodeMeta( tag ),
-		} );
+			attributes: extractAttributes(element),
+			styles: createImportedElementStyleSet(element, stylesheet),
+			meta: createHtmlNodeMeta(tag),
+		});
 	}
 
-	addDiagnostic( warnings, parityGaps, 'html-fallback-node', `HTML <${ tag }> was imported as an editable HTML node.`, 'unsupported', tag );
-	return createHtmlFallbackNode( element, tag, stylesheet );
+	addDiagnostic(
+		warnings,
+		parityGaps,
+		'html-fallback-node',
+		`HTML <${tag}> was imported as an editable HTML node.`,
+		'unsupported',
+		tag,
+	);
+	return createHtmlFallbackNode(element, tag, stylesheet);
 }
 
-function createHtmlFallbackNode( element: Element, tag: string, stylesheet: string ): BuilderNode {
-	return createNode( {
+function createHtmlFallbackNode(element: Element, tag: string, stylesheet: string): BuilderNode {
+	return createNode({
 		id: crypto.randomUUID(),
 		type: 'html',
 		props: {
-			markup: sanitizeBuilderHtml( element.outerHTML ),
+			markup: sanitizeBuilderHtml(element.outerHTML),
 		},
-		styles: createImportedElementStyleSet( element, stylesheet ),
-		attributes: extractAttributes( element ),
-		meta: createHtmlNodeMeta( tag, true ),
-	} );
+		styles: createImportedElementStyleSet(element, stylesheet),
+		attributes: extractAttributes(element),
+		meta: createHtmlNodeMeta(tag, true),
+	});
 }
 
-function createTextNode( text: string, type: 'paragraph' | 'heading' ): BuilderNode {
-	return createNode( {
+function createTextNode(text: string, type: 'paragraph' | 'heading'): BuilderNode {
+	return createNode({
 		id: crypto.randomUUID(),
 		type,
 		props: {
 			text,
-			...( type === 'heading' ? { level: 'h2' } : {} ),
+			...(type === 'heading' ? { level: 'h2' } : {}),
 		},
-		meta: createHtmlNodeMeta( '#text' ),
-	} );
+		meta: createHtmlNodeMeta('#text'),
+	});
 }
 
-function createHtmlNodeMeta( tag: string, fallback = false ): Record<string, JsonValue> {
+function createHtmlNodeMeta(tag: string, fallback = false): Record<string, JsonValue> {
 	return {
 		imported: true,
 		importSource: 'html',
 		htmlTag: tag,
-		...( fallback ? { htmlFallback: true } : {} ),
+		...(fallback ? { htmlFallback: true } : {}),
 	};
 }
 
-function collectHtmlMediaAssets( parsed: Document, roots: BuilderNode[], css: string ): MediaAsset[] {
-	const fromNodes = collectNodeMediaAssets( roots );
-	const fromMarkup = [ ...parsed.querySelectorAll( 'img' ) ].map( ( image ) => sanitizeBuilderUrl( image.getAttribute( 'src' ) ?? '' ) );
-	const fromCss = [ ...css.matchAll( /url\(\s*["']?([^"')]+)["']?\s*\)/gi ) ].map( ( match ) => sanitizeBuilderUrl( match[ 1 ] ?? '' ) );
+function collectHtmlMediaAssets(parsed: Document, roots: BuilderNode[], css: string): MediaAsset[] {
+	const fromNodes = collectNodeMediaAssets(roots);
+	const fromMarkup = [...parsed.querySelectorAll('img')].map((image) =>
+		sanitizeBuilderUrl(image.getAttribute('src') ?? ''),
+	);
+	const fromCss = [...css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)].map((match) =>
+		sanitizeBuilderUrl(match[1] ?? ''),
+	);
 	const assets = [
 		...fromNodes,
-		...fromMarkup.filter( Boolean ).map( ( url ) => normalizeMediaAsset( { url, source: 'external' } ) ),
-		...fromCss.filter( isImportableMediaUrl ).map( ( url ) => normalizeMediaAsset( { url, source: 'external' } ) ),
+		...fromMarkup.filter(Boolean).map((url) => normalizeMediaAsset({ url, source: 'external' })),
+		...fromCss.filter(isImportableMediaUrl).map((url) => normalizeMediaAsset({ url, source: 'external' })),
 	];
-	return mergeMediaCatalog( [], assets );
+	return mergeMediaCatalog([], assets);
 }
 
-function collectNodeMediaAssets( nodes: BuilderNode[] ): MediaAsset[] {
-	return nodes.flatMap( ( node ) => {
+function collectNodeMediaAssets(nodes: BuilderNode[]): MediaAsset[] {
+	return nodes.flatMap((node) => {
 		const assets: MediaAsset[] = [];
-		if ( node.type === 'image' && typeof node.props.src === 'string' && node.props.src ) {
-			assets.push( normalizeMediaAsset( {
-				url: node.props.src,
-				alt: typeof node.props.alt === 'string' ? node.props.alt : undefined,
-				source: 'external',
-			} ) );
+		if (node.type === 'image' && typeof node.props.src === 'string' && node.props.src) {
+			assets.push(
+				normalizeMediaAsset({
+					url: node.props.src,
+					alt: typeof node.props.alt === 'string' ? node.props.alt : undefined,
+					source: 'external',
+				}),
+			);
 		}
-		for ( const child of node.children ) {
-			assets.push( ...collectNodeMediaAssets( [ child ] ) );
+		for (const child of node.children) {
+			assets.push(...collectNodeMediaAssets([child]));
 		}
-		for ( const children of Object.values( node.slots as Record<string, BuilderNode[]> ) ) {
-			assets.push( ...collectNodeMediaAssets( children ) );
+		for (const children of Object.values(node.slots as Record<string, BuilderNode[]>)) {
+			assets.push(...collectNodeMediaAssets(children));
 		}
 		return assets;
-	} );
+	});
 }
 
-function isImportableMediaUrl( url: string ): boolean {
-	return /^(https?:|data:image\/|\/|\.\/|\.\.\/)/i.test( url ) && /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test( url );
+function isImportableMediaUrl(url: string): boolean {
+	return /^(https?:|data:image\/|\/|\.\/|\.\.\/)/i.test(url) && /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(url);
 }
 
-function extractAttributes( element: Element, omit: string[] = [] ): HtmlAttribute[] {
-	const omitted = new Set( [ 'style', ...omit ].map( ( entry ) => entry.toLowerCase() ) );
+function extractAttributes(element: Element, omit: string[] = []): HtmlAttribute[] {
+	const omitted = new Set(['style', ...omit].map((entry) => entry.toLowerCase()));
 	const source: Record<string, string> = Object.fromEntries(
-		[ ...element.attributes ]
-			.filter( ( attribute ) => !omitted.has( attribute.name.toLowerCase() ) )
-			.map( ( attribute ): [ string, string ] => [ attribute.name, attribute.value ] ),
+		[...element.attributes]
+			.filter((attribute) => !omitted.has(attribute.name.toLowerCase()))
+			.map((attribute): [string, string] => [attribute.name, attribute.value]),
 	);
-	return Object.entries( sanitizeBuilderAttributes( source ) )
-		.map( ( [ name, value ] ) => ( {
-			id: crypto.randomUUID(),
-			name,
-			value,
-			kind: 'static' as const,
-		} ) );
+	return Object.entries(sanitizeBuilderAttributes(source)).map(([name, value]) => ({
+		id: crypto.randomUUID(),
+		name,
+		value,
+		kind: 'static' as const,
+	}));
 }
 
-function parseInlineStyle( value: string | null ): Record<string, JsonValue> {
-	if ( !value ) {
+function parseInlineStyle(value: string | null): Record<string, JsonValue> {
+	if (!value) {
 		return {};
 	}
 	const styles: Record<string, JsonValue> = {};
-	for ( const declaration of value.split( ';' ) ) {
-		const separatorIndex = declaration.indexOf( ':' );
-		if ( separatorIndex === -1 ) {
+	for (const declaration of value.split(';')) {
+		const separatorIndex = declaration.indexOf(':');
+		if (separatorIndex === -1) {
 			continue;
 		}
-		const property = declaration.slice( 0, separatorIndex ).trim();
-		const propertyValue = declaration.slice( separatorIndex + 1 ).trim();
-		if ( !property || !propertyValue || /[;{}]/.test( property ) ) {
+		const property = declaration.slice(0, separatorIndex).trim();
+		const propertyValue = declaration.slice(separatorIndex + 1).trim();
+		if (!property || !propertyValue || /[;{}]/.test(property)) {
 			continue;
 		}
-		styles[ normalizeCssPropertyName( property ) ] = propertyValue;
+		styles[normalizeCssPropertyName(property)] = propertyValue;
 	}
 	return styles;
 }
 
-function createImportedElementStyleSet( element: Element, stylesheet: string ): StyleSet {
-	return createStyleSet( resolveElementStyleSetInput( element, stylesheet ) );
+function createImportedElementStyleSet(element: Element, stylesheet: string): StyleSet {
+	return createStyleSet(resolveElementStyleSetInput(element, stylesheet));
 }
 
-function resolveElementStyleSetInput( element: Element, stylesheet: string ): Partial<StyleSet> {
-	const stylesheetStyles = resolveStylesheetStylesForElement( element, stylesheet );
+function resolveElementStyleSetInput(element: Element, stylesheet: string): Partial<StyleSet> {
+	const stylesheetStyles = resolveStylesheetStylesForElement(element, stylesheet);
 	return {
-		base: compactJsonObject( {
+		base: compactJsonObject({
 			...stylesheetStyles.base,
-			...parseInlineStyle( element.getAttribute( 'style' ) ),
-		} ),
+			...parseInlineStyle(element.getAttribute('style')),
+		}),
 		states: stylesheetStyles.states,
 	};
 }
 
-function resolveImportedHtmlContainerLayout( element: Element, tag: string, stylesheet: string ): Record<string, JsonValue> {
-	const inlineStyles = parseInlineStyle( element.getAttribute( 'style' ) );
-	const inlineDisplay = stringStyleValue( inlineStyles.display );
-	const inlineDirection = stringStyleValue( inlineStyles.flexDirection ?? inlineStyles[ 'flex-direction' ] );
-	const stylesheetFlex = resolveStylesheetFlexHint( element, tag, stylesheet );
+function resolveImportedHtmlContainerLayout(
+	element: Element,
+	tag: string,
+	stylesheet: string,
+): Record<string, JsonValue> {
+	const inlineStyles = parseInlineStyle(element.getAttribute('style'));
+	const inlineDisplay = stringStyleValue(inlineStyles.display);
+	const inlineDirection = stringStyleValue(inlineStyles.flexDirection ?? inlineStyles['flex-direction']);
+	const stylesheetFlex = resolveStylesheetFlexHint(element, tag, stylesheet);
 	const display = inlineDisplay || stylesheetFlex.display || 'flex';
-	const explicitFlexDisplay = inlineDisplay === 'flex' || inlineDisplay === 'inline-flex' || stylesheetFlex.display === 'flex';
-	const direction = normalizeImportedFlexDirection( inlineDirection ?? stylesheetFlex.direction )
-		?? ( display === 'flex' && explicitFlexDisplay ? undefined : 'column' );
-	return compactJsonObject( {
+	const explicitFlexDisplay =
+		inlineDisplay === 'flex' || inlineDisplay === 'inline-flex' || stylesheetFlex.display === 'flex';
+	const direction =
+		normalizeImportedFlexDirection(inlineDirection ?? stylesheetFlex.direction) ??
+		(display === 'flex' && explicitFlexDisplay ? undefined : 'column');
+	return compactJsonObject({
 		display,
 		direction,
 		width: tag === 'section' || tag === 'main' ? '100%' : undefined,
-	} );
+	});
 }
 
-function stringStyleValue( value: JsonValue | undefined ): string | undefined {
+function stringStyleValue(value: JsonValue | undefined): string | undefined {
 	return typeof value === 'string' && value.trim() ? value.trim() : undefined;
 }
 
-function normalizeImportedFlexDirection( value: string | undefined ): string | undefined {
-	const normalized = value?.trim().toLowerCase().replaceAll( '_', '-' );
-	return normalized && [ 'row', 'row-reverse', 'column', 'column-reverse' ].includes( normalized )
-		? normalized
-		: undefined;
+function normalizeImportedFlexDirection(value: string | undefined): string | undefined {
+	const normalized = value?.trim().toLowerCase().replaceAll('_', '-');
+	return normalized && ['row', 'row-reverse', 'column', 'column-reverse'].includes(normalized) ? normalized : undefined;
 }
 
-function resolveStylesheetFlexHint( element: Element, tag: string, stylesheet: string ): { display?: string; direction?: string } {
-	if ( !stylesheet.trim() ) {
+function resolveStylesheetFlexHint(
+	element: Element,
+	tag: string,
+	stylesheet: string,
+): { display?: string; direction?: string } {
+	if (!stylesheet.trim()) {
 		return {};
 	}
 	let hint: { display?: string; direction?: string } = {};
-	for ( const { selectorText, declarations } of iterateTopLevelCssRules( stylesheet ) ) {
+	for (const { selectorText, declarations } of iterateTopLevelCssRules(stylesheet)) {
 		void tag;
-		if ( !selectorText.split( ',' ).some( ( selector ) => isBaseStyleSelector( selector ) && matchesImportedElementSelector( element, selector ) ) ) {
+		if (
+			!selectorText
+				.split(',')
+				.some((selector) => isBaseStyleSelector(selector) && matchesImportedElementSelector(element, selector))
+		) {
 			continue;
 		}
-		const declarationMap = parseInlineStyle( declarations );
-		const display = stringStyleValue( declarationMap.display );
-		const direction = normalizeImportedFlexDirection( stringStyleValue( declarationMap.flexDirection ?? declarationMap[ 'flex-direction' ] ) );
+		const declarationMap = parseInlineStyle(declarations);
+		const display = stringStyleValue(declarationMap.display);
+		const direction = normalizeImportedFlexDirection(
+			stringStyleValue(declarationMap.flexDirection ?? declarationMap['flex-direction']),
+		);
 		hint = {
 			display: display === 'flex' || display === 'inline-flex' ? 'flex' : hint.display,
 			direction: direction ?? hint.direction,
@@ -388,26 +466,26 @@ function resolveStylesheetFlexHint( element: Element, tag: string, stylesheet: s
 	return hint;
 }
 
-function resolveStylesheetStylesForElement( element: Element, stylesheet: string ): Pick<StyleSet, 'base' | 'states'> {
-	if ( !stylesheet.trim() ) {
+function resolveStylesheetStylesForElement(element: Element, stylesheet: string): Pick<StyleSet, 'base' | 'states'> {
+	if (!stylesheet.trim()) {
 		return { base: {}, states: {} };
 	}
 	let base: Record<string, JsonValue> = {};
 	const states: Record<string, Record<string, JsonValue>> = {};
-	for ( const { selectorText, declarations } of iterateTopLevelCssRules( stylesheet ) ) {
-		const declarationMap = parseInlineStyle( declarations );
-		for ( const selector of selectorText.split( ',' ) ) {
-			const state = getSelectorState( selector );
-			if ( state ) {
-				if ( matchesImportedElementSelector( element, selector ) ) {
-					states[ state ] = {
-						...( states[ state ] ?? {} ),
+	for (const { selectorText, declarations } of iterateTopLevelCssRules(stylesheet)) {
+		const declarationMap = parseInlineStyle(declarations);
+		for (const selector of selectorText.split(',')) {
+			const state = getSelectorState(selector);
+			if (state) {
+				if (matchesImportedElementSelector(element, selector)) {
+					states[state] = {
+						...(states[state] ?? {}),
 						...declarationMap,
 					};
 				}
 				continue;
 			}
-			if ( isBaseStyleSelector( selector ) && matchesImportedElementSelector( element, selector ) ) {
+			if (isBaseStyleSelector(selector) && matchesImportedElementSelector(element, selector)) {
 				base = {
 					...base,
 					...declarationMap,
@@ -418,113 +496,140 @@ function resolveStylesheetStylesForElement( element: Element, stylesheet: string
 	return { base, states };
 }
 
-function iterateTopLevelCssRules( css: string ): Array<{ selectorText: string; declarations: string }> {
+function iterateTopLevelCssRules(css: string): Array<{ selectorText: string; declarations: string }> {
 	const output: Array<{ selectorText: string; declarations: string }> = [];
-	const cleaned = stripCssComments( css );
+	const cleaned = stripCssComments(css);
 	let index = 0;
-	while ( index < cleaned.length ) {
-		const open = cleaned.indexOf( '{', index );
-		if ( open === -1 ) {
+	while (index < cleaned.length) {
+		const open = cleaned.indexOf('{', index);
+		if (open === -1) {
 			break;
 		}
-		const selectorText = cleaned.slice( index, open ).trim();
-		const close = findMatchingBrace( cleaned, open );
-		if ( close === -1 ) {
+		const selectorText = cleaned.slice(index, open).trim();
+		const close = findMatchingBrace(cleaned, open);
+		if (close === -1) {
 			break;
 		}
-		if ( selectorText && !selectorText.startsWith( '@' ) ) {
-			output.push( {
+		if (selectorText && !selectorText.startsWith('@')) {
+			output.push({
 				selectorText,
-				declarations: cleaned.slice( open + 1, close ).trim(),
-			} );
+				declarations: cleaned.slice(open + 1, close).trim(),
+			});
 		}
 		index = close + 1;
 	}
 	return output;
 }
 
-function stripCssComments( css: string ): string {
-	return css.replaceAll( /\/\*[\s\S]*?\*\//g, '' );
+function stripCssComments(css: string): string {
+	return css.replaceAll(/\/\*[\s\S]*?\*\//g, '');
 }
 
-function isBaseStyleSelector( selector: string ): boolean {
+function isBaseStyleSelector(selector: string): boolean {
 	const normalized = selector.trim();
-	return Boolean( normalized ) && !getSelectorState( normalized ) && !/::[a-z-]+/i.test( normalized );
+	return Boolean(normalized) && !getSelectorState(normalized) && !/::[a-z-]+/i.test(normalized);
 }
 
-function getSelectorState( selector: string ): string | undefined {
-	const match = selector.match( /:(hover|active|focus-visible|focus|visited|disabled|checked)\b/i );
-	return match?.[ 1 ]?.toLowerCase();
+function getSelectorState(selector: string): string | undefined {
+	const match = selector.match(/:(hover|active|focus-visible|focus|visited|disabled|checked)\b/i);
+	return match?.[1]?.toLowerCase();
 }
 
-function matchesImportedElementSelector( element: Element, selector: string ): boolean {
+function matchesImportedElementSelector(element: Element, selector: string): boolean {
 	const normalized = selector.trim();
-	if ( !normalized || /(^|[\s>+~])(:root|html|body)(?=$|[\s.#:[>+~])/i.test( normalized ) ) {
+	if (!normalized || /(^|[\s>+~])(:root|html|body)(?=$|[\s.#:[>+~])/i.test(normalized)) {
 		return false;
 	}
 	const withoutState = normalized
-		.replaceAll( /:(hover|active|focus|focus-visible|visited|disabled|checked)\b/gi, '' )
-		.replaceAll( /::[a-z-]+/gi, '' )
+		.replaceAll(/:(hover|active|focus|focus-visible|visited|disabled|checked)\b/gi, '')
+		.replaceAll(/::[a-z-]+/gi, '')
 		.trim();
 	try {
-		return Boolean( withoutState ) && element.matches( withoutState );
+		return Boolean(withoutState) && element.matches(withoutState);
 	} catch {
-		const lastCompound = withoutState.split( /[\s>+~]+/ ).filter( Boolean ).at( -1 );
-		if ( !lastCompound ) {
+		const lastCompound = withoutState
+			.split(/[\s>+~]+/)
+			.filter(Boolean)
+			.at(-1);
+		if (!lastCompound) {
 			return false;
 		}
 		try {
-			return element.matches( lastCompound );
+			return element.matches(lastCompound);
 		} catch {
 			return false;
 		}
 	}
 }
 
-function compactJsonObject( value: Record<string, JsonValue | undefined> ): Record<string, JsonValue> {
+function compactJsonObject(value: Record<string, JsonValue | undefined>): Record<string, JsonValue> {
 	return Object.fromEntries(
-		Object.entries( value ).filter( ( _entry ): _entry is [ string, JsonValue ] => _entry[ 1 ] !== undefined ),
+		Object.entries(value).filter((_entry): _entry is [string, JsonValue] => _entry[1] !== undefined),
 	);
 }
 
-function scopeImportedCss( css: string, warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[] ): string {
-	const withoutImports = css.replaceAll( /@import[^;]+;/gi, ( match ) => {
-		addDiagnostic( warnings, parityGaps, 'unsupported-css-import', `Skipped external CSS import: ${ match.trim() }`, 'unsupported', '@import' );
-		return '';
-	} ).trim();
-	const sanitized = sanitizeBuilderCss( withoutImports ).trim();
-	if ( !sanitized ) {
+function scopeImportedCss(
+	css: string,
+	warnings: TemplateImportDiagnostic[],
+	parityGaps: TemplateImportDiagnostic[],
+): string {
+	const withoutImports = css
+		.replaceAll(/@import[^;]+;/gi, (match) => {
+			addDiagnostic(
+				warnings,
+				parityGaps,
+				'unsupported-css-import',
+				`Skipped external CSS import: ${match.trim()}`,
+				'unsupported',
+				'@import',
+			);
+			return '';
+		})
+		.trim();
+	const sanitized = sanitizeBuilderCss(withoutImports).trim();
+	if (!sanitized) {
 		return '';
 	}
-	return scopeCssBlock( sanitized, warnings, parityGaps );
+	return scopeCssBlock(sanitized, warnings, parityGaps);
 }
 
-function scopeCssBlock( css: string, warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[] ): string {
+function scopeCssBlock(
+	css: string,
+	warnings: TemplateImportDiagnostic[],
+	parityGaps: TemplateImportDiagnostic[],
+): string {
 	let output = '';
 	let index = 0;
-	const cleaned = stripCssComments( css );
-	while ( index < cleaned.length ) {
-		const open = cleaned.indexOf( '{', index );
-		if ( open === -1 ) {
+	const cleaned = stripCssComments(css);
+	while (index < cleaned.length) {
+		const open = cleaned.indexOf('{', index);
+		if (open === -1) {
 			break;
 		}
-		const selector = cleaned.slice( index, open ).trim();
-		const close = findMatchingBrace( cleaned, open );
-		if ( close === -1 ) {
+		const selector = cleaned.slice(index, open).trim();
+		const close = findMatchingBrace(cleaned, open);
+		if (close === -1) {
 			break;
 		}
-		const body = cleaned.slice( open + 1, close ).trim();
-		if ( selector.startsWith( '@media' ) || selector.startsWith( '@supports' ) ) {
-			const scopedBody = scopeCssBlock( body, warnings, parityGaps );
-			if ( scopedBody ) {
-				output += `${ selector } { ${ scopedBody } }\n`;
+		const body = cleaned.slice(open + 1, close).trim();
+		if (selector.startsWith('@media') || selector.startsWith('@supports')) {
+			const scopedBody = scopeCssBlock(body, warnings, parityGaps);
+			if (scopedBody) {
+				output += `${selector} { ${scopedBody} }\n`;
 			}
-		} else if ( selector.startsWith( '@' ) ) {
-			addDiagnostic( warnings, parityGaps, 'unsupported-css-rule', `Skipped unsupported CSS rule "${ selector }".`, 'unsupported', selector );
+		} else if (selector.startsWith('@')) {
+			addDiagnostic(
+				warnings,
+				parityGaps,
+				'unsupported-css-rule',
+				`Skipped unsupported CSS rule "${selector}".`,
+				'unsupported',
+				selector,
+			);
 		} else {
-			const scopedSelector = scopeSelectorList( selector, warnings, parityGaps );
-			if ( scopedSelector && body ) {
-				output += `${ scopedSelector } { ${ body } }\n`;
+			const scopedSelector = scopeSelectorList(selector, warnings, parityGaps);
+			if (scopedSelector && body) {
+				output += `${scopedSelector} { ${body} }\n`;
 			}
 		}
 		index = close + 1;
@@ -532,43 +637,66 @@ function scopeCssBlock( css: string, warnings: TemplateImportDiagnostic[], parit
 	return output.trim();
 }
 
-function scopeSelectorList( selector: string, warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[] ): string {
-	const scoped = selector.split( ',' )
-		.map( ( entry ) => entry.trim() )
-		.filter( Boolean )
-		.map( ( entry ) => scopeSingleSelector( entry, warnings, parityGaps ) )
-		.filter( Boolean );
-	return scoped.join( ', ' );
+function scopeSelectorList(
+	selector: string,
+	warnings: TemplateImportDiagnostic[],
+	parityGaps: TemplateImportDiagnostic[],
+): string {
+	const scoped = selector
+		.split(',')
+		.map((entry) => entry.trim())
+		.filter(Boolean)
+		.map((entry) => scopeSingleSelector(entry, warnings, parityGaps))
+		.filter(Boolean);
+	return scoped.join(', ');
 }
 
-function scopeSingleSelector( selector: string, warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[] ): string {
+function scopeSingleSelector(
+	selector: string,
+	warnings: TemplateImportDiagnostic[],
+	parityGaps: TemplateImportDiagnostic[],
+): string {
 	const normalized = selector.trim();
-	if ( !normalized ) {
+	if (!normalized) {
 		return '';
 	}
-	if ( /(^|[\s>+~])(html|body)(?=$|[\s.#:[>+~])/i.test( normalized ) ) {
-		addDiagnostic( warnings, parityGaps, 'global-css-selector', `Scoped global selector "${ normalized }" to the imported root.`, 'info', normalized );
+	if (/(^|[\s>+~])(html|body)(?=$|[\s.#:[>+~])/i.test(normalized)) {
+		addDiagnostic(
+			warnings,
+			parityGaps,
+			'global-css-selector',
+			`Scoped global selector "${normalized}" to the imported root.`,
+			'info',
+			normalized,
+		);
 		return 'selector';
 	}
-	if ( normalized === ':root' ) {
-		addDiagnostic( warnings, parityGaps, 'global-css-selector', 'Scoped :root styles to the imported root.', 'info', ':root' );
+	if (normalized === ':root') {
+		addDiagnostic(
+			warnings,
+			parityGaps,
+			'global-css-selector',
+			'Scoped :root styles to the imported root.',
+			'info',
+			':root',
+		);
 		return 'selector';
 	}
-	if ( normalized.startsWith( 'selector' ) ) {
+	if (normalized.startsWith('selector')) {
 		return normalized;
 	}
-	return `selector ${ normalized }`;
+	return `selector ${normalized}`;
 }
 
-function findMatchingBrace( value: string, openIndex: number ): number {
+function findMatchingBrace(value: string, openIndex: number): number {
 	let depth = 0;
-	for ( let index = openIndex; index < value.length; index += 1 ) {
-		if ( value[ index ] === '{' ) {
+	for (let index = openIndex; index < value.length; index += 1) {
+		if (value[index] === '{') {
 			depth += 1;
 		}
-		if ( value[ index ] === '}' ) {
+		if (value[index] === '}') {
 			depth -= 1;
-			if ( depth === 0 ) {
+			if (depth === 0) {
 				return index;
 			}
 		}
@@ -576,44 +704,43 @@ function findMatchingBrace( value: string, openIndex: number ): number {
 	return -1;
 }
 
-function normalizeCssPropertyName( property: string ): string {
-	if ( property.startsWith( '--' ) ) {
+function normalizeCssPropertyName(property: string): string {
+	if (property.startsWith('--')) {
 		return property;
 	}
-	return property.replaceAll( /-([a-z])/g, ( _match, character: string ) => character.toUpperCase() );
+	return property.replaceAll(/-([a-z])/g, (_match, character: string) => character.toUpperCase());
 }
 
-function isButtonLikeAnchor( element: Element ): boolean {
-	const className = element.getAttribute( 'class' ) ?? '';
-	const role = element.getAttribute( 'role' ) ?? '';
-	return role.toLowerCase() === 'button' || /\b(btn|button|cta|primary|secondary)\b/i.test( className );
+function isButtonLikeAnchor(element: Element): boolean {
+	const className = element.getAttribute('class') ?? '';
+	const role = element.getAttribute('role') ?? '';
+	return role.toLowerCase() === 'button' || /\b(btn|button|cta|primary|secondary)\b/i.test(className);
 }
 
-function hasOnlyInlineContent( element: Element ): boolean {
-	return [ ...element.children ].every( ( child ) => {
+function hasOnlyInlineContent(element: Element): boolean {
+	return [...element.children].every((child) => {
 		const tag = child.tagName.toLowerCase();
-		return [ 'a', 'span', 'strong', 'em', 'b', 'i', 'u', 'small', 'mark', 'br', 'sup', 'sub' ].includes( tag );
-	} );
+		return ['a', 'span', 'strong', 'em', 'b', 'i', 'u', 'small', 'mark', 'br', 'sup', 'sub'].includes(tag);
+	});
 }
 
-function resolveDocumentTitle( parsed: Document, roots: BuilderNode[], sourceName: string ): string {
+function resolveDocumentTitle(parsed: Document, roots: BuilderNode[], sourceName: string): string {
 	const title = parsed.title.trim();
-	if ( title ) {
+	if (title) {
 		return title;
 	}
-	const firstHeading = roots.flatMap( flattenBuilderNodes ).find( ( node ) => node.type === 'heading' );
-	const headingText = typeof firstHeading?.props.text === 'string'
-		? firstHeading.props.text.replaceAll( /<[^>]+>/g, '' ).trim()
-		: '';
+	const firstHeading = roots.flatMap(flattenBuilderNodes).find((node) => node.type === 'heading');
+	const headingText =
+		typeof firstHeading?.props.text === 'string' ? firstHeading.props.text.replaceAll(/<[^>]+>/g, '').trim() : '';
 	return headingText || sourceName || 'Imported HTML';
 }
 
-function flattenBuilderNodes( node: BuilderNode ): BuilderNode[] {
+function flattenBuilderNodes(node: BuilderNode): BuilderNode[] {
 	const slots = node.slots as Record<string, BuilderNode[]>;
 	return [
 		node,
-		...node.children.flatMap( flattenBuilderNodes ),
-		...Object.values( slots ).flatMap( ( children ) => children.flatMap( flattenBuilderNodes ) ),
+		...node.children.flatMap(flattenBuilderNodes),
+		...Object.values(slots).flatMap((children) => children.flatMap(flattenBuilderNodes)),
 	];
 }
 
@@ -626,10 +753,10 @@ function addDiagnostic(
 	sourceKey?: string,
 ): void {
 	const diagnostic = { code, message, severity, sourceKey };
-	if ( !warnings.some( ( entry ) => entry.code === code && entry.message === message ) ) {
-		warnings.push( diagnostic );
+	if (!warnings.some((entry) => entry.code === code && entry.message === message)) {
+		warnings.push(diagnostic);
 	}
-	if ( !parityGaps.some( ( entry ) => entry.code === code && entry.message === message ) ) {
-		parityGaps.push( diagnostic );
+	if (!parityGaps.some((entry) => entry.code === code && entry.message === message)) {
+		parityGaps.push(diagnostic);
 	}
 }

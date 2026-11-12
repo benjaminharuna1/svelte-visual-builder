@@ -3,11 +3,11 @@ import { defineConfig } from 'vite';
 import { createBuilderManualChunks } from '../reference-studio/build-chunks';
 
 function builderChunkEnvironmentPlugin() {
-	const clientManualChunks = createBuilderManualChunks( false );
+	const clientManualChunks = createBuilderManualChunks(false);
 	return {
 		name: 'embed-smoke-builder-chunks',
-		configEnvironment( name: string ) {
-			if ( name !== 'client' || !clientManualChunks ) {
+		configEnvironment(name: string) {
+			if (name !== 'client' || !clientManualChunks) {
 				return;
 			}
 			return {
@@ -23,12 +23,12 @@ function builderChunkEnvironmentPlugin() {
 	};
 }
 
-export default defineConfig( {
-	plugins: [ builderChunkEnvironmentPlugin(), sveltekit() ],
+export default defineConfig({
+	plugins: [builderChunkEnvironmentPlugin(), sveltekit()],
 	ssr: {
-		noExternal: [ /^@builder\// ],
+		noExternal: [/^@builder\//],
 	},
 	server: {
 		port: 5175,
 	},
-} );
+});

@@ -1,56 +1,52 @@
 <script module lang="ts">
 	export interface PreviewBridgeCallbacks {
-		onSelect: ( nodeElement: HTMLElement ) => void;
-		onHover: ( nodeElement?: HTMLElement ) => void;
+		onSelect: (nodeElement: HTMLElement) => void;
+		onHover: (nodeElement?: HTMLElement) => void;
 	}
 
-	export function resolveBuilderNodeElement( target: EventTarget | null ): HTMLElement | undefined {
-		const element = target instanceof Element
-			? target
-			: target instanceof Node
-				? target.parentElement
-				: undefined;
+	export function resolveBuilderNodeElement(target: EventTarget | null): HTMLElement | undefined {
+		const element = target instanceof Element ? target : target instanceof Node ? target.parentElement : undefined;
 
-		return element?.closest( '[data-builder-node]' ) as HTMLElement | undefined;
+		return element?.closest('[data-builder-node]') as HTMLElement | undefined;
 	}
 
-	export function createDelegatedPreviewBridge( targetDocument: Document, callbacks: PreviewBridgeCallbacks ) {
-		const handleClick = ( event: MouseEvent ) => {
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( !nodeElement ) {
+	export function createDelegatedPreviewBridge(targetDocument: Document, callbacks: PreviewBridgeCallbacks) {
+		const handleClick = (event: MouseEvent) => {
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (!nodeElement) {
 				return;
 			}
 
 			event.preventDefault();
-			callbacks.onSelect( nodeElement );
+			callbacks.onSelect(nodeElement);
 		};
 
-		const handlePointerOver = ( event: PointerEvent ) => {
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( !nodeElement || resolveBuilderNodeElement( event.relatedTarget ) === nodeElement ) {
+		const handlePointerOver = (event: PointerEvent) => {
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (!nodeElement || resolveBuilderNodeElement(event.relatedTarget) === nodeElement) {
 				return;
 			}
 
-			callbacks.onHover( nodeElement );
+			callbacks.onHover(nodeElement);
 		};
 
-		const handlePointerOut = ( event: PointerEvent ) => {
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( !nodeElement || resolveBuilderNodeElement( event.relatedTarget ) === nodeElement ) {
+		const handlePointerOut = (event: PointerEvent) => {
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (!nodeElement || resolveBuilderNodeElement(event.relatedTarget) === nodeElement) {
 				return;
 			}
 
-			callbacks.onHover( undefined );
+			callbacks.onHover(undefined);
 		};
 
-		targetDocument.addEventListener( 'click', handleClick, true );
-		targetDocument.addEventListener( 'pointerover', handlePointerOver, true );
-		targetDocument.addEventListener( 'pointerout', handlePointerOut, true );
+		targetDocument.addEventListener('click', handleClick, true);
+		targetDocument.addEventListener('pointerover', handlePointerOver, true);
+		targetDocument.addEventListener('pointerout', handlePointerOut, true);
 
 		return () => {
-			targetDocument.removeEventListener( 'click', handleClick, true );
-			targetDocument.removeEventListener( 'pointerover', handlePointerOver, true );
-			targetDocument.removeEventListener( 'pointerout', handlePointerOut, true );
+			targetDocument.removeEventListener('click', handleClick, true);
+			targetDocument.removeEventListener('pointerover', handlePointerOver, true);
+			targetDocument.removeEventListener('pointerout', handlePointerOut, true);
 		};
 	}
 </script>
@@ -98,7 +94,7 @@
 	import { getAuthoringBreakpointDefinitions } from './responsive-authoring';
 
 	export let editor: BuilderEditorController;
-	export let registerSurface: ( element?: HTMLElement ) => void = () => {};
+	export let registerSurface: (element?: HTMLElement) => void = () => {};
 	export let liveAiPreviewActive = false;
 	export let liveAiPreviewSrcdoc = '';
 	export let liveAiPreviewTitle = '';
@@ -130,8 +126,8 @@
 	type PreviewRuntimeOptions = BuilderRuntimeOptions & {
 		bridgeEvents?: boolean;
 		bridgeRenderVersion?: number;
-		onGeometrySnapshot?: ( snapshot: CanvasGeometrySnapshot ) => void;
-		onGeometryInvalidated?: ( reason: string, renderVersion: number ) => void;
+		onGeometrySnapshot?: (snapshot: CanvasGeometrySnapshot) => void;
+		onGeometryInvalidated?: (reason: string, renderVersion: number) => void;
 	};
 
 	let previewShell: HTMLDivElement | undefined;
@@ -139,7 +135,7 @@
 	let previewHostController: PreviewHostController | undefined;
 	let state: BuilderEngineState = editor.engine.getState();
 	let mountedRuntime: ReturnType<typeof mount> | undefined;
-	const runtimeOptions = writable<PreviewRuntimeOptions | undefined>( undefined );
+	const runtimeOptions = writable<PreviewRuntimeOptions | undefined>(undefined);
 	let unsubscribe = () => {};
 	let previewBridgeCleanup = () => {};
 	let aiStandinElement: HTMLDivElement | undefined;
@@ -151,17 +147,17 @@
 	let inlineCommitTimer: number | undefined;
 	let inlineBlurTimer: number | undefined;
 	let suppressNextProjectSyncFor: { documentId: string; nodeId: string } | undefined;
-	let activeDocument: BuilderDocument = getActiveDocument( state );
+	let activeDocument: BuilderDocument = getActiveDocument(state);
 	let projectDocuments = state.project.documents;
-	let documentsById = buildDocumentsById( projectDocuments );
-	let componentDocumentsById = buildComponentDocumentsById( projectDocuments );
+	let documentsById = buildDocumentsById(projectDocuments);
+	let componentDocumentsById = buildComponentDocumentsById(projectDocuments);
 	let previewDocument: BuilderDocument = activeDocument;
 	let selectedNode: BuilderNode | undefined;
 	let selectedComponentDocument: BuilderDocument | undefined;
 	let themeAssignments = state.project.themeAssignments;
-	let activeAssignments = themeAssignments.filter( ( assignment ) => assignment.documentId === state.activeDocumentId );
+	let activeAssignments = themeAssignments.filter((assignment) => assignment.documentId === state.activeDocumentId);
 	let breakpointDefinitions: BreakpointDefinition[] = state.project.designSystem.breakpoints;
-	let viewportDefinitions: BreakpointDefinition[] = getAuthoringBreakpointDefinitions( breakpointDefinitions );
+	let viewportDefinitions: BreakpointDefinition[] = getAuthoringBreakpointDefinitions(breakpointDefinitions);
 	let previewViewportWidth = 1280;
 	let previewViewportHeight = 0;
 	let previewViewportKind: PreviewViewportKind = 'desktop';
@@ -182,14 +178,14 @@
 	let selectedLayoutOverlay: BuilderLayoutOverlayModel | undefined;
 	let layoutGapDrag:
 		| {
-			pointerId: number;
-			startX: number;
-			startY: number;
-			initialValue: string;
-			axis: 'x' | 'y';
-			documentId: string;
-			nodeId: string;
-		}
+				pointerId: number;
+				startX: number;
+				startY: number;
+				initialValue: string;
+				axis: 'x' | 'y';
+				documentId: string;
+				nodeId: string;
+		  }
 		| undefined;
 	let selectionRailElement: HTMLDivElement | undefined;
 	let hoverRailElement: HTMLDivElement | undefined;
@@ -202,117 +198,129 @@
 	let inlineEditorSessionKey = '';
 	let inlineEditorValue = '';
 	let inlineEditorMode: 'html' | 'text' = 'text';
-	const selectedNodeDraggable = createDraggable( {
+	const selectedNodeDraggable = createDraggable({
 		get id() {
-			return `preview:${ selectedBounds?.nodeId ?? 'selection' }`;
+			return `preview:${selectedBounds?.nodeId ?? 'selection'}`;
 		},
 		get disabled() {
 			return !selectedBounds;
 		},
 		get data() {
 			return selectedBounds
-				? createBuilderDndData( formatNodeTypeLabel( selectedBounds.nodeType ), {
-					kind: 'canvas-node',
-					nodeId: selectedBounds.nodeId,
-					documentId: selectedBounds.documentId,
-				} )
+				? createBuilderDndData(formatNodeTypeLabel(selectedBounds.nodeType), {
+						kind: 'canvas-node',
+						nodeId: selectedBounds.nodeId,
+						documentId: selectedBounds.documentId,
+					})
 				: undefined;
 		},
-	} );
+	});
 
 	const INLINE_COMMIT_DELAY = 180;
 
 	$: dropTarget = state.ui.dropTarget;
-	$: coarseDropRegions = createCoarseDropRegions( state );
-	$: dropTargetAxis = resolveDropIndicatorAxis( dropTarget );
-	$: dropTargetIndicatorStyle = getDropIndicatorStyle( dropTarget, dropTargetAxis );
-	$: dropTargetHighlightStyle = getDropTargetHighlightStyle( dropTarget, dropTargetAxis );
-	$: dropTargetHandleStyles = getDropTargetHandleStyles( dropTarget, dropTargetAxis );
-	$: activeDocument = getActiveDocument( state );
-	$: if ( state.project.documents !== projectDocuments ) {
+	$: coarseDropRegions = createCoarseDropRegions(state);
+	$: dropTargetAxis = resolveDropIndicatorAxis(dropTarget);
+	$: dropTargetIndicatorStyle = getDropIndicatorStyle(dropTarget, dropTargetAxis);
+	$: dropTargetHighlightStyle = getDropTargetHighlightStyle(dropTarget, dropTargetAxis);
+	$: dropTargetHandleStyles = getDropTargetHandleStyles(dropTarget, dropTargetAxis);
+	$: activeDocument = getActiveDocument(state);
+	$: if (state.project.documents !== projectDocuments) {
 		projectDocuments = state.project.documents;
-		documentsById = buildDocumentsById( projectDocuments );
-		componentDocumentsById = buildComponentDocumentsById( projectDocuments );
+		documentsById = buildDocumentsById(projectDocuments);
+		componentDocumentsById = buildComponentDocumentsById(projectDocuments);
 	}
-	$: previewDocument = documentsById.get( state.ui.preview.documentId ?? state.activeDocumentId ) ?? activeDocument;
-	$: selectedNode = state.ui.selectedNodeIds[ 0 ] ? editor.getActiveDocumentCache().nodeById.get( state.ui.selectedNodeIds[ 0 ] ) : undefined;
+	$: previewDocument = documentsById.get(state.ui.preview.documentId ?? state.activeDocumentId) ?? activeDocument;
+	$: selectedNode = state.ui.selectedNodeIds[0]
+		? editor.getActiveDocumentCache().nodeById.get(state.ui.selectedNodeIds[0])
+		: undefined;
 	$: selectedComponentDocument = state.ui.componentEditing.componentDocumentId
-		? componentDocumentsById.get( state.ui.componentEditing.componentDocumentId )
+		? componentDocumentsById.get(state.ui.componentEditing.componentDocumentId)
 		: selectedNode?.type === 'component-instance'
-			? componentDocumentsById.get( String( selectedNode?.props.componentId ?? '' ) )
+			? componentDocumentsById.get(String(selectedNode?.props.componentId ?? ''))
 			: undefined;
-	$: if ( state.project.themeAssignments !== themeAssignments ) {
+	$: if (state.project.themeAssignments !== themeAssignments) {
 		themeAssignments = state.project.themeAssignments;
 	}
-	$: activeAssignments = themeAssignments.filter( ( assignment ) => assignment.documentId === previewDocument.id );
-	$: if ( state.project.designSystem.breakpoints !== breakpointDefinitions ) {
+	$: activeAssignments = themeAssignments.filter((assignment) => assignment.documentId === previewDocument.id);
+	$: if (state.project.designSystem.breakpoints !== breakpointDefinitions) {
 		breakpointDefinitions = state.project.designSystem.breakpoints;
-		viewportDefinitions = getAuthoringBreakpointDefinitions( breakpointDefinitions );
+		viewportDefinitions = getAuthoringBreakpointDefinitions(breakpointDefinitions);
 	}
-	$: previewViewportKind = resolvePreviewViewportKind( state.ui.viewport, viewportDefinitions );
-	$: previewViewportWidth = resolvePreviewViewportWidth( state.ui.viewport, viewportDefinitions );
-	$: previewFrameStyle = previewViewportKind === 'desktop'
-		? '--builder-preview-frame-width:100%;'
-		: `--builder-preview-frame-width:${ previewViewportWidth }px;`;
+	$: previewViewportKind = resolvePreviewViewportKind(state.ui.viewport, viewportDefinitions);
+	$: previewViewportWidth = resolvePreviewViewportWidth(state.ui.viewport, viewportDefinitions);
+	$: previewFrameStyle =
+		previewViewportKind === 'desktop'
+			? '--builder-preview-frame-width:100%;'
+			: `--builder-preview-frame-width:${previewViewportWidth}px;`;
 	$: liveAiPreviewFrameSrcdoc = liveAiPreviewSrcdoc || createEmptyLiveAiPreviewSrcdoc();
 	$: previewLoading = renderVersion === 0 || runtimeMeasurementVersion < renderVersion;
 	$: contextBanner = buildContextBanner();
 	$: previewPresentationMode = state.ui.shell.panelCollapsed;
-	$: selectedBounds = !previewPresentationMode && state.ui.selectedNodeIds[ 0 ]
-		? state.ui.canvas.index.nodeBoundsById.get( state.ui.selectedNodeIds[ 0 ] )
-		: undefined;
-	$: hoveredBounds = !previewPresentationMode && state.ui.hoveredNodeId
-		? state.ui.canvas.index.nodeBoundsById.get( state.ui.hoveredNodeId )
-		: undefined;
-	$: inlineEditingBounds = !previewPresentationMode && state.ui.inlineEditing?.nodeId
-		? state.ui.canvas.index.nodeBoundsById.get( state.ui.inlineEditing.nodeId )
-		: undefined;
+	$: selectedBounds =
+		!previewPresentationMode && state.ui.selectedNodeIds[0]
+			? state.ui.canvas.index.nodeBoundsById.get(state.ui.selectedNodeIds[0])
+			: undefined;
+	$: hoveredBounds =
+		!previewPresentationMode && state.ui.hoveredNodeId
+			? state.ui.canvas.index.nodeBoundsById.get(state.ui.hoveredNodeId)
+			: undefined;
+	$: inlineEditingBounds =
+		!previewPresentationMode && state.ui.inlineEditing?.nodeId
+			? state.ui.canvas.index.nodeBoundsById.get(state.ui.inlineEditing.nodeId)
+			: undefined;
 	$: selectedLayoutChildBounds = selectedBounds
-		? state.ui.canvas.index.childBoundsByContainer.get( getCanvasGeometryKey( selectedBounds.documentId, selectedBounds.nodeId, undefined ) ) ?? []
+		? (state.ui.canvas.index.childBoundsByContainer.get(
+				getCanvasGeometryKey(selectedBounds.documentId, selectedBounds.nodeId, undefined),
+			) ?? [])
 		: [];
-	$: selectedLayoutOverlay = createLayoutOverlayModel( selectedNode, selectedBounds, selectedLayoutChildBounds );
-	$: registerSurface( frameShell );
+	$: selectedLayoutOverlay = createLayoutOverlayModel(selectedNode, selectedBounds, selectedLayoutChildBounds);
+	$: registerSurface(frameShell);
 	$: {
 		const nextInlineSessionKey = state.ui.inlineEditing
-			? `${ state.ui.inlineEditing.documentId }:${ state.ui.inlineEditing.nodeId }:${ state.ui.inlineEditing.richText ? 'html' : 'text' }`
+			? `${state.ui.inlineEditing.documentId}:${state.ui.inlineEditing.nodeId}:${state.ui.inlineEditing.richText ? 'html' : 'text'}`
 			: '';
-		if ( nextInlineSessionKey !== inlineEditorSessionKey ) {
+		if (nextInlineSessionKey !== inlineEditorSessionKey) {
 			inlineEditorSessionKey = nextInlineSessionKey;
 			inlineEditorMode = state.ui.inlineEditing?.richText ? 'html' : 'text';
-			inlineEditorValue = resolveInlineEditorValue( state.ui.inlineEditing );
+			inlineEditorValue = resolveInlineEditorValue(state.ui.inlineEditing);
 		}
 	}
 	$: {
 		selectionRailCleanup();
 		selectionRailCleanup = () => {};
-		if ( selectedBounds && selectionOverlayElement && selectionRailElement ) {
-			selectionRailCleanup = selectionRailAnchor.open( selectionOverlayElement, selectionRailElement, {
+		if (selectedBounds && selectionOverlayElement && selectionRailElement) {
+			selectionRailCleanup = selectionRailAnchor.open(selectionOverlayElement, selectionRailElement, {
 				placement: 'top-start',
-			} );
+			});
 		}
 	}
 	$: {
 		hoverRailCleanup();
 		hoverRailCleanup = () => {};
-		if ( hoveredBounds && hoverOverlayElement && hoverRailElement ) {
-			hoverRailCleanup = hoverRailAnchor.open( hoverOverlayElement, hoverRailElement, {
+		if (hoveredBounds && hoverOverlayElement && hoverRailElement) {
+			hoverRailCleanup = hoverRailAnchor.open(hoverOverlayElement, hoverRailElement, {
 				placement: 'top-end',
-			} );
+			});
 		}
 	}
 
 	function buildContextBanner(): PreviewContextBanner | undefined {
-		if ( state.ui.componentEditing.context === 'master' || activeDocument.kind === 'component' || state.ui.mode === 'component-master' ) {
+		if (
+			state.ui.componentEditing.context === 'master' ||
+			activeDocument.kind === 'component' ||
+			state.ui.mode === 'component-master'
+		) {
 			const exposedCount = activeDocument.component?.exposedProperties.length ?? 0;
 			return {
 				tone: 'component',
 				label: 'Master Editing',
-				title: `${ exposedCount } exposed override${ exposedCount === 1 ? '' : 's' }`,
-				detail: `Structure ${ activeDocument.component?.lockedStructure === false ? 'can be changed per instance' : 'is locked to the master' }`,
+				title: `${exposedCount} exposed override${exposedCount === 1 ? '' : 's'}`,
+				detail: `Structure ${activeDocument.component?.lockedStructure === false ? 'can be changed per instance' : 'is locked to the master'}`,
 			};
 		}
 
-		if ( state.ui.componentEditing.context === 'instance' && selectedComponentDocument ) {
+		if (state.ui.componentEditing.context === 'instance' && selectedComponentDocument) {
 			return {
 				tone: 'component',
 				label: 'Instance Editing',
@@ -322,7 +330,7 @@
 			};
 		}
 
-		if ( state.ui.componentEditing.context === 'detached' ) {
+		if (state.ui.componentEditing.context === 'detached') {
 			return {
 				tone: 'detached',
 				label: 'Detached Component',
@@ -331,7 +339,7 @@
 			};
 		}
 
-		if ( selectedNode?.legacy ) {
+		if (selectedNode?.legacy) {
 			return {
 				tone: 'compat',
 				label: 'Compat Editing',
@@ -343,24 +351,24 @@
 		return undefined;
 	}
 
-	function buildDocumentsById( documents: BuilderDocument[] ) {
-		return new Map( documents.map( ( document ) => [ document.id, document ] ) );
+	function buildDocumentsById(documents: BuilderDocument[]) {
+		return new Map(documents.map((document) => [document.id, document]));
 	}
 
-	function buildComponentDocumentsById( documents: BuilderDocument[] ) {
-		return new Map( documents
-			.filter( ( document ) => document.kind === 'component' )
-			.map( ( document ) => [ document.id, document ] ) );
+	function buildComponentDocumentsById(documents: BuilderDocument[]) {
+		return new Map(
+			documents.filter((document) => document.kind === 'component').map((document) => [document.id, document]),
+		);
 	}
 
 	function ensurePreviewHostController() {
-		if ( !frameShell ) {
+		if (!frameShell) {
 			return undefined;
 		}
 
-		if ( !previewHostController || previewHostController.hostElement !== frameShell ) {
+		if (!previewHostController || previewHostController.hostElement !== frameShell) {
 			previewHostController?.destroy();
-			previewHostController = createPreviewHostController( frameShell );
+			previewHostController = createPreviewHostController(frameShell);
 		}
 
 		return previewHostController;
@@ -368,20 +376,20 @@
 
 	function syncLiveAiPreview() {
 		const previewHost = ensurePreviewHostController();
-		if ( !previewHost ) {
+		if (!previewHost) {
 			return;
 		}
-		if ( !liveAiPreviewActive ) {
+		if (!liveAiPreviewActive) {
 			aiStandinElement?.remove();
 			aiStandinElement = undefined;
 			aiStandinIframe = undefined;
 			return;
 		}
-		ensureLiveAiPreviewStyle( previewHost.shadowRoot );
+		ensureLiveAiPreviewStyle(previewHost.shadowRoot);
 		let created = false;
-		if ( !aiStandinElement || !aiStandinIframe || aiStandinElement.parentElement !== previewHost.mountTarget ) {
+		if (!aiStandinElement || !aiStandinIframe || aiStandinElement.parentElement !== previewHost.mountTarget) {
 			aiStandinElement?.remove();
-			aiStandinElement = document.createElement( 'div' );
+			aiStandinElement = document.createElement('div');
 			aiStandinElement.className = 'builder-ai-standin';
 			aiStandinElement.dataset.builderAiStandin = 'true';
 			aiStandinElement.innerHTML = `
@@ -391,39 +399,42 @@
 				</div>
 				<iframe title="AI generated HTML preview"></iframe>
 			`;
-			aiStandinIframe = aiStandinElement.querySelector( 'iframe' ) ?? undefined;
-			if ( aiStandinIframe ) {
-				aiStandinIframe.setAttribute( 'sandbox', 'allow-same-origin' );
-				aiStandinIframe.addEventListener( 'load', resizeLiveAiPreviewIframe );
+			aiStandinIframe = aiStandinElement.querySelector('iframe') ?? undefined;
+			if (aiStandinIframe) {
+				aiStandinIframe.setAttribute('sandbox', 'allow-same-origin');
+				aiStandinIframe.addEventListener('load', resizeLiveAiPreviewIframe);
 			}
-			previewHost.mountTarget.prepend( aiStandinElement );
+			previewHost.mountTarget.prepend(aiStandinElement);
 			created = true;
 		}
-		const headerLabel = aiStandinElement.querySelector( '.builder-ai-standin__header span' );
-		const headerDetail = aiStandinElement.querySelector( '.builder-ai-standin__header small' );
-		if ( headerLabel ) {
+		const headerLabel = aiStandinElement.querySelector('.builder-ai-standin__header span');
+		const headerDetail = aiStandinElement.querySelector('.builder-ai-standin__header small');
+		if (headerLabel) {
 			headerLabel.textContent = 'HTML preview';
 		}
-		if ( headerDetail ) {
+		if (headerDetail) {
 			headerDetail.textContent = liveAiPreviewStatus || liveAiPreviewTitle || 'Waiting for generated HTML';
 		}
 		const nextSrcdoc = liveAiPreviewSrcdoc || createEmptyLiveAiPreviewSrcdoc();
-		if ( aiStandinIframe && aiStandinIframe.srcdoc !== nextSrcdoc ) {
+		if (aiStandinIframe && aiStandinIframe.srcdoc !== nextSrcdoc) {
 			aiStandinIframe.style.height = '520px';
 			aiStandinIframe.srcdoc = nextSrcdoc;
 		}
-		if ( aiStandinElement.parentElement === previewHost.mountTarget && previewHost.mountTarget.firstElementChild !== aiStandinElement ) {
-			previewHost.mountTarget.prepend( aiStandinElement );
+		if (
+			aiStandinElement.parentElement === previewHost.mountTarget &&
+			previewHost.mountTarget.firstElementChild !== aiStandinElement
+		) {
+			previewHost.mountTarget.prepend(aiStandinElement);
 		}
-		if ( created ) {
-			requestAnimationFrame( () => {
-				aiStandinElement?.scrollIntoView( { block: 'start', behavior: 'smooth' } );
-			} );
+		if (created) {
+			requestAnimationFrame(() => {
+				aiStandinElement?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+			});
 		}
 	}
 
 	function resizeLiveAiPreviewIframe() {
-		if ( !aiStandinIframe ) {
+		if (!aiStandinIframe) {
 			return;
 		}
 		try {
@@ -435,7 +446,7 @@
 				body?.scrollHeight ?? 0,
 				body?.offsetHeight ?? 0,
 			);
-			aiStandinIframe.style.height = `${ height }px`;
+			aiStandinIframe.style.height = `${height}px`;
 		} catch {
 			aiStandinIframe.style.height = '70vh';
 		}
@@ -457,14 +468,14 @@
 			'</head>',
 			'<body><div class="empty"><strong>HTML preview</strong><span>Waiting for the AI to stream generated HTML...</span></div></body>',
 			'</html>',
-		].join( '' );
+		].join('');
 	}
 
-	function ensureLiveAiPreviewStyle( shadowRoot: ShadowRoot ) {
-		if ( shadowRoot.querySelector( 'style[data-builder-ai-standin-style]' ) ) {
+	function ensureLiveAiPreviewStyle(shadowRoot: ShadowRoot) {
+		if (shadowRoot.querySelector('style[data-builder-ai-standin-style]')) {
 			return;
 		}
-		const style = document.createElement( 'style' );
+		const style = document.createElement('style');
 		style.dataset.builderAiStandinStyle = 'true';
 		style.textContent = `
 			.builder-ai-standin {
@@ -503,29 +514,26 @@
 				background: #ffffff;
 			}
 		`;
-		shadowRoot.append( style );
+		shadowRoot.append(style);
 	}
 
-	function applyGeometrySnapshot( snapshot: CanvasGeometrySnapshot ) {
-		if ( snapshot.renderVersion < renderVersion ) {
+	function applyGeometrySnapshot(snapshot: CanvasGeometrySnapshot) {
+		if (snapshot.renderVersion < renderVersion) {
 			return;
 		}
 
 		const currentCanvas = editor.engine.getState().ui.canvas;
-		if (
-			currentCanvas.renderVersion === snapshot.renderVersion
-			&& currentCanvas.snapshotVersion >= snapshot.version
-		) {
+		if (currentCanvas.renderVersion === snapshot.renderVersion && currentCanvas.snapshotVersion >= snapshot.version) {
 			return;
 		}
 
 		runtimeMeasurementVersion = snapshot.renderVersion;
 		previewViewportHeight = ensurePreviewHostController()?.mountTarget.clientHeight ?? previewViewportHeight;
-		editor.incrementPerfCounter( 'canvasMetricsDispatches' );
-		editor.dispatch( {
+		editor.incrementPerfCounter('canvasMetricsDispatches');
+		editor.dispatch({
 			type: 'document/ui/set-canvas-measurements',
 			snapshot,
-		} );
+		});
 	}
 
 	function cleanupPreviewBridge() {
@@ -533,82 +541,82 @@
 		previewBridgeCleanup = () => {};
 	}
 
-	function openPreviewDocumentForNode( documentId: string ) {
+	function openPreviewDocumentForNode(documentId: string) {
 		const currentState = editor.engine.getState();
-		if ( documentId === currentState.activeDocumentId ) {
+		if (documentId === currentState.activeDocumentId) {
 			return;
 		}
 
-		editor.focusDocument( documentId );
+		editor.focusDocument(documentId);
 	}
 
-	function selectPreviewNode( element: HTMLElement ) {
+	function selectPreviewNode(element: HTMLElement) {
 		const nodeId = element.dataset.builderNode;
-		if ( !nodeId ) {
+		if (!nodeId) {
 			return;
 		}
 
 		flushInlineUpdate();
-		openPreviewDocumentForNode( element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId );
-		editor.dispatch( { type: 'document/ui/select-node', nodeId } );
+		openPreviewDocumentForNode(element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId);
+		editor.dispatch({ type: 'document/ui/select-node', nodeId });
 	}
 
-	function focusSelectedNodeInEditor( panel: 'content' | 'style' | 'advanced' = 'content' ) {
-		editor.toggleShellPanel( false );
-		editor.setShellPage( 'editor' );
-		if ( state.ui.panel !== 'content' && state.ui.panel !== 'style' && state.ui.panel !== 'advanced' ) {
-			editor.setPanel( panel );
+	function focusSelectedNodeInEditor(panel: 'content' | 'style' | 'advanced' = 'content') {
+		editor.toggleShellPanel(false);
+		editor.setShellPage('editor');
+		if (state.ui.panel !== 'content' && state.ui.panel !== 'style' && state.ui.panel !== 'advanced') {
+			editor.setPanel(panel);
 		}
 	}
 
-	function hoverPreviewNode( element: HTMLElement | undefined ) {
-		editor.dispatch( {
+	function hoverPreviewNode(element: HTMLElement | undefined) {
+		editor.dispatch({
 			type: 'document/ui/hover-node',
 			nodeId: element?.dataset.builderNode,
-		} );
+		});
 	}
 
-	function resolveInlineContentElement( element: HTMLElement ): HTMLElement {
-		if ( element.dataset.builderInlineContent === 'true' ) {
+	function resolveInlineContentElement(element: HTMLElement): HTMLElement {
+		if (element.dataset.builderInlineContent === 'true') {
 			return element;
 		}
 
-		return element.querySelector( '[data-builder-inline-content="true"]' ) as HTMLElement ?? element;
+		return (element.querySelector('[data-builder-inline-content="true"]') as HTMLElement) ?? element;
 	}
 
-	function startInlineEditingForNode( element: HTMLElement ) {
+	function startInlineEditingForNode(element: HTMLElement) {
 		const nodeId = element.dataset.builderNode;
-		if ( !nodeId ) {
+		if (!nodeId) {
 			return;
 		}
 
 		const documentId = element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId;
-		const inlineEditMode = resolveInlineEditMode( documentId, nodeId, element.dataset.builderInlineMode );
-		if ( !inlineEditMode ) {
+		const inlineEditMode = resolveInlineEditMode(documentId, nodeId, element.dataset.builderInlineMode);
+		if (!inlineEditMode) {
 			return;
 		}
 
-		openPreviewDocumentForNode( documentId );
-		editor.dispatch( {
+		openPreviewDocumentForNode(documentId);
+		editor.dispatch({
 			type: 'document/ui/start-inline-edit',
 			nodeId,
 			richText: inlineEditMode === 'html',
-		} );
+		});
 	}
 
-	function getInlineUpdatePayload( element: HTMLElement ): PendingInlineUpdate | undefined {
+	function getInlineUpdatePayload(element: HTMLElement): PendingInlineUpdate | undefined {
 		const nodeId = element.dataset.builderNode;
-		if ( !nodeId ) {
+		if (!nodeId) {
 			return undefined;
 		}
 
 		const documentId = element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId;
-		const inlineEditMode = resolveInlineEditMode( documentId, nodeId, element.dataset.builderInlineMode );
-		if ( !inlineEditMode ) {
+		const inlineEditMode = resolveInlineEditMode(documentId, nodeId, element.dataset.builderInlineMode);
+		if (!inlineEditMode) {
 			return undefined;
 		}
 
-		const inlineContentElement = resolveInlineContentElement( element );
+		const inlineContentElement = resolveInlineContentElement(element);
 		const textValue = inlineContentElement.innerText || inlineContentElement.textContent || '';
 
 		return {
@@ -620,7 +628,7 @@
 		};
 	}
 
-	function resolvePreviewContextMenuAnchor( clientX: number, clientY: number ) {
+	function resolvePreviewContextMenuAnchor(clientX: number, clientY: number) {
 		return {
 			x: clientX,
 			y: clientY,
@@ -637,63 +645,63 @@
 		} = {},
 	) {
 		event.preventDefault();
-		const anchor = resolvePreviewContextMenuAnchor( event.clientX, event.clientY );
-		editor.openContextMenu( {
+		const anchor = resolvePreviewContextMenuAnchor(event.clientX, event.clientY);
+		editor.openContextMenu({
 			x: anchor.x,
 			y: anchor.y,
 			targetKind,
 			documentId: options.documentId,
 			nodeId: options.nodeId,
 			slot: options.slot,
-		} );
+		});
 	}
 
-	function openPreviewNodeContextMenu( element: HTMLElement, event: MouseEvent ) {
+	function openPreviewNodeContextMenu(element: HTMLElement, event: MouseEvent) {
 		const nodeId = element.dataset.builderNode;
-		if ( !nodeId ) {
+		if (!nodeId) {
 			return;
 		}
 
-		openPreviewDocumentForNode( element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId );
-		editor.dispatch( { type: 'document/ui/select-node', nodeId } );
-		openPreviewContextMenu( event, 'canvas-node', {
+		openPreviewDocumentForNode(element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId);
+		editor.dispatch({ type: 'document/ui/select-node', nodeId });
+		openPreviewContextMenu(event, 'canvas-node', {
 			documentId: element.dataset.builderDocument ?? editor.engine.getState().activeDocumentId,
 			nodeId,
 			slot: element.dataset.builderSlot || undefined,
-		} );
+		});
 	}
 
-	function openPreviewRootContextMenu( event: MouseEvent ) {
-		openPreviewContextMenu( event, 'canvas-root', {
+	function openPreviewRootContextMenu(event: MouseEvent) {
+		openPreviewContextMenu(event, 'canvas-root', {
 			documentId: previewDocument.id,
 			slot: state.ui.preview.slot,
-		} );
+		});
 	}
 
 	function duplicateSelectedNode() {
-		if ( !selectedBounds ) {
+		if (!selectedBounds) {
 			return;
 		}
 
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/elements/duplicate',
 			documentId: selectedBounds.documentId,
 			nodeId: selectedBounds.nodeId,
 			targetParentId: selectedBounds.parentId,
 			targetSlot: selectedBounds.slot,
 			index: selectedBounds.index + 1,
-		} );
+		});
 		editor.closeContextMenu();
 	}
 
-	function startLayoutGapDrag( event: PointerEvent ) {
-		if ( !selectedBounds || !selectedLayoutOverlay ) {
+	function startLayoutGapDrag(event: PointerEvent) {
+		if (!selectedBounds || !selectedLayoutOverlay) {
 			return;
 		}
 
 		event.preventDefault();
 		event.stopPropagation();
-		( event.currentTarget as HTMLElement ).setPointerCapture?.( event.pointerId );
+		(event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
 		layoutGapDrag = {
 			pointerId: event.pointerId,
 			startX: event.clientX,
@@ -703,32 +711,31 @@
 			documentId: selectedBounds.documentId,
 			nodeId: selectedBounds.nodeId,
 		};
-		editor.beginTransaction( 'Adjust container gap' );
-		window.addEventListener( 'pointermove', handleLayoutGapDrag );
-		window.addEventListener( 'pointerup', stopLayoutGapDrag, { once: true } );
-		window.addEventListener( 'pointercancel', stopLayoutGapDrag, { once: true } );
+		editor.beginTransaction('Adjust container gap');
+		window.addEventListener('pointermove', handleLayoutGapDrag);
+		window.addEventListener('pointerup', stopLayoutGapDrag, { once: true });
+		window.addEventListener('pointercancel', stopLayoutGapDrag, { once: true });
 	}
 
-	function handleLayoutGapDrag( event: PointerEvent ) {
-		if ( !layoutGapDrag || event.pointerId !== layoutGapDrag.pointerId ) {
+	function handleLayoutGapDrag(event: PointerEvent) {
+		if (!layoutGapDrag || event.pointerId !== layoutGapDrag.pointerId) {
 			return;
 		}
 
-		const delta = layoutGapDrag.axis === 'x'
-			? event.clientX - layoutGapDrag.startX
-			: event.clientY - layoutGapDrag.startY;
-		const stepPx = resolveGapDragStep( layoutGapDrag.initialValue );
-		const nextGap = computeNextGapValue( layoutGapDrag.initialValue, delta, { stepPx } );
-		editor.dispatch( {
+		const delta =
+			layoutGapDrag.axis === 'x' ? event.clientX - layoutGapDrag.startX : event.clientY - layoutGapDrag.startY;
+		const stepPx = resolveGapDragStep(layoutGapDrag.initialValue);
+		const nextGap = computeNextGapValue(layoutGapDrag.initialValue, delta, { stepPx });
+		editor.dispatch({
 			type: 'document/elements/update',
 			documentId: layoutGapDrag.documentId,
 			nodeId: layoutGapDrag.nodeId,
 			layoutPatch: { gap: nextGap },
-		} );
+		});
 	}
 
-	function stopLayoutGapDrag( event: PointerEvent ) {
-		if ( layoutGapDrag && event.pointerId !== layoutGapDrag.pointerId ) {
+	function stopLayoutGapDrag(event: PointerEvent) {
+		if (layoutGapDrag && event.pointerId !== layoutGapDrag.pointerId) {
 			return;
 		}
 
@@ -738,190 +745,190 @@
 	}
 
 	function clearLayoutGapDragListeners() {
-		window.removeEventListener( 'pointermove', handleLayoutGapDrag );
-		window.removeEventListener( 'pointerup', stopLayoutGapDrag );
-		window.removeEventListener( 'pointercancel', stopLayoutGapDrag );
+		window.removeEventListener('pointermove', handleLayoutGapDrag);
+		window.removeEventListener('pointerup', stopLayoutGapDrag);
+		window.removeEventListener('pointercancel', stopLayoutGapDrag);
 	}
 
-	function resolveGapDragStep( value: string ) {
-		const unit = value.trim().match( /[a-z%]+$/i )?.[ 0 ] ?? 'px';
-		if ( unit === 'rem' || unit === 'em' ) {
+	function resolveGapDragStep(value: string) {
+		const unit = value.trim().match(/[a-z%]+$/i)?.[0] ?? 'px';
+		if (unit === 'rem' || unit === 'em') {
 			return 1 / 16;
 		}
-		if ( unit === '%' ) {
+		if (unit === '%') {
 			return 0.1;
 		}
 		return 1;
 	}
 
-	function getLayoutOverlayStyle( bounds: NodeBounds | undefined ): string {
-		return bounds ? rectToPreviewStyle( bounds.rect ) : '';
+	function getLayoutOverlayStyle(bounds: NodeBounds | undefined): string {
+		return bounds ? rectToPreviewStyle(bounds.rect) : '';
 	}
 
-	function getLayoutGridLineStyles( model: BuilderLayoutOverlayModel, axis: 'x' | 'y' ): string[] {
+	function getLayoutGridLineStyles(model: BuilderLayoutOverlayModel, axis: 'x' | 'y'): string[] {
 		const count = axis === 'x' ? model.grid.columns : model.grid.rows;
-		if ( model.display !== 'grid' || count <= 1 ) {
+		if (model.display !== 'grid' || count <= 1) {
 			return [];
 		}
 
-		return Array.from( { length: count - 1 }, ( _, index ) => {
-			const position = ( ( index + 1 ) / count ) * 100;
+		return Array.from({ length: count - 1 }, (_, index) => {
+			const position = ((index + 1) / count) * 100;
 			return axis === 'x'
-				? `left:${ position }%;top:0;width:1px;height:100%;`
-				: `top:${ position }%;left:0;height:1px;width:100%;`;
-		} );
+				? `left:${position}%;top:0;width:1px;height:100%;`
+				: `top:${position}%;left:0;height:1px;width:100%;`;
+		});
 	}
 
-	function getLayoutChildRectStyle( rect: BuilderRect ): string {
-		if ( !selectedBounds ) {
-			return rectToPreviewStyle( rect );
+	function getLayoutChildRectStyle(rect: BuilderRect): string {
+		if (!selectedBounds) {
+			return rectToPreviewStyle(rect);
 		}
 
-		return rectToStyle( {
+		return rectToStyle({
 			left: rect.left - selectedBounds.rect.left,
 			top: rect.top - selectedBounds.rect.top,
 			right: rect.right - selectedBounds.rect.left,
 			bottom: rect.bottom - selectedBounds.rect.top,
 			width: rect.width,
 			height: rect.height,
-		} );
+		});
 	}
 
 	function deleteSelectedNode() {
-		const nodeId = state.ui.selectedNodeIds[ 0 ];
-		if ( !nodeId ) {
+		const nodeId = state.ui.selectedNodeIds[0];
+		if (!nodeId) {
 			return;
 		}
 
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/elements/delete',
 			documentId: state.activeDocumentId,
 			nodeId,
-		} );
+		});
 		editor.closeContextMenu();
 	}
 
 	function wirePreviewBridge() {
 		const previewHost = ensurePreviewHostController();
-		if ( !previewHost ) {
+		if (!previewHost) {
 			return;
 		}
 
 		cleanupPreviewBridge();
 		const document = previewHost.mountTarget;
 
-		const handleClick = ( event: MouseEvent ) => {
-			if ( state.ui.shell.panelCollapsed ) {
-				const linkElement = resolvePreviewLinkElement( event.target );
-				if ( linkElement ) {
+		const handleClick = (event: MouseEvent) => {
+			if (state.ui.shell.panelCollapsed) {
+				const linkElement = resolvePreviewLinkElement(event.target);
+				if (linkElement) {
 					event.preventDefault();
 					event.stopPropagation();
 				}
 				return;
 			}
 
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( !nodeElement ) {
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (!nodeElement) {
 				return;
 			}
 
 			event.preventDefault();
-			selectPreviewNode( nodeElement );
+			selectPreviewNode(nodeElement);
 		};
 
-		const handlePointerOver = ( event: PointerEvent ) => {
-			if ( state.ui.shell.panelCollapsed ) {
+		const handlePointerOver = (event: PointerEvent) => {
+			if (state.ui.shell.panelCollapsed) {
 				return;
 			}
 
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( !nodeElement || resolveBuilderNodeElement( event.relatedTarget ) === nodeElement ) {
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (!nodeElement || resolveBuilderNodeElement(event.relatedTarget) === nodeElement) {
 				return;
 			}
 
-			hoverPreviewNode( nodeElement );
+			hoverPreviewNode(nodeElement);
 		};
 
-		const handlePointerOut = ( event: PointerEvent ) => {
-			if ( state.ui.shell.panelCollapsed ) {
+		const handlePointerOut = (event: PointerEvent) => {
+			if (state.ui.shell.panelCollapsed) {
 				return;
 			}
 
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( !nodeElement || resolveBuilderNodeElement( event.relatedTarget ) === nodeElement ) {
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (!nodeElement || resolveBuilderNodeElement(event.relatedTarget) === nodeElement) {
 				return;
 			}
 
-			hoverPreviewNode( undefined );
+			hoverPreviewNode(undefined);
 		};
 
-		const handleDoubleClick = ( event: MouseEvent ) => {
-			if ( state.ui.shell.panelCollapsed ) {
+		const handleDoubleClick = (event: MouseEvent) => {
+			if (state.ui.shell.panelCollapsed) {
 				return;
 			}
 
-			const nodeElement = resolveBuilderNodeElement( event.target );
+			const nodeElement = resolveBuilderNodeElement(event.target);
 			const nodeId = nodeElement?.dataset.builderNode;
 			const documentId = nodeElement?.dataset.builderDocument ?? editor.engine.getState().activeDocumentId;
-			if ( !nodeId || !resolveInlineEditMode( documentId, nodeId ) ) {
+			if (!nodeId || !resolveInlineEditMode(documentId, nodeId)) {
 				return;
 			}
 
 			event.preventDefault();
-			selectPreviewNode( nodeElement );
-			startInlineEditingForNode( nodeElement );
+			selectPreviewNode(nodeElement);
+			startInlineEditingForNode(nodeElement);
 		};
 
-		const handleContextMenu = ( event: MouseEvent ) => {
-			if ( state.ui.shell.panelCollapsed ) {
+		const handleContextMenu = (event: MouseEvent) => {
+			if (state.ui.shell.panelCollapsed) {
 				return;
 			}
 
-			const nodeElement = resolveBuilderNodeElement( event.target );
-			if ( nodeElement ) {
-				openPreviewNodeContextMenu( nodeElement, event );
+			const nodeElement = resolveBuilderNodeElement(event.target);
+			if (nodeElement) {
+				openPreviewNodeContextMenu(nodeElement, event);
 				return;
 			}
 
-			openPreviewRootContextMenu( event );
+			openPreviewRootContextMenu(event);
 		};
 
-		document.addEventListener( 'click', handleClick, true );
-		document.addEventListener( 'pointerover', handlePointerOver, true );
-		document.addEventListener( 'pointerout', handlePointerOut, true );
-		document.addEventListener( 'dblclick', handleDoubleClick, true );
-		document.addEventListener( 'contextmenu', handleContextMenu, true );
+		document.addEventListener('click', handleClick, true);
+		document.addEventListener('pointerover', handlePointerOver, true);
+		document.addEventListener('pointerout', handlePointerOut, true);
+		document.addEventListener('dblclick', handleDoubleClick, true);
+		document.addEventListener('contextmenu', handleContextMenu, true);
 
 		previewBridgeCleanup = () => {
-			document.removeEventListener( 'click', handleClick, true );
-			document.removeEventListener( 'pointerover', handlePointerOver, true );
-			document.removeEventListener( 'pointerout', handlePointerOut, true );
-			document.removeEventListener( 'dblclick', handleDoubleClick, true );
-			document.removeEventListener( 'contextmenu', handleContextMenu, true );
+			document.removeEventListener('click', handleClick, true);
+			document.removeEventListener('pointerover', handlePointerOver, true);
+			document.removeEventListener('pointerout', handlePointerOut, true);
+			document.removeEventListener('dblclick', handleDoubleClick, true);
+			document.removeEventListener('contextmenu', handleContextMenu, true);
 		};
 	}
 
-	function resolvePreviewLinkElement( target: EventTarget | null ): HTMLAnchorElement | undefined {
+	function resolvePreviewLinkElement(target: EventTarget | null): HTMLAnchorElement | undefined {
 		const element = target instanceof Element ? target : undefined;
-		return element?.closest<HTMLAnchorElement>( 'a[href]' ) ?? undefined;
+		return element?.closest<HTMLAnchorElement>('a[href]') ?? undefined;
 	}
 
 	function queuePreviewSync() {
-		if ( typeof window === 'undefined' ) {
+		if (typeof window === 'undefined') {
 			syncPreview();
 			return;
 		}
 
-		cancelAnimationFrame( previewSyncFrame );
-		previewSyncFrame = window.requestAnimationFrame( () => {
+		cancelAnimationFrame(previewSyncFrame);
+		previewSyncFrame = window.requestAnimationFrame(() => {
 			previewSyncFrame = 0;
 			syncPreview();
-		} );
+		});
 	}
 
 	function syncPreview() {
 		const previewHost = ensurePreviewHostController();
-		if ( !previewHost ) {
+		if (!previewHost) {
 			return;
 		}
 
@@ -930,20 +937,20 @@
 		const nextRenderVersion = renderVersion;
 		const mountTarget = previewHost.mountTarget;
 		previewViewportHeight = mountTarget.clientHeight;
-		runtimeMeasurementVersion = Math.min( runtimeMeasurementVersion, nextRenderVersion - 1 );
+		runtimeMeasurementVersion = Math.min(runtimeMeasurementVersion, nextRenderVersion - 1);
 
-		if ( !mountedRuntime ) {
+		if (!mountedRuntime) {
 			mountTarget.replaceChildren();
-			mountedRuntime = mount( PreviewRuntimeHost, {
+			mountedRuntime = mount(PreviewRuntimeHost, {
 				target: mountTarget,
 				props: {
 					options: runtimeOptions,
 				},
-			} );
-			editor.incrementPerfCounter( 'previewMounts' );
+			});
+			editor.incrementPerfCounter('previewMounts');
 		}
 
-		runtimeOptions.set( {
+		runtimeOptions.set({
 			project: state.project,
 			activeDocumentId: state.ui.preview.documentId ?? state.activeDocumentId,
 			registry: editor.registry,
@@ -951,34 +958,34 @@
 			adapter: editor.adapter,
 			bindingContext: {
 				...editor.bindingContext,
-				query: new URLSearchParams( state.ui.preview.query ),
+				query: new URLSearchParams(state.ui.preview.query),
 			},
 			conditionContext: {
 				pathname: state.ui.preview.pathname,
-				query: new URLSearchParams( state.ui.preview.query ),
+				query: new URLSearchParams(state.ui.preview.query),
 			},
 			viewport: state.ui.viewport,
 			showPopups: state.ui.preview.showPopups,
 			authoringMode: !previewPresentationMode,
 			bridgeEvents: true,
 			bridgeRenderVersion: nextRenderVersion,
-			onGeometrySnapshot: ( snapshot ) => {
-				editor.incrementPerfCounter( 'geometrySnapshotsPosted' );
-				applyGeometrySnapshot( snapshot );
+			onGeometrySnapshot: (snapshot) => {
+				editor.incrementPerfCounter('geometrySnapshotsPosted');
+				applyGeometrySnapshot(snapshot);
 			},
-			onGeometryInvalidated: ( reason, renderVersion ) => {
+			onGeometryInvalidated: (reason, renderVersion) => {
 				void reason;
 				void renderVersion;
-				editor.incrementPerfCounter( 'geometryInvalidations' );
+				editor.incrementPerfCounter('geometryInvalidations');
 			},
-		} );
+		});
 		wirePreviewBridge();
-		editor.incrementPerfCounter( 'fullPreviewSyncs' );
+		editor.incrementPerfCounter('fullPreviewSyncs');
 	}
 
 	function getPreviewHostViewportRect() {
 		const rect = ensurePreviewHostController()?.mountTarget.getBoundingClientRect();
-		if ( !rect ) {
+		if (!rect) {
 			return undefined;
 		}
 
@@ -990,9 +997,9 @@
 		};
 	}
 
-	function resolvePreviewLocalRect( rect: BuilderRect ): BuilderRect {
+	function resolvePreviewLocalRect(rect: BuilderRect): BuilderRect {
 		const viewportRect = getPreviewHostViewportRect();
-		if ( !viewportRect ) {
+		if (!viewportRect) {
 			return rect;
 		}
 
@@ -1006,48 +1013,51 @@
 		};
 	}
 
-	function rectToPreviewStyle( rect: BuilderRect ): string {
-		return rectToStyle( resolvePreviewLocalRect( rect ) );
+	function rectToPreviewStyle(rect: BuilderRect): string {
+		return rectToStyle(resolvePreviewLocalRect(rect));
 	}
 
-	function resolveDropIndicatorAxis( target: DropTarget | undefined ): 'x' | 'y' | undefined {
-		if ( !target || target.placement === 'into' || target.placement === 'root' ) {
+	function resolveDropIndicatorAxis(target: DropTarget | undefined): 'x' | 'y' | undefined {
+		if (!target || target.placement === 'into' || target.placement === 'root') {
 			return undefined;
 		}
 
 		const canvasIndex = state.ui.canvas.index;
-		if ( target.slot !== undefined ) {
-			const childBounds = canvasIndex.childBoundsBySlot.get( getCanvasGeometryKey( target.documentId, target.parentId, target.slot ) ) ?? [];
-			return resolveDropIndicatorAxisFromBounds( target.rect, childBounds );
+		if (target.slot !== undefined) {
+			const childBounds =
+				canvasIndex.childBoundsBySlot.get(getCanvasGeometryKey(target.documentId, target.parentId, target.slot)) ?? [];
+			return resolveDropIndicatorAxisFromBounds(target.rect, childBounds);
 		}
 
-		if ( target.parentId ) {
-			const childBounds = canvasIndex.childBoundsByContainer.get( getCanvasGeometryKey( target.documentId, target.parentId, undefined ) ) ?? [];
-			return resolveDropIndicatorAxisFromBounds( target.rect, childBounds );
+		if (target.parentId) {
+			const childBounds =
+				canvasIndex.childBoundsByContainer.get(getCanvasGeometryKey(target.documentId, target.parentId, undefined)) ??
+				[];
+			return resolveDropIndicatorAxisFromBounds(target.rect, childBounds);
 		}
 
-		return resolveDropIndicatorAxisFromBounds( target.rect, [] );
+		return resolveDropIndicatorAxisFromBounds(target.rect, []);
 	}
 
-	function createCoarseDropRegions( latestState: BuilderEngineState ): CoarseDropRegion[] {
-		if ( !latestState.ui.dragSession || latestState.ui.dragSession.kind !== 'create' ) {
+	function createCoarseDropRegions(latestState: BuilderEngineState): CoarseDropRegion[] {
+		if (!latestState.ui.dragSession || latestState.ui.dragSession.kind !== 'create') {
 			return [];
 		}
 
 		const canvasIndex = latestState.ui.canvas.index;
 		const regions: CoarseDropRegion[] = [];
-		const addRegion = ( id: string, target: DropTarget, priority: CoarseDropRegion['priority'] ) => {
-			regions.push( {
+		const addRegion = (id: string, target: DropTarget, priority: CoarseDropRegion['priority']) => {
+			regions.push({
 				id,
 				target,
 				priority,
-				style: `${ rectToPreviewStyle( target.rect ) }pointer-events:auto;`,
-			} );
+				style: `${rectToPreviewStyle(target.rect)}pointer-events:auto;`,
+			});
 		};
 
-		for ( const slot of canvasIndex.rootSlotsByDocument.get( previewDocument.id ) ?? [] ) {
+		for (const slot of canvasIndex.rootSlotsByDocument.get(previewDocument.id) ?? []) {
 			addRegion(
-				`root:${ slot.documentId }:${ slot.slot ?? 'default' }`,
+				`root:${slot.documentId}:${slot.slot ?? 'default'}`,
 				{
 					documentId: slot.documentId,
 					parentId: slot.ownerId,
@@ -1060,9 +1070,9 @@
 			);
 		}
 
-		for ( const slot of canvasIndex.nonRootSlotsByDocument.get( previewDocument.id ) ?? [] ) {
+		for (const slot of canvasIndex.nonRootSlotsByDocument.get(previewDocument.id) ?? []) {
 			addRegion(
-				`slot:${ slot.documentId }:${ slot.ownerId ?? 'root' }:${ slot.slot ?? 'default' }`,
+				`slot:${slot.documentId}:${slot.ownerId ?? 'root'}:${slot.slot ?? 'default'}`,
 				{
 					documentId: slot.documentId,
 					parentId: slot.ownerId,
@@ -1076,14 +1086,17 @@
 			);
 		}
 
-		for ( const container of canvasIndex.containersByDocument.get( previewDocument.id ) ?? [] ) {
-			const childBounds = canvasIndex.childBoundsByContainer.get( getCanvasGeometryKey( container.documentId, container.nodeId, undefined ) ) ?? [];
-			if ( childBounds.length > 0 ) {
+		for (const container of canvasIndex.containersByDocument.get(previewDocument.id) ?? []) {
+			const childBounds =
+				canvasIndex.childBoundsByContainer.get(
+					getCanvasGeometryKey(container.documentId, container.nodeId, undefined),
+				) ?? [];
+			if (childBounds.length > 0) {
 				continue;
 			}
 
 			addRegion(
-				`container:${ container.documentId }:${ container.nodeId }`,
+				`container:${container.documentId}:${container.nodeId}`,
 				{
 					documentId: container.documentId,
 					parentId: container.nodeId,
@@ -1100,13 +1113,13 @@
 		return regions;
 	}
 
-	function resolveDropIndicatorAxisFromBounds( rect: BuilderRect, childBounds: NodeBounds[] ): 'x' | 'y' {
-		if ( childBounds.length > 1 ) {
-			const first = childBounds[ 0 ];
-			const last = childBounds.at( -1 );
-			if ( first && last ) {
-				const spreadX = Math.abs( last.rect.left - first.rect.left ) + last.rect.width;
-				const spreadY = Math.abs( last.rect.top - first.rect.top ) + last.rect.height;
+	function resolveDropIndicatorAxisFromBounds(rect: BuilderRect, childBounds: NodeBounds[]): 'x' | 'y' {
+		if (childBounds.length > 1) {
+			const first = childBounds[0];
+			const last = childBounds.at(-1);
+			if (first && last) {
+				const spreadX = Math.abs(last.rect.left - first.rect.left) + last.rect.width;
+				const spreadY = Math.abs(last.rect.top - first.rect.top) + last.rect.height;
 				return spreadX > spreadY ? 'x' : 'y';
 			}
 		}
@@ -1114,167 +1127,172 @@
 		return rect.width > rect.height * 1.4 ? 'x' : 'y';
 	}
 
-	function getDropIndicatorStyle( target: DropTarget | undefined, axis: 'x' | 'y' | undefined ): string {
-		if ( !target ) {
+	function getDropIndicatorStyle(target: DropTarget | undefined, axis: 'x' | 'y' | undefined): string {
+		if (!target) {
 			return '';
 		}
 
-		const rect = resolvePreviewLocalRect( target.indicatorRect ?? target.rect );
+		const rect = resolvePreviewLocalRect(target.indicatorRect ?? target.rect);
 
-		if ( target.placement === 'into' || target.placement === 'root' ) {
-			return rectToStyle( rect );
+		if (target.placement === 'into' || target.placement === 'root') {
+			return rectToStyle(rect);
 		}
 
 		const resolvedAxis = axis ?? 'y';
 		const bandThickness = 12;
 		const coreThickness = 3;
 
-		if ( resolvedAxis === 'x' ) {
+		if (resolvedAxis === 'x') {
 			const left = target.indicatorRect
-				? ( rect.left + rect.right - bandThickness ) / 2
+				? (rect.left + rect.right - bandThickness) / 2
 				: target.placement === 'before'
-				? rect.left - ( bandThickness / 2 )
-				: rect.right - ( bandThickness / 2 );
-			return [
-				`left:${ left }px`,
-				`top:${ rect.top }px`,
-				`width:${ bandThickness }px`,
-				`height:${ rect.height }px`,
-				'border:1px solid rgba(208, 4, 212, 0.28)',
-				'border-radius:999px',
-				'background:linear-gradient(90deg, rgba(208, 4, 212, 0.12) 0%, rgba(208, 4, 212, 0.22) 100%)',
-				'box-shadow:0 8px 22px rgba(143, 0, 157, 0.18)',
-				`background-image:linear-gradient(90deg,
+					? rect.left - bandThickness / 2
+					: rect.right - bandThickness / 2;
+			return (
+				[
+					`left:${left}px`,
+					`top:${rect.top}px`,
+					`width:${bandThickness}px`,
+					`height:${rect.height}px`,
+					'border:1px solid rgba(208, 4, 212, 0.28)',
+					'border-radius:999px',
+					'background:linear-gradient(90deg, rgba(208, 4, 212, 0.12) 0%, rgba(208, 4, 212, 0.22) 100%)',
+					'box-shadow:0 8px 22px rgba(143, 0, 157, 0.18)',
+					`background-image:linear-gradient(90deg,
 					rgba(208, 4, 212, 0.12) 0%,
 					rgba(208, 4, 212, 0.22) 100%
 				),
 				linear-gradient(90deg,
-					transparent calc(50% - ${ coreThickness / 2 }px),
-					rgba(246, 208, 255, 0.96) calc(50% - ${ coreThickness / 2 }px),
-					rgba(208, 4, 212, 0.98) calc(50% + ${ coreThickness / 2 }px),
-					transparent calc(50% + ${ coreThickness / 2 }px)
+					transparent calc(50% - ${coreThickness / 2}px),
+					rgba(246, 208, 255, 0.96) calc(50% - ${coreThickness / 2}px),
+					rgba(208, 4, 212, 0.98) calc(50% + ${coreThickness / 2}px),
+					transparent calc(50% + ${coreThickness / 2}px)
 				)`,
-			].join( ';' ) + ';';
+				].join(';') + ';'
+			);
 		}
 
 		const top = target.indicatorRect
-			? ( rect.top + rect.bottom - bandThickness ) / 2
+			? (rect.top + rect.bottom - bandThickness) / 2
 			: target.placement === 'before'
-			? rect.top - ( bandThickness / 2 )
-			: rect.bottom - ( bandThickness / 2 );
-		return [
-			`left:${ rect.left }px`,
-			`top:${ top }px`,
-			`width:${ rect.width }px`,
-			`height:${ bandThickness }px`,
-			'border:1px solid rgba(208, 4, 212, 0.28)',
-			'border-radius:999px',
-			'background:linear-gradient(180deg, rgba(208, 4, 212, 0.12) 0%, rgba(208, 4, 212, 0.22) 100%)',
-			'box-shadow:0 8px 22px rgba(143, 0, 157, 0.18)',
-			`background-image:linear-gradient(180deg,
+				? rect.top - bandThickness / 2
+				: rect.bottom - bandThickness / 2;
+		return (
+			[
+				`left:${rect.left}px`,
+				`top:${top}px`,
+				`width:${rect.width}px`,
+				`height:${bandThickness}px`,
+				'border:1px solid rgba(208, 4, 212, 0.28)',
+				'border-radius:999px',
+				'background:linear-gradient(180deg, rgba(208, 4, 212, 0.12) 0%, rgba(208, 4, 212, 0.22) 100%)',
+				'box-shadow:0 8px 22px rgba(143, 0, 157, 0.18)',
+				`background-image:linear-gradient(180deg,
 				rgba(208, 4, 212, 0.12) 0%,
 				rgba(208, 4, 212, 0.22) 100%
 			),
 			linear-gradient(180deg,
-				transparent calc(50% - ${ coreThickness / 2 }px),
-				rgba(246, 208, 255, 0.96) calc(50% - ${ coreThickness / 2 }px),
-				rgba(208, 4, 212, 0.98) calc(50% + ${ coreThickness / 2 }px),
-				transparent calc(50% + ${ coreThickness / 2 }px)
+				transparent calc(50% - ${coreThickness / 2}px),
+				rgba(246, 208, 255, 0.96) calc(50% - ${coreThickness / 2}px),
+				rgba(208, 4, 212, 0.98) calc(50% + ${coreThickness / 2}px),
+				transparent calc(50% + ${coreThickness / 2}px)
 			)`,
-		].join( ';' ) + ';';
+			].join(';') + ';'
+		);
 	}
 
-	function getDropTargetHighlightStyle( target: DropTarget | undefined, axis: 'x' | 'y' | undefined ): string {
-		if ( !target || target.placement === 'into' || target.placement === 'root' ) {
+	function getDropTargetHighlightStyle(target: DropTarget | undefined, axis: 'x' | 'y' | undefined): string {
+		if (!target || target.placement === 'into' || target.placement === 'root') {
 			return '';
 		}
 
-		const rect = resolvePreviewLocalRect( target.indicatorRect ?? target.rect );
+		const rect = resolvePreviewLocalRect(target.indicatorRect ?? target.rect);
 		const resolvedAxis = axis ?? 'y';
-		const edgeShadow = resolvedAxis === 'x'
-			? target.placement === 'before'
-				? `inset 2px 0 0 rgba(208, 4, 212, 0.32)`
-				: `inset -2px 0 0 rgba(208, 4, 212, 0.32)`
-			: target.placement === 'before'
-				? `inset 0 2px 0 rgba(208, 4, 212, 0.32)`
-				: `inset 0 -2px 0 rgba(208, 4, 212, 0.32)`;
+		const edgeShadow =
+			resolvedAxis === 'x'
+				? target.placement === 'before'
+					? `inset 2px 0 0 rgba(208, 4, 212, 0.32)`
+					: `inset -2px 0 0 rgba(208, 4, 212, 0.32)`
+				: target.placement === 'before'
+					? `inset 0 2px 0 rgba(208, 4, 212, 0.32)`
+					: `inset 0 -2px 0 rgba(208, 4, 212, 0.32)`;
 
-		return `${ rectToStyle( rect ) }border:1px solid rgba(208, 4, 212, 0.16);background:rgba(208, 4, 212, 0.035);box-shadow:${ edgeShadow };`;
+		return `${rectToStyle(rect)}border:1px solid rgba(208, 4, 212, 0.16);background:rgba(208, 4, 212, 0.035);box-shadow:${edgeShadow};`;
 	}
 
-	function getDropTargetHandleStyles( target: DropTarget | undefined, axis: 'x' | 'y' | undefined ): string[] {
-		if ( !target || target.placement === 'into' || target.placement === 'root' ) {
+	function getDropTargetHandleStyles(target: DropTarget | undefined, axis: 'x' | 'y' | undefined): string[] {
+		if (!target || target.placement === 'into' || target.placement === 'root') {
 			return [];
 		}
 
-		const rect = resolvePreviewLocalRect( target.indicatorRect ?? target.rect );
+		const rect = resolvePreviewLocalRect(target.indicatorRect ?? target.rect);
 		const resolvedAxis = axis ?? 'y';
 		const bandThickness = 12;
 		const handleSize = 8;
 
-		if ( resolvedAxis === 'x' ) {
+		if (resolvedAxis === 'x') {
 			const left = target.indicatorRect
-				? ( rect.left + rect.right - handleSize ) / 2
+				? (rect.left + rect.right - handleSize) / 2
 				: target.placement === 'before'
-				? rect.left - ( bandThickness / 2 ) + ( bandThickness / 2 ) - ( handleSize / 2 )
-				: rect.right - ( bandThickness / 2 ) + ( bandThickness / 2 ) - ( handleSize / 2 );
+					? rect.left - bandThickness / 2 + bandThickness / 2 - handleSize / 2
+					: rect.right - bandThickness / 2 + bandThickness / 2 - handleSize / 2;
 			return [
-				`left:${ left }px;top:${ rect.top - ( handleSize / 2 ) }px;width:${ handleSize }px;height:${ handleSize }px;`,
-				`left:${ left }px;top:${ rect.bottom - ( handleSize / 2 ) }px;width:${ handleSize }px;height:${ handleSize }px;`,
+				`left:${left}px;top:${rect.top - handleSize / 2}px;width:${handleSize}px;height:${handleSize}px;`,
+				`left:${left}px;top:${rect.bottom - handleSize / 2}px;width:${handleSize}px;height:${handleSize}px;`,
 			];
 		}
 
 		const top = target.indicatorRect
-			? ( rect.top + rect.bottom - handleSize ) / 2
+			? (rect.top + rect.bottom - handleSize) / 2
 			: target.placement === 'before'
-			? rect.top - ( bandThickness / 2 ) + ( bandThickness / 2 ) - ( handleSize / 2 )
-			: rect.bottom - ( bandThickness / 2 ) + ( bandThickness / 2 ) - ( handleSize / 2 );
+				? rect.top - bandThickness / 2 + bandThickness / 2 - handleSize / 2
+				: rect.bottom - bandThickness / 2 + bandThickness / 2 - handleSize / 2;
 		return [
-			`left:${ rect.left - ( handleSize / 2 ) }px;top:${ top }px;width:${ handleSize }px;height:${ handleSize }px;`,
-			`left:${ rect.right - ( handleSize / 2 ) }px;top:${ top }px;width:${ handleSize }px;height:${ handleSize }px;`,
+			`left:${rect.left - handleSize / 2}px;top:${top}px;width:${handleSize}px;height:${handleSize}px;`,
+			`left:${rect.right - handleSize / 2}px;top:${top}px;width:${handleSize}px;height:${handleSize}px;`,
 		];
 	}
 
 	function openSelectedComponentMaster() {
-		if ( !selectedComponentDocument ) {
+		if (!selectedComponentDocument) {
 			return;
 		}
 
-		editor.openDocument( selectedComponentDocument.id, {
+		editor.openDocument(selectedComponentDocument.id, {
 			mode: 'component-master',
 			pathname: state.ui.preview.pathname,
 			query: state.ui.preview.query,
 			source: 'manual',
-		} );
+		});
 	}
 
 	function clearInlineCommitTimer() {
-		if ( inlineCommitTimer ) {
-			clearTimeout( inlineCommitTimer );
+		if (inlineCommitTimer) {
+			clearTimeout(inlineCommitTimer);
 			inlineCommitTimer = undefined;
 		}
 	}
 
 	function clearInlineBlurTimer() {
-		if ( inlineBlurTimer ) {
-			clearTimeout( inlineBlurTimer );
+		if (inlineBlurTimer) {
+			clearTimeout(inlineBlurTimer);
 			inlineBlurTimer = undefined;
 		}
 	}
 
-	function normalizePlainText( value: string ): string {
-		return normalizeInlineEditingPlainText( value );
+	function normalizePlainText(value: string): string {
+		return normalizeInlineEditingPlainText(value);
 	}
 
-	function resolveInlineEditingNode( documentId: string, nodeId: string ) {
-		const cache = editor.getDocumentCache( documentId );
-		const node = cache?.nodeById.get( nodeId );
-		if ( !node ) {
+	function resolveInlineEditingNode(documentId: string, nodeId: string) {
+		const cache = editor.getDocumentCache(documentId);
+		const node = cache?.nodeById.get(nodeId);
+		if (!node) {
 			return undefined;
 		}
 
-		const definition = editor.registry.elements.get( node.type );
-		if ( !definition?.runtime.supportsInlineEditing ) {
+		const definition = editor.registry.elements.get(node.type);
+		if (!definition?.runtime.supportsInlineEditing) {
 			return undefined;
 		}
 
@@ -1284,7 +1302,7 @@
 		};
 	}
 
-	function parseInlineEditMode( value: string | undefined ): BuilderInlineEditingMode | undefined {
+	function parseInlineEditMode(value: string | undefined): BuilderInlineEditingMode | undefined {
 		return value === 'text' || value === 'html' ? value : undefined;
 	}
 
@@ -1293,13 +1311,13 @@
 		nodeId: string,
 		datasetMode?: string,
 	): BuilderInlineEditingMode | undefined {
-		const modeFromDataset = parseInlineEditMode( datasetMode );
-		if ( modeFromDataset ) {
+		const modeFromDataset = parseInlineEditMode(datasetMode);
+		if (modeFromDataset) {
 			return modeFromDataset;
 		}
 
-		const inlineEditingNode = resolveInlineEditingNode( documentId, nodeId );
-		if ( !inlineEditingNode ) {
+		const inlineEditingNode = resolveInlineEditingNode(documentId, nodeId);
+		if (!inlineEditingNode) {
 			return undefined;
 		}
 
@@ -1309,76 +1327,76 @@
 		);
 	}
 
-	function resolveInlineTextValue( update: PendingInlineUpdate ): string {
-		return serializeInlineEditingValue( {
-			nodeType: resolveInlineEditingNode( update.documentId, update.nodeId )?.node.type,
-			mode: resolveInlineEditMode( update.documentId, update.nodeId ),
+	function resolveInlineTextValue(update: PendingInlineUpdate): string {
+		return serializeInlineEditingValue({
+			nodeType: resolveInlineEditingNode(update.documentId, update.nodeId)?.node.type,
+			mode: resolveInlineEditMode(update.documentId, update.nodeId),
 			value: update.value,
 			html: update.html,
-		} );
+		});
 	}
 
-	function resolveInlineEditorValue( session = state.ui.inlineEditing ): string {
-		if ( !session ) {
+	function resolveInlineEditorValue(session = state.ui.inlineEditing): string {
+		if (!session) {
 			return '';
 		}
 
-		const cache = editor.getDocumentCache( session.documentId );
-		const node = cache?.nodeById.get( session.nodeId );
+		const cache = editor.getDocumentCache(session.documentId);
+		const node = cache?.nodeById.get(session.nodeId);
 		return typeof node?.props.text === 'string' ? node.props.text : '';
 	}
 
-	function handleInlineEditorChange( detail: { mode: 'html' | 'text'; value: string; html: string; text: string } ) {
+	function handleInlineEditorChange(detail: { mode: 'html' | 'text'; value: string; html: string; text: string }) {
 		const inlineSession = state.ui.inlineEditing;
-		if ( !inlineSession ) {
+		if (!inlineSession) {
 			return;
 		}
 
 		inlineEditorValue = detail.value;
-		const inlineEditMode = resolveInlineEditMode( inlineSession.documentId, inlineSession.nodeId );
-		if ( !inlineEditMode ) {
+		const inlineEditMode = resolveInlineEditMode(inlineSession.documentId, inlineSession.nodeId);
+		if (!inlineEditMode) {
 			return;
 		}
 
-		queueInlineUpdate( {
+		queueInlineUpdate({
 			documentId: inlineSession.documentId,
 			nodeId: inlineSession.nodeId,
 			value: detail.text,
 			html: detail.html,
 			richText: inlineEditMode === 'html',
-		} );
+		});
 	}
 
 	function stopInlineEditor() {
 		clearInlineBlurTimer();
 		flushInlineUpdate();
-		editor.dispatch( { type: 'document/ui/stop-inline-edit' } );
+		editor.dispatch({ type: 'document/ui/stop-inline-edit' });
 		queuePreviewSync();
 	}
 
-	function shouldPreserveInlineEditorForTarget( target: Element | null ): boolean {
-		return Boolean( target?.closest( '[data-inline-rich-text-root="true"], [data-inline-edit-preserve-focus="true"]' ) );
+	function shouldPreserveInlineEditorForTarget(target: Element | null): boolean {
+		return Boolean(target?.closest('[data-inline-rich-text-root="true"], [data-inline-edit-preserve-focus="true"]'));
 	}
 
 	function handleInlineEditorBlur() {
 		clearInlineBlurTimer();
-		inlineBlurTimer = window.setTimeout( () => {
-			if ( shouldPreserveInlineEditorForTarget( document.activeElement ) ) {
+		inlineBlurTimer = window.setTimeout(() => {
+			if (shouldPreserveInlineEditorForTarget(document.activeElement)) {
 				return;
 			}
 
 			stopInlineEditor();
-		}, 0 );
+		}, 0);
 	}
 
-	function getInlineEditorStyle( rect: BuilderRect ): string {
-		const localRect = resolvePreviewLocalRect( rect );
-		return `left:${ localRect.left }px;top:${ localRect.top }px;width:${ Math.max( localRect.width, 180 ) }px;min-height:${ Math.max( localRect.height, 48 ) }px;`;
+	function getInlineEditorStyle(rect: BuilderRect): string {
+		const localRect = resolvePreviewLocalRect(rect);
+		return `left:${localRect.left}px;top:${localRect.top}px;width:${Math.max(localRect.width, 180)}px;min-height:${Math.max(localRect.height, 48)}px;`;
 	}
 
 	function flushInlineUpdate() {
 		clearInlineCommitTimer();
-		if ( !pendingInlineUpdate ) {
+		if (!pendingInlineUpdate) {
 			return;
 		}
 
@@ -1388,44 +1406,44 @@
 			documentId: update.documentId,
 			nodeId: update.nodeId,
 		};
-		editor.dispatch( {
+		editor.dispatch({
 			type: 'document/elements/update',
 			documentId: update.documentId,
 			nodeId: update.nodeId,
 			propsPatch: {
-				text: resolveInlineTextValue( update ),
+				text: resolveInlineTextValue(update),
 			},
-		} );
+		});
 	}
 
-	function queueInlineUpdate( update: PendingInlineUpdate ) {
+	function queueInlineUpdate(update: PendingInlineUpdate) {
 		pendingInlineUpdate = {
 			...update,
-			value: normalizePlainText( update.value ),
+			value: normalizePlainText(update.value),
 		};
 		clearInlineCommitTimer();
-		inlineCommitTimer = window.setTimeout( flushInlineUpdate, INLINE_COMMIT_DELAY );
+		inlineCommitTimer = window.setTimeout(flushInlineUpdate, INLINE_COMMIT_DELAY);
 	}
 
-	function setViewport( viewport: string ) {
-		if ( state.ui.viewport === viewport ) {
+	function setViewport(viewport: string) {
+		if (state.ui.viewport === viewport) {
 			return;
 		}
 
-		editor.dispatch( { type: 'document/ui/set-viewport', viewport } );
+		editor.dispatch({ type: 'document/ui/set-viewport', viewport });
 	}
 
 	function togglePreviewPopups() {
-		editor.togglePreviewPopups( !state.ui.preview.showPopups );
+		editor.togglePreviewPopups(!state.ui.preview.showPopups);
 	}
 
 	function closeResponsiveBar() {
-		setViewport( 'desktop' );
-		editor.toggleResponsiveBar( false );
+		setViewport('desktop');
+		editor.toggleResponsiveBar(false);
 	}
 
-	function resolveViewportIconName( viewportId: string ): 'desktop' | 'tablet' | 'mobile' {
-		switch ( viewportKindFor( viewportId ) ) {
+	function resolveViewportIconName(viewportId: string): 'desktop' | 'tablet' | 'mobile' {
+		switch (viewportKindFor(viewportId)) {
 			case 'tablet':
 				return 'tablet';
 			case 'mobile':
@@ -1435,116 +1453,123 @@
 		}
 	}
 
-	function formatModeLabel( value: string ) {
-		return value.replaceAll( '-', ' ' );
+	function formatModeLabel(value: string) {
+		return value.replaceAll('-', ' ');
 	}
 
-	function formatNodeTypeLabel( value: string | undefined ) {
-		return ( value ?? 'node' )
-			.replaceAll( '-', ' ' )
-			.replace( /\b\w/g, ( character ) => character.toUpperCase() );
+	function formatNodeTypeLabel(value: string | undefined) {
+		return (value ?? 'node').replaceAll('-', ' ').replace(/\b\w/g, (character) => character.toUpperCase());
 	}
 
-	function resolveViewportTitle( viewport: BreakpointDefinition ) {
-		return `${ viewport.label } (${ resolvePreviewViewportWidth( viewport.id, viewportDefinitions ) }px)`;
+	function resolveViewportTitle(viewport: BreakpointDefinition) {
+		return `${viewport.label} (${resolvePreviewViewportWidth(viewport.id, viewportDefinitions)}px)`;
 	}
 
-	function viewportKindFor( viewportId: string ) {
-		return resolvePreviewViewportKind( viewportId, viewportDefinitions );
+	function viewportKindFor(viewportId: string) {
+		return resolvePreviewViewportKind(viewportId, viewportDefinitions);
 	}
 
-	function arePreviewStatesEqual( left: BuilderEngineState, right: BuilderEngineState ) {
-		return left.project === right.project
-			&& left.activeDocumentId === right.activeDocumentId
-			&& left.ui.viewport === right.ui.viewport
-			&& left.ui.preview.pathname === right.ui.preview.pathname
-			&& left.ui.preview.query === right.ui.preview.query
-			&& left.ui.preview.showPopups === right.ui.preview.showPopups
-			&& left.ui.preview.documentId === right.ui.preview.documentId
-			&& left.ui.preview.slot === right.ui.preview.slot
-			&& left.ui.preview.assignmentId === right.ui.preview.assignmentId
-			&& left.ui.preview.source === right.ui.preview.source
-			&& left.ui.selectedNodeIds[ 0 ] === right.ui.selectedNodeIds[ 0 ]
-			&& left.ui.hoveredNodeId === right.ui.hoveredNodeId
-			&& left.ui.inlineEditing?.nodeId === right.ui.inlineEditing?.nodeId
-			&& left.ui.dragSession === right.ui.dragSession
-			&& left.ui.dropTarget === right.ui.dropTarget
-			&& left.ui.canvas.renderVersion === right.ui.canvas.renderVersion
-			&& left.ui.canvas.snapshotVersion === right.ui.canvas.snapshotVersion
-			&& left.ui.shell.panelCollapsed === right.ui.shell.panelCollapsed
-			&& left.ui.shell.responsiveBarVisible === right.ui.shell.responsiveBarVisible
-			&& left.ui.saveState === right.ui.saveState
-			&& left.ui.mode === right.ui.mode
-			&& left.ui.componentEditing.context === right.ui.componentEditing.context
-			&& left.ui.componentEditing.componentDocumentId === right.ui.componentEditing.componentDocumentId;
+	function arePreviewStatesEqual(left: BuilderEngineState, right: BuilderEngineState) {
+		return (
+			left.project === right.project &&
+			left.activeDocumentId === right.activeDocumentId &&
+			left.ui.viewport === right.ui.viewport &&
+			left.ui.preview.pathname === right.ui.preview.pathname &&
+			left.ui.preview.query === right.ui.preview.query &&
+			left.ui.preview.showPopups === right.ui.preview.showPopups &&
+			left.ui.preview.documentId === right.ui.preview.documentId &&
+			left.ui.preview.slot === right.ui.preview.slot &&
+			left.ui.preview.assignmentId === right.ui.preview.assignmentId &&
+			left.ui.preview.source === right.ui.preview.source &&
+			left.ui.selectedNodeIds[0] === right.ui.selectedNodeIds[0] &&
+			left.ui.hoveredNodeId === right.ui.hoveredNodeId &&
+			left.ui.inlineEditing?.nodeId === right.ui.inlineEditing?.nodeId &&
+			left.ui.dragSession === right.ui.dragSession &&
+			left.ui.dropTarget === right.ui.dropTarget &&
+			left.ui.canvas.renderVersion === right.ui.canvas.renderVersion &&
+			left.ui.canvas.snapshotVersion === right.ui.canvas.snapshotVersion &&
+			left.ui.shell.panelCollapsed === right.ui.shell.panelCollapsed &&
+			left.ui.shell.responsiveBarVisible === right.ui.shell.responsiveBarVisible &&
+			left.ui.saveState === right.ui.saveState &&
+			left.ui.mode === right.ui.mode &&
+			left.ui.componentEditing.context === right.ui.componentEditing.context &&
+			left.ui.componentEditing.componentDocumentId === right.ui.componentEditing.componentDocumentId
+		);
 	}
 
-	onMount( () => {
-		unsubscribe = editor.subscribeSelector( ( nextState ) => nextState, ( nextState ) => {
-			const previousState = state;
-			const projectChanged = nextState.project !== previousState.project;
-			const suppressProjectSync = projectChanged
-				&& Boolean( suppressNextProjectSyncFor )
-				&& suppressNextProjectSyncFor?.documentId === nextState.activeDocumentId
-				&& suppressNextProjectSyncFor?.nodeId === previousState.ui.inlineEditing?.nodeId
-				&& suppressNextProjectSyncFor?.nodeId === nextState.ui.inlineEditing?.nodeId;
-			const shouldSyncPreview = !suppressProjectSync && (
-				projectChanged
-				|| nextState.activeDocumentId !== previousState.activeDocumentId
-				|| nextState.ui.viewport !== previousState.ui.viewport
-				|| nextState.ui.preview.pathname !== previousState.ui.preview.pathname
-				|| nextState.ui.preview.query !== previousState.ui.preview.query
-				|| nextState.ui.preview.showPopups !== previousState.ui.preview.showPopups
-				|| nextState.ui.preview.documentId !== previousState.ui.preview.documentId
-				|| nextState.ui.preview.slot !== previousState.ui.preview.slot
-				|| nextState.ui.preview.assignmentId !== previousState.ui.preview.assignmentId
-				|| nextState.ui.preview.source !== previousState.ui.preview.source
-				|| nextState.ui.shell.panelCollapsed !== previousState.ui.shell.panelCollapsed
-			);
-			const shouldRefreshOverlay = suppressProjectSync
-				|| nextState.ui.selectedNodeIds[ 0 ] !== previousState.ui.selectedNodeIds[ 0 ]
-				|| nextState.ui.hoveredNodeId !== previousState.ui.hoveredNodeId
-				|| nextState.ui.inlineEditing?.nodeId !== previousState.ui.inlineEditing?.nodeId
-				|| nextState.ui.canvas.renderVersion !== previousState.ui.canvas.renderVersion
-				|| nextState.ui.canvas.snapshotVersion !== previousState.ui.canvas.snapshotVersion;
-			state = nextState;
-			if ( suppressProjectSync ) {
-				suppressNextProjectSyncFor = undefined;
-			}
-			if ( shouldSyncPreview ) {
-				if ( pendingInlineUpdate ) {
-					flushInlineUpdate();
+	onMount(() => {
+		unsubscribe = editor.subscribeSelector(
+			(nextState) => nextState,
+			(nextState) => {
+				const previousState = state;
+				const projectChanged = nextState.project !== previousState.project;
+				const suppressProjectSync =
+					projectChanged &&
+					Boolean(suppressNextProjectSyncFor) &&
+					suppressNextProjectSyncFor?.documentId === nextState.activeDocumentId &&
+					suppressNextProjectSyncFor?.nodeId === previousState.ui.inlineEditing?.nodeId &&
+					suppressNextProjectSyncFor?.nodeId === nextState.ui.inlineEditing?.nodeId;
+				const shouldSyncPreview =
+					!suppressProjectSync &&
+					(projectChanged ||
+						nextState.activeDocumentId !== previousState.activeDocumentId ||
+						nextState.ui.viewport !== previousState.ui.viewport ||
+						nextState.ui.preview.pathname !== previousState.ui.preview.pathname ||
+						nextState.ui.preview.query !== previousState.ui.preview.query ||
+						nextState.ui.preview.showPopups !== previousState.ui.preview.showPopups ||
+						nextState.ui.preview.documentId !== previousState.ui.preview.documentId ||
+						nextState.ui.preview.slot !== previousState.ui.preview.slot ||
+						nextState.ui.preview.assignmentId !== previousState.ui.preview.assignmentId ||
+						nextState.ui.preview.source !== previousState.ui.preview.source ||
+						nextState.ui.shell.panelCollapsed !== previousState.ui.shell.panelCollapsed);
+				const shouldRefreshOverlay =
+					suppressProjectSync ||
+					nextState.ui.selectedNodeIds[0] !== previousState.ui.selectedNodeIds[0] ||
+					nextState.ui.hoveredNodeId !== previousState.ui.hoveredNodeId ||
+					nextState.ui.inlineEditing?.nodeId !== previousState.ui.inlineEditing?.nodeId ||
+					nextState.ui.canvas.renderVersion !== previousState.ui.canvas.renderVersion ||
+					nextState.ui.canvas.snapshotVersion !== previousState.ui.canvas.snapshotVersion;
+				state = nextState;
+				if (suppressProjectSync) {
+					suppressNextProjectSyncFor = undefined;
+				}
+				if (shouldSyncPreview) {
+					if (pendingInlineUpdate) {
+						flushInlineUpdate();
+						return;
+					}
+					queuePreviewSync();
 					return;
 				}
-				queuePreviewSync();
-				return;
-			}
-			if ( shouldRefreshOverlay ) {
-				previewViewportHeight = ensurePreviewHostController()?.mountTarget.clientHeight ?? previewViewportHeight;
-				editor.incrementPerfCounter( 'overlayOnlyUpdates' );
-			}
-		}, arePreviewStatesEqual, 'preview' );
+				if (shouldRefreshOverlay) {
+					previewViewportHeight = ensurePreviewHostController()?.mountTarget.clientHeight ?? previewViewportHeight;
+					editor.incrementPerfCounter('overlayOnlyUpdates');
+				}
+			},
+			arePreviewStatesEqual,
+			'preview',
+		);
 		queuePreviewSync();
 
 		return () => {
-			registerSurface( undefined );
+			registerSurface(undefined);
 			cleanupPreviewBridge();
 			flushInlineUpdate();
 			clearInlineCommitTimer();
 			clearInlineBlurTimer();
 			clearLayoutGapDragListeners();
-			cancelAnimationFrame( previewSyncFrame );
+			cancelAnimationFrame(previewSyncFrame);
 			editor.clearTransientDrag();
 			selectionRailCleanup();
 			hoverRailCleanup();
 			unsubscribe();
-			if ( mountedRuntime ) {
-				unmount( mountedRuntime );
+			if (mountedRuntime) {
+				unmount(mountedRuntime);
 			}
 			previewHostController?.destroy();
 			previewHostController = undefined;
 		};
-	} );
+	});
 </script>
 
 <div
@@ -1567,10 +1592,10 @@
 						class="builder-preview__device-button"
 						data-inline-edit-preserve-focus="true"
 						aria-label={viewport.label}
-						title={resolveViewportTitle( viewport )}
-						onclick={() => setViewport( viewport.id )}
+						title={resolveViewportTitle(viewport)}
+						onclick={() => setViewport(viewport.id)}
 					>
-						<EditorShellIcon name={resolveViewportIconName( viewport.id )} title={viewport.label} size={16} />
+						<EditorShellIcon name={resolveViewportIconName(viewport.id)} title={viewport.label} size={16} />
 					</button>
 				{/each}
 			</div>
@@ -1579,7 +1604,13 @@
 				<button type="button" class="builder-preview__scale-button" disabled aria-label="Decrease zoom">-</button>
 				<div class="builder-preview__scale-value">100%</div>
 				<button type="button" class="builder-preview__scale-button" disabled aria-label="Increase zoom">+</button>
-				<button type="button" class="builder-preview__scale-button" data-inline-edit-preserve-focus="true" onclick={() => setViewport( 'desktop' )} aria-label="Reset viewport">
+				<button
+					type="button"
+					class="builder-preview__scale-button"
+					data-inline-edit-preserve-focus="true"
+					onclick={() => setViewport('desktop')}
+					aria-label="Reset viewport"
+				>
 					<EditorShellIcon name="revision" title="Reset viewport" size={14} />
 				</button>
 			</div>
@@ -1600,7 +1631,13 @@
 			>
 				Popups
 			</button>
-			<button type="button" class="builder-preview__bar-button builder-preview__bar-button--icon" data-inline-edit-preserve-focus="true" aria-label="Close responsive bar" onclick={closeResponsiveBar}>
+			<button
+				type="button"
+				class="builder-preview__bar-button builder-preview__bar-button--icon"
+				data-inline-edit-preserve-focus="true"
+				aria-label="Close responsive bar"
+				onclick={closeResponsiveBar}
+			>
 				<EditorShellIcon name="close" title="Close responsive bar" size={14} />
 			</button>
 		</div>
@@ -1651,7 +1688,12 @@
 			<div class="builder-preview__viewport-shell" style={previewFrameStyle}>
 				<div class="builder-preview__viewport-frame">
 					<div class="builder-preview__iframe-clip">
-						<div bind:this={frameShell} class="builder-preview" data-builder-preview-surface="true" title="Builder preview"></div>
+						<div
+							bind:this={frameShell}
+							class="builder-preview"
+							data-builder-preview-surface="true"
+							title="Builder preview"
+						></div>
 						{#if liveAiPreviewActive}
 							<div class="builder-preview__ai-standin" data-builder-ai-standin="true">
 								<div class="builder-preview__ai-standin-header">
@@ -1677,7 +1719,10 @@
 								</div>
 							</div>
 						{/if}
-						<div class:dragging={Boolean( state.ui.dragSession ) && !previewPresentationMode} class="builder-preview__overlay">
+						<div
+							class:dragging={Boolean(state.ui.dragSession) && !previewPresentationMode}
+							class="builder-preview__overlay"
+						>
 							{#if state.ui.dragSession && !previewPresentationMode}
 								{#each coarseDropRegions as region (region.id)}
 									<PreviewDroppableRegion
@@ -1690,15 +1735,25 @@
 							{/if}
 
 							{#if hoveredBounds && hoveredBounds.nodeId !== state.ui.selectedNodeIds[0]}
-								<div bind:this={hoverOverlayElement} class="builder-preview__hover" style={rectToPreviewStyle( hoveredBounds.rect )}>
-									<div bind:this={hoverRailElement} class="builder-preview__action-rail builder-preview__action-rail--hover">
-										<button type="button" onclick={() => {
-											editor.dispatch( { type: 'document/ui/select-node', nodeId: hoveredBounds.nodeId } );
-											focusSelectedNodeInEditor();
-										}}>
+								<div
+									bind:this={hoverOverlayElement}
+									class="builder-preview__hover"
+									style={rectToPreviewStyle(hoveredBounds.rect)}
+								>
+									<div
+										bind:this={hoverRailElement}
+										class="builder-preview__action-rail builder-preview__action-rail--hover"
+									>
+										<button
+											type="button"
+											onclick={() => {
+												editor.dispatch({ type: 'document/ui/select-node', nodeId: hoveredBounds.nodeId });
+												focusSelectedNodeInEditor();
+											}}
+										>
 											Edit
 										</button>
-										<span>{formatNodeTypeLabel( hoveredBounds.nodeType )}</span>
+										<span>{formatNodeTypeLabel(hoveredBounds.nodeType)}</span>
 									</div>
 								</div>
 							{/if}
@@ -1706,10 +1761,11 @@
 							{#if selectedBounds}
 								<div
 									bind:this={selectionOverlayElement}
-									class:builder-preview__selection--container={selectedBounds.acceptsChildren || selectedBounds.slotIds.length > 0}
+									class:builder-preview__selection--container={selectedBounds.acceptsChildren ||
+										selectedBounds.slotIds.length > 0}
 									class="builder-preview__selection"
 									{@attach selectedNodeDraggable.attach}
-									style={rectToPreviewStyle( selectedBounds.rect )}
+									style={rectToPreviewStyle(selectedBounds.rect)}
 								></div>
 							{/if}
 
@@ -1718,7 +1774,7 @@
 									class="builder-preview__layout-overlay"
 									data-layout-display={selectedLayoutOverlay.display}
 									data-layout-axis={selectedLayoutOverlay.axis}
-									style={getLayoutOverlayStyle( selectedBounds )}
+									style={getLayoutOverlayStyle(selectedBounds)}
 								>
 									<div class="builder-preview__layout-label">
 										<span>{selectedLayoutOverlay.label}</span>
@@ -1728,11 +1784,17 @@
 									</div>
 									{#if selectedLayoutOverlay.display === 'grid'}
 										<div class="builder-preview__layout-grid-lines" aria-hidden="true">
-											{#each getLayoutGridLineStyles( selectedLayoutOverlay, 'x' ) as lineStyle}
-												<span class="builder-preview__layout-grid-line builder-preview__layout-grid-line--column" style={lineStyle}></span>
+											{#each getLayoutGridLineStyles(selectedLayoutOverlay, 'x') as lineStyle}
+												<span
+													class="builder-preview__layout-grid-line builder-preview__layout-grid-line--column"
+													style={lineStyle}
+												></span>
 											{/each}
-											{#each getLayoutGridLineStyles( selectedLayoutOverlay, 'y' ) as lineStyle}
-												<span class="builder-preview__layout-grid-line builder-preview__layout-grid-line--row" style={lineStyle}></span>
+											{#each getLayoutGridLineStyles(selectedLayoutOverlay, 'y') as lineStyle}
+												<span
+													class="builder-preview__layout-grid-line builder-preview__layout-grid-line--row"
+													style={lineStyle}
+												></span>
 											{/each}
 										</div>
 									{/if}
@@ -1742,8 +1804,9 @@
 										</div>
 									{/if}
 									<div class="builder-preview__layout-child-outlines" aria-hidden="true">
-										{#each getLayoutOverlayChildRects( selectedLayoutChildBounds ) as childRect}
-											<span class="builder-preview__layout-child-outline" style={getLayoutChildRectStyle( childRect )}></span>
+										{#each getLayoutOverlayChildRects(selectedLayoutChildBounds) as childRect}
+											<span class="builder-preview__layout-child-outline" style={getLayoutChildRectStyle(childRect)}
+											></span>
 										{/each}
 									</div>
 									<button
@@ -1751,7 +1814,7 @@
 										class="builder-preview__layout-gap-handle"
 										data-layout-gap-handle="true"
 										data-inline-edit-preserve-focus="true"
-										aria-label={`Adjust ${ selectedLayoutOverlay.display } gap`}
+										aria-label={`Adjust ${selectedLayoutOverlay.display} gap`}
 										title="Drag to adjust gap"
 										onpointerdown={startLayoutGapDrag}
 									>
@@ -1790,11 +1853,14 @@
 							{/if}
 
 							{#if state.ui.inlineEditing && inlineEditingBounds}
-								<div class="builder-preview__inline-editor-shell" style={getInlineEditorStyle( inlineEditingBounds.rect )}>
+								<div
+									class="builder-preview__inline-editor-shell"
+									style={getInlineEditorStyle(inlineEditingBounds.rect)}
+								>
 									<InlineRichTextEditor
 										value={inlineEditorValue}
 										valueMode={inlineEditorMode}
-										minHeight={`${ Math.max( inlineEditingBounds.rect.height, 48 ) }px`}
+										minHeight={`${Math.max(inlineEditingBounds.rect.height, 48)}px`}
 										showBubbleMenu={state.ui.inlineEditing.richText}
 										showToolbar={true}
 										autofocus={true}
@@ -1808,10 +1874,11 @@
 						{#if selectedBounds}
 							<div
 								bind:this={selectionRailElement}
-								class:builder-preview__action-rail--container={selectedBounds.acceptsChildren || selectedBounds.slotIds.length > 0}
+								class:builder-preview__action-rail--container={selectedBounds.acceptsChildren ||
+									selectedBounds.slotIds.length > 0}
 								class="builder-preview__action-rail"
 							>
-								<span class="builder-preview__action-label">{formatNodeTypeLabel( selectedBounds.nodeType )}</span>
+								<span class="builder-preview__action-label">{formatNodeTypeLabel(selectedBounds.nodeType)}</span>
 								<button type="button" onclick={() => focusSelectedNodeInEditor()}>Edit</button>
 								<button
 									type="button"
@@ -1822,7 +1889,9 @@
 									Grab
 								</button>
 								<button type="button" onclick={duplicateSelectedNode}>Duplicate</button>
-								<button type="button" class="builder-preview__action-button--danger" onclick={deleteSelectedNode}>Delete</button>
+								<button type="button" class="builder-preview__action-button--danger" onclick={deleteSelectedNode}
+									>Delete</button
+								>
 							</div>
 						{/if}
 					</div>
@@ -1886,8 +1955,14 @@
 		background: var(--builder-shell-gray-800);
 		opacity: 0;
 		border-bottom: 0;
-		box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.33), 0 0 2px 1px rgba(0, 0, 0, 0.25), 0 0 6px -3px rgba(255, 255, 255, 0.5);
-		transition: height 160ms ease, opacity 120ms ease, border-color 160ms ease;
+		box-shadow:
+			0 0 10px 2px rgba(0, 0, 0, 0.33),
+			0 0 2px 1px rgba(0, 0, 0, 0.25),
+			0 0 6px -3px rgba(255, 255, 255, 0.5);
+		transition:
+			height 160ms ease,
+			opacity 120ms ease,
+			border-color 160ms ease;
 	}
 
 	.builder-preview__responsive-bar.expanded {
@@ -2040,7 +2115,7 @@
 		align-items: center;
 		justify-content: center;
 		height: 112px;
-		transform: translateY( -50% );
+		transform: translateY(-50%);
 		pointer-events: none;
 	}
 
@@ -2408,8 +2483,8 @@
 	}
 
 	.builder-preview__coarse-droppable.active {
-		background: rgba( 208, 4, 212, 0.04 );
-		box-shadow: inset 0 0 0 1px rgba( 208, 4, 212, 0.16 );
+		background: rgba(208, 4, 212, 0.04);
+		box-shadow: inset 0 0 0 1px rgba(208, 4, 212, 0.16);
 	}
 
 	.builder-preview__selection {
@@ -2442,10 +2517,10 @@
 	.builder-preview__layout-overlay {
 		z-index: 34;
 		pointer-events: none;
-		border: 1px dashed rgba( 208, 4, 212, 0.7 );
+		border: 1px dashed rgba(208, 4, 212, 0.7);
 		background:
-			linear-gradient( 90deg, rgba( 208, 4, 212, 0.08 ), transparent 26px ),
-			linear-gradient( 180deg, rgba( 208, 4, 212, 0.08 ), transparent 26px );
+			linear-gradient(90deg, rgba(208, 4, 212, 0.08), transparent 26px),
+			linear-gradient(180deg, rgba(208, 4, 212, 0.08), transparent 26px);
 	}
 
 	.builder-preview__layout-label {
@@ -2457,13 +2532,13 @@
 		align-items: center;
 		justify-content: flex-end;
 		gap: 3px;
-		max-inline-size: calc( 100% - 12px );
+		max-inline-size: calc(100% - 12px);
 		overflow: hidden;
 		padding: 2px;
 		border-radius: 6px;
-		border: 1px solid rgba( 255, 255, 255, 0.16 );
-		background: rgba( 12, 18, 32, 0.92 );
-		box-shadow: 0 10px 24px rgba( 0, 0, 0, 0.22 );
+		border: 1px solid rgba(255, 255, 255, 0.16);
+		background: rgba(12, 18, 32, 0.92);
+		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
 		color: #f8fbff;
 		font-size: 10px;
 		font-weight: 700;
@@ -2480,11 +2555,11 @@
 		min-block-size: 18px;
 		padding: 0 6px;
 		border-radius: 4px;
-		background: rgba( 255, 255, 255, 0.08 );
+		background: rgba(255, 255, 255, 0.08);
 	}
 
 	.builder-preview__layout-label span:first-child {
-		background: rgba( 208, 4, 212, 0.26 );
+		background: rgba(208, 4, 212, 0.26);
 		color: #ffffff;
 	}
 
@@ -2499,15 +2574,15 @@
 
 	.builder-preview__layout-grid-line {
 		position: absolute;
-		background: rgba( 82, 76, 255, 0.5 );
-		box-shadow: 0 0 0 1px rgba( 255, 255, 255, 0.28 );
+		background: rgba(82, 76, 255, 0.5);
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
 	}
 
 	.builder-preview__layout-child-outline {
 		position: absolute;
-		border: 1px solid rgba( 82, 76, 255, 0.45 );
+		border: 1px solid rgba(82, 76, 255, 0.45);
 		border-radius: 6px;
-		background: rgba( 82, 76, 255, 0.05 );
+		background: rgba(82, 76, 255, 0.05);
 	}
 
 	.builder-preview__layout-empty {
@@ -2515,10 +2590,10 @@
 		inset: 10px;
 		display: grid;
 		place-items: center;
-		border: 1px dashed rgba( 208, 4, 212, 0.45 );
+		border: 1px dashed rgba(208, 4, 212, 0.45);
 		border-radius: 8px;
-		background: rgba( 208, 4, 212, 0.06 );
-		color: rgba( 248, 251, 255, 0.84 );
+		background: rgba(208, 4, 212, 0.06);
+		color: rgba(248, 251, 255, 0.84);
 		font-size: 11px;
 		font-weight: 700;
 		text-transform: uppercase;
@@ -2535,10 +2610,10 @@
 		place-items: center;
 		inline-size: 26px;
 		block-size: 26px;
-		border: 1px solid rgba( 255, 255, 255, 0.26 );
+		border: 1px solid rgba(255, 255, 255, 0.26);
 		border-radius: 999px;
 		background: #d004d4;
-		box-shadow: 0 8px 22px rgba( 0, 0, 0, 0.26 );
+		box-shadow: 0 8px 22px rgba(0, 0, 0, 0.26);
 		color: #ffffff;
 		cursor: ew-resize;
 	}
@@ -2556,18 +2631,18 @@
 		block-size: 3px;
 		border-radius: 999px;
 		background: currentColor;
-		box-shadow: 0 0 0 1px rgba( 255, 255, 255, 0.14 );
+		box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
 	}
 
 	.builder-preview__layout-gap-handle {
 		gap: 2px;
-		grid-template-columns: repeat( 3, 3px );
+		grid-template-columns: repeat(3, 3px);
 	}
 
 	.builder-preview__layout-gap-handle:hover,
 	.builder-preview__layout-gap-handle:focus-visible {
 		background: #f012f4;
-		outline: 2px solid rgba( 255, 255, 255, 0.72 );
+		outline: 2px solid rgba(255, 255, 255, 0.72);
 		outline-offset: 2px;
 	}
 
@@ -2587,16 +2662,24 @@
 	.builder-preview__drop-target[data-drop-placement='root'] {
 		border-style: dashed;
 		border-width: 2px;
-		background:
-			linear-gradient( 135deg, rgba( 208, 4, 212, 0.12 ) 0 10px, rgba( 208, 4, 212, 0.06 ) 10px 20px );
-		box-shadow: inset 0 0 0 2px rgba( 255, 255, 255, 0.5 ), 0 0 0 5px rgba( 208, 4, 212, 0.08 );
+		background: linear-gradient(135deg, rgba(208, 4, 212, 0.12) 0 10px, rgba(208, 4, 212, 0.06) 10px 20px);
+		box-shadow:
+			inset 0 0 0 2px rgba(255, 255, 255, 0.5),
+			0 0 0 5px rgba(208, 4, 212, 0.08);
 	}
 
 	.builder-preview__drop-target-handle {
 		position: absolute;
 		border-radius: 999px;
-		background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.98), rgba(244, 193, 255, 0.94) 35%, rgba(208, 4, 212, 0.98) 100%);
-		box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 0 5px rgba(208, 4, 212, 0.12);
+		background: radial-gradient(
+			circle at 35% 35%,
+			rgba(255, 255, 255, 0.98),
+			rgba(244, 193, 255, 0.94) 35%,
+			rgba(208, 4, 212, 0.98) 100%
+		);
+		box-shadow:
+			0 0 0 2px rgba(255, 255, 255, 0.9),
+			0 0 0 5px rgba(208, 4, 212, 0.12);
 	}
 
 	.builder-preview__action-rail {

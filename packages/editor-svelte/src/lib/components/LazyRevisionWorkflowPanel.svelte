@@ -6,25 +6,25 @@
 	let LoadedRevisionWorkflowPanel: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './RevisionWorkflowPanel.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./RevisionWorkflowPanel.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedRevisionWorkflowPanel = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let activeDocument: BuilderDocument;
 	export let session: DocumentSession | undefined = undefined;
@@ -38,9 +38,9 @@
 	export let publishDisabledReason = 'Publishing is disabled by this host.';
 	export let onSaveDraft: () => void = () => {};
 	export let onPublish: () => void = () => {};
-	export let onTogglePanel: ( open?: boolean ) => void = () => {};
-	export let onSelectRevision: ( revisionId?: string ) => void = () => {};
-	export let onRestoreRevision: ( revisionId: string ) => Promise<void> | void = () => {};
+	export let onTogglePanel: (open?: boolean) => void = () => {};
+	export let onSelectRevision: (revisionId?: string) => void = () => {};
+	export let onRestoreRevision: (revisionId: string) => Promise<void> | void = () => {};
 </script>
 
 {#if LoadedRevisionWorkflowPanel}

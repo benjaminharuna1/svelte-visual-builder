@@ -1,36 +1,36 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const floatingUiMocks = vi.hoisted( () => {
+const floatingUiMocks = vi.hoisted(() => {
 	const cleanup = vi.fn();
 	return {
-		autoUpdate: vi.fn( ( _reference: unknown, _floating: unknown, update: () => void ) => {
+		autoUpdate: vi.fn((_reference: unknown, _floating: unknown, update: () => void) => {
 			void update();
 			return cleanup;
-		} ),
+		}),
 		cleanup,
-		computePosition: vi.fn( async () => ( { x: 32, y: 48 } ) ),
-		flip: vi.fn( () => ( { name: 'flip' } ) ),
-		offset: vi.fn( () => ( { name: 'offset' } ) ),
-		shift: vi.fn( () => ( { name: 'shift' } ) ),
+		computePosition: vi.fn(async () => ({ x: 32, y: 48 })),
+		flip: vi.fn(() => ({ name: 'flip' })),
+		offset: vi.fn(() => ({ name: 'offset' })),
+		shift: vi.fn(() => ({ name: 'shift' })),
 	};
-} );
+});
 
-vi.mock( '@floating-ui/dom', () => floatingUiMocks );
+vi.mock('@floating-ui/dom', () => floatingUiMocks);
 
 import { createAnchorController } from '../src/lib/anchor-controller';
 
-describe( 'anchor-controller', () => {
-	afterEach( () => {
+describe('anchor-controller', () => {
+	afterEach(() => {
 		floatingUiMocks.cleanup.mockClear();
 		floatingUiMocks.computePosition.mockClear();
 		floatingUiMocks.autoUpdate.mockClear();
 		document.body.innerHTML = '';
-	} );
+	});
 
-	it( 'positions floating content and cleans up autoUpdate listeners on close', async () => {
+	it('positions floating content and cleans up autoUpdate listeners on close', async () => {
 		const controller = createAnchorController();
 		const reference = {
-			getBoundingClientRect: () => ( {
+			getBoundingClientRect: () => ({
 				x: 100,
 				y: 120,
 				top: 120,
@@ -39,22 +39,22 @@ describe( 'anchor-controller', () => {
 				bottom: 121,
 				width: 1,
 				height: 1,
-				toJSON: () => ( {} ),
-			} ),
+				toJSON: () => ({}),
+			}),
 		};
-		const floating = document.createElement( 'div' );
-		document.body.appendChild( floating );
+		const floating = document.createElement('div');
+		document.body.appendChild(floating);
 
-		const close = controller.open( reference as never, floating );
+		const close = controller.open(reference as never, floating);
 		await Promise.resolve();
 		await Promise.resolve();
 
-		expect( floatingUiMocks.autoUpdate ).toHaveBeenCalledTimes( 1 );
-		expect( floatingUiMocks.computePosition ).toHaveBeenCalledTimes( 2 );
-		expect( floating.style.left ).toBe( '32px' );
-		expect( floating.style.top ).toBe( '48px' );
+		expect(floatingUiMocks.autoUpdate).toHaveBeenCalledTimes(1);
+		expect(floatingUiMocks.computePosition).toHaveBeenCalledTimes(2);
+		expect(floating.style.left).toBe('32px');
+		expect(floating.style.top).toBe('48px');
 
 		close();
-		expect( floatingUiMocks.cleanup ).toHaveBeenCalledTimes( 1 );
-	} );
-} );
+		expect(floatingUiMocks.cleanup).toHaveBeenCalledTimes(1);
+	});
+});

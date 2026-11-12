@@ -171,12 +171,12 @@ pnpm embed:validate
 
 ## Documentation
 
-| Guide | Purpose |
-| --- | --- |
-| [Full Builder Documentation](docs/builder-documentation.md) | End-to-end feature, architecture, schema, SDK, runtime, import, AI, and API reference. |
-| [SDK Embedding Guide](docs/sdk-embedding.md) | Focused production embedding guide for Svelte/SvelteKit hosts. |
-| [CMS Integration Guide](docs/cms-integration-guide.md) | Run the demo, integrate the builder as a landing/docs/pricing/blog CMS, and review the safety checklist. |
-| [Implementation Plan](docs/implementation-plan.md) | Phased roadmap for packaging, security, persistence, CMS features, and quality. |
+| Guide                                                       | Purpose                                                                                                  |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [Full Builder Documentation](docs/builder-documentation.md) | End-to-end feature, architecture, schema, SDK, runtime, import, AI, and API reference.                   |
+| [SDK Embedding Guide](docs/sdk-embedding.md)                | Focused production embedding guide for Svelte/SvelteKit hosts.                                           |
+| [CMS Integration Guide](docs/cms-integration-guide.md)      | Run the demo, integrate the builder as a landing/docs/pricing/blog CMS, and review the safety checklist. |
+| [Implementation Plan](docs/implementation-plan.md)          | Phased roadmap for packaging, security, persistence, CMS features, and quality.                          |
 
 ## Embedding In A Svelte App
 

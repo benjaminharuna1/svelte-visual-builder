@@ -4,30 +4,30 @@ import type { BuilderPackage } from '@builder/schema';
 export const starterProjectId = 'starter';
 export const starterDocumentId = 'home';
 
-function createDocSection( title: string, body: string ) {
-	return createNode( {
+function createDocSection(title: string, body: string) {
+	return createNode({
 		type: 'container',
 		name: title,
 		layout: { display: 'flex', direction: 'column', gap: '0.5rem' },
 		children: [
-			createNode( {
+			createNode({
 				type: 'heading',
 				props: { text: title, level: 'h2', align: 'left' },
-			} ),
-			createNode( {
+			}),
+			createNode({
 				type: 'paragraph',
 				props: { text: body },
-			} ),
+			}),
 		],
-	} );
+	});
 }
 
 export function createStarterProject(): BuilderPackage {
-	const page = createDocument( 'page', 'Docs', 'home' );
+	const page = createDocument('page', 'Docs', 'home');
 	page.id = starterDocumentId;
 	page.status = 'published';
 	page.root = [
-		createNode( {
+		createNode({
 			id: 'starter-hero',
 			type: 'container',
 			name: 'Docs hero',
@@ -44,17 +44,17 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createNode( {
+				createNode({
 					type: 'heading',
 					props: { text: 'Documentation', level: 'h1', align: 'left' },
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'paragraph',
 					props: { text: 'Everything you need to build and publish with the visual builder.' },
-				} ),
+				}),
 			],
-		} ),
-		createNode( {
+		}),
+		createNode({
 			id: 'starter-docs-layout',
 			type: 'container',
 			name: 'Docs layout',
@@ -67,40 +67,44 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createNode( {
+				createNode({
 					type: 'container',
 					name: 'Docs navigation',
 					layout: { display: 'flex', direction: 'column', gap: '0.75rem' },
 					children: [
-						createNode( { type: 'heading', props: { text: 'On this page', level: 'h3', align: 'left' } } ),
-						createNode( { type: 'paragraph', props: { text: 'Installation' } } ),
-						createNode( { type: 'paragraph', props: { text: 'Editor basics' } } ),
-						createNode( { type: 'paragraph', props: { text: 'Publishing' } } ),
+						createNode({ type: 'heading', props: { text: 'On this page', level: 'h3', align: 'left' } }),
+						createNode({ type: 'paragraph', props: { text: 'Installation' } }),
+						createNode({ type: 'paragraph', props: { text: 'Editor basics' } }),
+						createNode({ type: 'paragraph', props: { text: 'Publishing' } }),
 					],
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'container',
 					name: 'Docs content',
 					layout: { display: 'flex', direction: 'column', gap: '1.5rem' },
 					children: [
-						createDocSection( 'Installation', 'Add the builder packages to a SvelteKit app and start the dev server.' ),
-						createDocSection( 'Editor basics', 'Drag blocks onto the canvas, edit content, and preview the result.' ),
-						createDocSection( 'Publishing', 'Save a draft, publish a revision, and open the published route.' ),
+						createDocSection('Installation', 'Add the builder packages to a SvelteKit app and start the dev server.'),
+						createDocSection('Editor basics', 'Drag blocks onto the canvas, edit content, and preview the result.'),
+						createDocSection('Publishing', 'Save a draft, publish a revision, and open the published route.'),
 					],
-				} ),
+				}),
 			],
-		} ),
+		}),
 	];
 
-	const project = createBuilderPackage( 'Svelte Builder Docs', [ page ], [
-		createThemeAssignment( {
-			documentId: page.id,
-			slot: 'page',
-			status: 'published',
-			pathname: '/published/home',
-			label: 'Docs',
-		} ),
-	] );
+	const project = createBuilderPackage(
+		'Svelte Builder Docs',
+		[page],
+		[
+			createThemeAssignment({
+				documentId: page.id,
+				slot: 'page',
+				status: 'published',
+				pathname: '/published/home',
+				label: 'Docs',
+			}),
+		],
+	);
 	project.meta = {
 		starterTemplate: 'docs',
 	};

@@ -14,18 +14,19 @@
 	export let data: PageData;
 	const adapter = createSvelteKitBuilderAdapter();
 
-	const model = renderPublishedDocument( {
+	const model = renderPublishedDocument({
 		project: data.project,
 		documentId: data.documentId,
 		adapter,
 		dynamicContext: data.bindingContext,
 		media: {
-			resolveAssetUrl: ( asset ) => typeof asset === 'object' && asset && 'url' in asset ? String( asset.url ) : undefined,
+			resolveAssetUrl: (asset) =>
+				typeof asset === 'object' && asset && 'url' in asset ? String(asset.url) : undefined,
 		},
 		cssIsolation: {
 			rootSelector: '.published-host',
 		},
-	} );
+	});
 </script>
 
 <svelte:head>

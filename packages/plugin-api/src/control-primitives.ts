@@ -240,7 +240,7 @@ export interface BuilderSectionPrimitiveOptions {
 	stateTabs?: BuilderControlStateTab[];
 }
 
-export function createSectionPrimitive( options: BuilderSectionPrimitiveOptions = {} ): BuilderControlSectionPrimitive {
+export function createSectionPrimitive(options: BuilderSectionPrimitiveOptions = {}): BuilderControlSectionPrimitive {
 	return {
 		kind: 'section',
 		collapsible: options.collapsible ?? true,
@@ -373,7 +373,7 @@ export function createDimensionsPrimitive(
 	return {
 		kind: 'dimensions',
 		fieldType: config.fieldType ?? 'json',
-		sides: config.sides ?? [ 'top', 'right', 'bottom', 'left' ],
+		sides: config.sides ?? ['top', 'right', 'bottom', 'left'],
 		units: config.units,
 		defaultUnit: config.defaultUnit,
 		allowCustomUnit: config.allowCustomUnit,
@@ -418,7 +418,7 @@ export function createColorPrimitive(
 ): BuilderColorControlPrimitive {
 	return {
 		kind: 'color',
-		fieldType: config.fieldType ?? ( config.tokenAware ? 'token' : 'text' ),
+		fieldType: config.fieldType ?? (config.tokenAware ? 'token' : 'text'),
 		allowGlobal: config.allowGlobal ?? true,
 		allowGradient: config.allowGradient ?? false,
 		allowOpacity: config.allowOpacity ?? true,
@@ -447,7 +447,7 @@ export function createShadowPrimitive(
 		allowColor: config.allowColor ?? true,
 		allowGlobal: config.allowGlobal ?? true,
 		preset: config.preset ?? 'box',
-		controls: config.controls ?? [ 'x', 'y', 'blur', 'spread', 'color', 'inset' ],
+		controls: config.controls ?? ['x', 'y', 'blur', 'spread', 'color', 'inset'],
 		placeholder: config.placeholder,
 		description: config.description,
 		responsive: config.responsive,
@@ -531,7 +531,7 @@ export function createControlField(
 	primitive: BuilderControlFieldPrimitive,
 	options: Partial<Omit<BuilderControlFieldDefinition, 'id' | 'label' | 'type' | 'path' | 'primitive'>> = {},
 ): BuilderControlFieldDefinition {
-	return createPrimitiveField( id, label, primitive.fieldType, path, primitive, options );
+	return createPrimitiveField(id, label, primitive.fieldType, path, primitive, options);
 }
 
 export function createSelectField(
@@ -542,9 +542,9 @@ export function createSelectField(
 	config: Omit<BuilderSelectControlPrimitive, 'kind' | 'fieldType' | 'options'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createSelectPrimitive( options, config ), {
+	return createControlField(id, label, path, createSelectPrimitive(options, config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createChooseField(
@@ -555,9 +555,9 @@ export function createChooseField(
 	config: Omit<BuilderChooseControlPrimitive, 'kind' | 'fieldType' | 'options'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createChoosePrimitive( options, config ), {
+	return createControlField(id, label, path, createChoosePrimitive(options, config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createTabsField(
@@ -568,9 +568,9 @@ export function createTabsField(
 	config: Omit<BuilderTabsControlPrimitive, 'kind' | 'fieldType' | 'items'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createTabsPrimitive( items, config ), {
+	return createControlField(id, label, path, createTabsPrimitive(items, config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createSliderField(
@@ -580,9 +580,9 @@ export function createSliderField(
 	config: Omit<BuilderSliderControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType },
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createSliderPrimitive( config ), {
+	return createControlField(id, label, path, createSliderPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createDimensionsField(
@@ -592,9 +592,9 @@ export function createDimensionsField(
 	config: Omit<BuilderDimensionsControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createDimensionsPrimitive( config ), {
+	return createControlField(id, label, path, createDimensionsPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createSwitcherField(
@@ -603,7 +603,7 @@ export function createSwitcherField(
 	path: string,
 	config: Partial<Omit<BuilderSwitcherControlPrimitive, 'kind' | 'fieldType'>> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
-	const primitive = createSwitcherPrimitive( {
+	const primitive = createSwitcherPrimitive({
 		onLabel: config.onLabel ?? 'On',
 		offLabel: config.offLabel ?? 'Off',
 		onIcon: config.onIcon,
@@ -618,12 +618,12 @@ export function createSwitcherField(
 		stateTabs: config.stateTabs,
 		placeholderMode: config.placeholderMode,
 		fieldType: config.fieldType,
-	} );
+	});
 	const { fieldType, onLabel, offLabel, onIcon, offIcon, labelsInline, defaultValue, ...fieldOptions } = config;
 
-	return createControlField( id, label, path, primitive, {
+	return createControlField(id, label, path, primitive, {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createColorField(
@@ -633,9 +633,9 @@ export function createColorField(
 	config: Omit<BuilderColorControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createColorPrimitive( config ), {
+	return createControlField(id, label, path, createColorPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createShadowField(
@@ -645,9 +645,9 @@ export function createShadowField(
 	config: Omit<BuilderShadowControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createShadowPrimitive( config ), {
+	return createControlField(id, label, path, createShadowPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createFilterField(
@@ -657,9 +657,9 @@ export function createFilterField(
 	config: Omit<BuilderFilterControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType },
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createFilterPrimitive( config ), {
+	return createControlField(id, label, path, createFilterPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createMediaField(
@@ -669,9 +669,9 @@ export function createMediaField(
 	config: Omit<BuilderMediaControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType },
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createMediaPrimitive( config ), {
+	return createControlField(id, label, path, createMediaPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createUrlField(
@@ -681,9 +681,9 @@ export function createUrlField(
 	config: Omit<BuilderUrlControlPrimitive, 'kind' | 'fieldType'> & { fieldType?: BuilderFieldType } = {},
 ): BuilderControlFieldDefinition {
 	const { fieldType, ...fieldOptions } = config;
-	return createControlField( id, label, path, createUrlPrimitive( config ), {
+	return createControlField(id, label, path, createUrlPrimitive(config), {
 		...fieldOptions,
-	} );
+	});
 }
 
 export function createFieldWithPrimitive(
@@ -694,5 +694,5 @@ export function createFieldWithPrimitive(
 	primitive: BuilderControlFieldPrimitive,
 	options: Partial<Omit<BuilderControlFieldDefinition, 'id' | 'label' | 'type' | 'path' | 'primitive'>> = {},
 ): BuilderControlFieldDefinition {
-	return createPrimitiveField( id, label, type, path, primitive, options );
+	return createPrimitiveField(id, label, type, path, primitive, options);
 }

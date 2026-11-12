@@ -36,15 +36,15 @@ The target end state:
 
 ## 4. Phase overview
 
-| Phase | Focus | Effort | Depends on | Required for CMS |
-| --- | --- | --- | --- | --- |
-| 0 | Baseline, CI, governance | 1–2 days | — | Yes |
-| 1 | Packaging and distribution | 3–5 days | 0 | Yes |
-| 2 | Security hardening | 3–5 days | 1 | Yes |
-| 3 | Production persistence and media | 5–8 days | 1 | Yes |
-| 4 | CMS features | 8–12 days | 2, 3 | Yes |
-| 5 | Performance and quality | 4–6 days | 1–4 | Recommended |
-| 6 | Ecosystem | ongoing | 1–5 | Later |
+| Phase | Focus                            | Effort    | Depends on | Required for CMS |
+| ----- | -------------------------------- | --------- | ---------- | ---------------- |
+| 0     | Baseline, CI, governance         | 1–2 days  | —          | Yes              |
+| 1     | Packaging and distribution       | 3–5 days  | 0          | Yes              |
+| 2     | Security hardening               | 3–5 days  | 1          | Yes              |
+| 3     | Production persistence and media | 5–8 days  | 1          | Yes              |
+| 4     | CMS features                     | 8–12 days | 2, 3       | Yes              |
+| 5     | Performance and quality          | 4–6 days  | 1–4        | Recommended      |
+| 6     | Ecosystem                        | ongoing   | 1–5        | Later            |
 
 For one developer, Phases 0–4 are roughly 4–6 weeks. A small team can compress this to 2–3 weeks by running Phases 1–3 in parallel.
 
@@ -323,15 +323,15 @@ For one developer, Phases 0–4 are roughly 4–6 weeks. A small team can compre
 
 ## 5. Sequencing and effort
 
-| Phase | Focus | Effort | Depends on |
-| --- | --- | --- | --- |
-| 0 | Baseline, CI, governance | 1–2 days | — |
-| 1 | Packaging and distribution | 3–5 days | 0 |
-| 2 | Security hardening | 3–5 days | 1 |
-| 3 | Production persistence and media | 5–8 days | 1 |
-| 4 | CMS features | 8–12 days | 2, 3 |
-| 5 | Performance and quality | 4–6 days | 1–4 |
-| 6 | Ecosystem | ongoing | 1–5 |
+| Phase | Focus                            | Effort    | Depends on |
+| ----- | -------------------------------- | --------- | ---------- |
+| 0     | Baseline, CI, governance         | 1–2 days  | —          |
+| 1     | Packaging and distribution       | 3–5 days  | 0          |
+| 2     | Security hardening               | 3–5 days  | 1          |
+| 3     | Production persistence and media | 5–8 days  | 1          |
+| 4     | CMS features                     | 8–12 days | 2, 3       |
+| 5     | Performance and quality          | 4–6 days  | 1–4        |
+| 6     | Ecosystem                        | ongoing   | 1–5        |
 
 Recommended execution order:
 
@@ -344,16 +344,16 @@ Recommended execution order:
 
 ## 6. Risks and mitigations
 
-| Risk | Mitigation |
-| --- | --- |
+| Risk                                                            | Mitigation                                                                                         |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | Breaking changes from default-deny permissions and sanitization | Use Changesets, release with migration notes, provide `allowAll` and `trustedHtml` escape hatches. |
-| Sanitization breaks existing content | Warn on save, offer a one-time migration, and log dropped attributes. |
-| Packaging fails because of `workspace:*` dependencies | Test `pnpm pack`/`npm pack` tarballs in a clean app before publishing. |
-| Scope creep in Phase 4 | Freeze the feature set to the four site types; defer collaboration and marketplaces. |
-| Divergence from upstream | Keep patches small, rebase regularly, and isolate fork-only code behind adapters. |
-| In-memory demo hides production issues | Ship Phase 3 before launch; run persistence and media tests in CI. |
-| Large editor bundle | Enforce budgets in Phase 5 and lazy-load heavy panels. |
-| AI key leakage | Default to a server-side proxy; make browser storage opt-in; add CSP. |
+| Sanitization breaks existing content                            | Warn on save, offer a one-time migration, and log dropped attributes.                              |
+| Packaging fails because of `workspace:*` dependencies           | Test `pnpm pack`/`npm pack` tarballs in a clean app before publishing.                             |
+| Scope creep in Phase 4                                          | Freeze the feature set to the four site types; defer collaboration and marketplaces.               |
+| Divergence from upstream                                        | Keep patches small, rebase regularly, and isolate fork-only code behind adapters.                  |
+| In-memory demo hides production issues                          | Ship Phase 3 before launch; run persistence and media tests in CI.                                 |
+| Large editor bundle                                             | Enforce budgets in Phase 5 and lazy-load heavy panels.                                             |
+| AI key leakage                                                  | Default to a server-side proxy; make browser storage opt-in; add CSP.                              |
 
 ## 7. Definition of done
 
@@ -373,16 +373,16 @@ Recommended execution order:
 
 ## 9. File map
 
-| Area | Primary files and packages |
-| --- | --- |
-| CI, governance, release | `.github/`, `.changeset/`, `package.json`, `.gitignore`, `.nvmrc`, `eslint.config.js`, `SECURITY.md`, `CONTRIBUTING.md` |
-| Packaging | `packages/*/package.json`, `packages/*/tsconfig.build.json`, `packages/create-svelte-builder/` |
-| Sanitization | `packages/editor-svelte/src/lib/html-import.ts`, `packages/runtime-svelte/src/lib/BuilderNodeView.svelte`, new sanitizer module |
-| Permissions and AI | `packages/editor-svelte/src/lib/editor.ts`, `packages/editor-svelte/src/lib/ai-core.ts`, `packages/editor-svelte/src/lib/ai.ts` |
-| Persistence and media | `apps/reference-studio/src/lib/server/`, `apps/reference-studio/prisma/schema.prisma`, new storage adapter package |
+| Area                    | Primary files and packages                                                                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CI, governance, release | `.github/`, `.changeset/`, `package.json`, `.gitignore`, `.nvmrc`, `eslint.config.js`, `SECURITY.md`, `CONTRIBUTING.md`                                |
+| Packaging               | `packages/*/package.json`, `packages/*/tsconfig.build.json`, `packages/create-svelte-builder/`                                                         |
+| Sanitization            | `packages/editor-svelte/src/lib/html-import.ts`, `packages/runtime-svelte/src/lib/BuilderNodeView.svelte`, new sanitizer module                        |
+| Permissions and AI      | `packages/editor-svelte/src/lib/editor.ts`, `packages/editor-svelte/src/lib/ai-core.ts`, `packages/editor-svelte/src/lib/ai.ts`                        |
+| Persistence and media   | `apps/reference-studio/src/lib/server/`, `apps/reference-studio/prisma/schema.prisma`, new storage adapter package                                     |
 | CMS schema and elements | `packages/schema/src/index.ts`, `packages/plugin-api/src/`, `packages/runtime-svelte/src/lib/runtime.ts`, `packages/editor-svelte/src/lib/components/` |
-| Demo routes and samples | `apps/reference-studio/src/routes/`, `apps/embed-smoke-host/src/routes/` |
-| Tests and performance | `playwright.config.ts`, `vitest.config.ts`, `packages/*/tests/`, `apps/*/tests/` |
+| Demo routes and samples | `apps/reference-studio/src/routes/`, `apps/embed-smoke-host/src/routes/`                                                                               |
+| Tests and performance   | `playwright.config.ts`, `vitest.config.ts`, `packages/*/tests/`, `apps/*/tests/`                                                                       |
 
 ## 10. Tracking
 
@@ -390,4 +390,3 @@ Recommended execution order:
 - Label issues with `phase-0` through `phase-6`, plus `security`, `packaging`, `cms`, `performance`, and `testing`.
 - Every PR must include tests, documentation updates, and a changeset when behavior changes.
 - Review progress weekly and update this document when scope changes.
-

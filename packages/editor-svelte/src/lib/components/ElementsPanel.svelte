@@ -16,201 +16,231 @@
 	export let useDnd = false;
 	export let emptyTitle = 'No matching elements';
 	export let emptyMessage = 'Try a different search or category.';
-	export let onSearch: ( value: string ) => void = () => {};
-	export let onSelectCategory: ( categoryId: string ) => void = () => {};
-	export let onTilePointerDown: ( group: PanelTileGroup, tile: PanelTileItem, event: PointerEvent ) => void = () => {};
-	export let onTileDragStart: ( group: PanelTileGroup, tile: PanelTileItem, event: DragEvent ) => void = () => {};
-	export let onTileClick: ( group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent ) => void = () => {};
-	export let onTileDoubleClick: ( group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent ) => void = () => {};
-	export let onGroupAction: ( group: PanelTileGroup ) => void = () => {};
+	export let onSearch: (value: string) => void = () => {};
+	export let onSelectCategory: (categoryId: string) => void = () => {};
+	export let onTilePointerDown: (group: PanelTileGroup, tile: PanelTileItem, event: PointerEvent) => void = () => {};
+	export let onTileDragStart: (group: PanelTileGroup, tile: PanelTileItem, event: DragEvent) => void = () => {};
+	export let onTileClick: (group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent) => void = () => {};
+	export let onTileDoubleClick: (group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent) => void = () => {};
+	export let onGroupAction: (group: PanelTileGroup) => void = () => {};
 
-	$: normalizedGroups = groups.filter( ( group ) => group.items.length > 0 );
+	$: normalizedGroups = groups.filter((group) => group.items.length > 0);
 
-	function selectCategory( categoryId: string, disabled = false ) {
-		if ( disabled || categoryId === activeCategory ) {
+	function selectCategory(categoryId: string, disabled = false) {
+		if (disabled || categoryId === activeCategory) {
 			return;
 		}
 
-		onSelectCategory( categoryId );
+		onSelectCategory(categoryId);
 	}
 
-	function handleSearch( event: Event ) {
-		onSearch( ( event.currentTarget as HTMLInputElement ).value );
+	function handleSearch(event: Event) {
+		onSearch((event.currentTarget as HTMLInputElement).value);
 	}
 
-	function beginDrag( group: PanelTileGroup, tile: PanelTileItem, event: DragEvent ) {
-		if ( event.dataTransfer ) {
+	function beginDrag(group: PanelTileGroup, tile: PanelTileItem, event: DragEvent) {
+		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = tile.draggable === false ? 'none' : 'copyMove';
-			event.dataTransfer.setData( 'text/plain', tile.id );
+			event.dataTransfer.setData('text/plain', tile.id);
 			event.dataTransfer.setData(
 				'application/x-builder-element',
-				JSON.stringify( {
+				JSON.stringify({
 					groupId: group.id,
 					tileId: tile.id,
 					label: tile.label,
-				} )
+				}),
 			);
 		}
 
-		onTileDragStart( group, tile, event );
+		onTileDragStart(group, tile, event);
 	}
 
-	function getTileTone( tile: PanelTileItem ) {
+	function getTileTone(tile: PanelTileItem) {
 		return tile.tone ? `builder-shell-badge--${tile.tone}` : 'builder-shell-badge--neutral';
 	}
 
-	function getTileKey( tile: PanelTileItem ) {
-		return `${ tile.id } ${ tile.label } ${ tile.description ?? '' }`.toLowerCase();
+	function getTileKey(tile: PanelTileItem) {
+		return `${tile.id} ${tile.label} ${tile.description ?? ''}`.toLowerCase();
 	}
 
-	function getCategoryIcon( category: PanelTabItem ) {
-		const key = `${ category.id } ${ category.label }`.toLowerCase();
+	function getCategoryIcon(category: PanelTabItem) {
+		const key = `${category.id} ${category.label}`.toLowerCase();
 
-		if ( key.includes( 'all' ) ) {
+		if (key.includes('all')) {
 			return 'elements';
 		}
 
-		if ( key.includes( 'content' ) || key.includes( 'text' ) ) {
+		if (key.includes('content') || key.includes('text')) {
 			return 'editor';
 		}
 
-		if ( key.includes( 'layout' ) || key.includes( 'structure' ) || key.includes( 'container' ) ) {
+		if (key.includes('layout') || key.includes('structure') || key.includes('container')) {
 			return 'navigator';
 		}
 
-		if ( key.includes( 'media' ) || key.includes( 'image' ) || key.includes( 'gallery' ) ) {
+		if (key.includes('media') || key.includes('image') || key.includes('gallery')) {
 			return 'preview';
 		}
 
-		if ( key.includes( 'interactive' ) ) {
+		if (key.includes('interactive')) {
 			return 'component';
 		}
 
-		if ( key.includes( 'data' ) ) {
+		if (key.includes('data')) {
 			return 'assignment';
 		}
 
-		if ( key.includes( 'form' ) ) {
+		if (key.includes('form')) {
 			return 'settings';
 		}
 
-		if ( key.includes( 'legacy' ) ) {
+		if (key.includes('legacy')) {
 			return 'help';
 		}
 
-		if ( key.includes( 'global' ) ) {
+		if (key.includes('global')) {
 			return 'globals';
 		}
 
-		if ( key.includes( 'history' ) ) {
+		if (key.includes('history')) {
 			return 'history';
 		}
 
-		if ( key.includes( 'component' ) ) {
+		if (key.includes('component')) {
 			return 'component';
 		}
 
 		return 'elements';
 	}
 
-	function getGroupIcon( group: PanelTileGroup ) {
-		const key = `${ group.id } ${ group.label } ${ group.description ?? '' }`.toLowerCase();
+	function getGroupIcon(group: PanelTileGroup) {
+		const key = `${group.id} ${group.label} ${group.description ?? ''}`.toLowerCase();
 
-		if ( key.includes( 'layout' ) || key.includes( 'structure' ) || key.includes( 'container' ) ) {
+		if (key.includes('layout') || key.includes('structure') || key.includes('container')) {
 			return 'navigator';
 		}
 
-		if ( key.includes( 'media' ) || key.includes( 'image' ) || key.includes( 'gallery' ) ) {
+		if (key.includes('media') || key.includes('image') || key.includes('gallery')) {
 			return 'preview';
 		}
 
-		if ( key.includes( 'interactive' ) ) {
+		if (key.includes('interactive')) {
 			return 'component';
 		}
 
-		if ( key.includes( 'data' ) || key.includes( 'loop' ) ) {
+		if (key.includes('data') || key.includes('loop')) {
 			return 'assignment';
 		}
 
-		if ( key.includes( 'form' ) ) {
+		if (key.includes('form')) {
 			return 'settings';
 		}
 
-		if ( key.includes( 'legacy' ) || key.includes( 'compat' ) ) {
+		if (key.includes('legacy') || key.includes('compat')) {
 			return 'help';
 		}
 
-		if ( key.includes( 'component' ) ) {
+		if (key.includes('component')) {
 			return 'component';
 		}
 
-		if ( key.includes( 'document' ) || key.includes( 'page' ) ) {
+		if (key.includes('document') || key.includes('page')) {
 			return 'document-browser';
 		}
 
 		return 'elements';
 	}
 
-	function getTileIcon( tile: PanelTileItem ) {
-		const key = getTileKey( tile );
+	function getTileIcon(tile: PanelTileItem) {
+		const key = getTileKey(tile);
 
-		if ( key.includes( 'heading' ) || key.includes( 'paragraph' ) || key.includes( 'text editor' ) || key.includes( 'text-editor' ) || key.includes( 'blockquote' ) ) {
+		if (
+			key.includes('heading') ||
+			key.includes('paragraph') ||
+			key.includes('text editor') ||
+			key.includes('text-editor') ||
+			key.includes('blockquote')
+		) {
 			return 'editor';
 		}
 
-		if ( key.includes( 'list' ) ) {
+		if (key.includes('list')) {
 			return 'editor';
 		}
 
-		if ( key.includes( 'icon box' ) || key.includes( 'icon-box' ) ) {
+		if (key.includes('icon box') || key.includes('icon-box')) {
 			return 'component';
 		}
 
-		if ( key.includes( 'spacer' ) ) {
+		if (key.includes('spacer')) {
 			return 'block';
 		}
 
-		if ( key.includes( 'divider' ) ) {
+		if (key.includes('divider')) {
 			return 'align-justify';
 		}
 
-		if ( key.includes( 'popup-root' ) || key.includes( 'popup ' ) || key.endsWith( ' popup' ) || key.includes( 'popup' ) ) {
+		if (key.includes('popup-root') || key.includes('popup ') || key.endsWith(' popup') || key.includes('popup')) {
 			return 'preview';
 		}
 
-		if ( key.includes( 'loop' ) ) {
+		if (key.includes('loop')) {
 			return 'assignment';
 		}
 
-		if ( key.includes( 'social' ) ) {
+		if (key.includes('social')) {
 			return 'menu';
 		}
 
-		if ( key.includes( 'button' ) || key.includes( 'cta' ) || key.includes( 'call to action' ) ) {
+		if (key.includes('button') || key.includes('cta') || key.includes('call to action')) {
 			return 'preview';
 		}
 
-		if ( key.includes( 'image' ) || key.includes( 'gallery' ) || key.includes( 'video' ) || key.includes( 'svg' ) || key.includes( 'icon' ) ) {
+		if (
+			key.includes('image') ||
+			key.includes('gallery') ||
+			key.includes('video') ||
+			key.includes('svg') ||
+			key.includes('icon')
+		) {
 			return 'preview';
 		}
 
-		if ( key.includes( 'tabs' ) || key.includes( 'accordion' ) || key.includes( 'toggle' ) || key.includes( 'menu' ) || key.includes( 'social' ) ) {
+		if (
+			key.includes('tabs') ||
+			key.includes('accordion') ||
+			key.includes('toggle') ||
+			key.includes('menu') ||
+			key.includes('social')
+		) {
 			return 'menu';
 		}
 
-		if ( key.includes( 'form' ) || key.includes( 'input' ) || key.includes( 'textarea' ) || key.includes( 'checkbox' ) || key.includes( 'submit' ) ) {
+		if (
+			key.includes('form') ||
+			key.includes('input') ||
+			key.includes('textarea') ||
+			key.includes('checkbox') ||
+			key.includes('submit')
+		) {
 			return 'settings';
 		}
 
-		if ( key.includes( 'container' ) || key.includes( 'grid' ) || key.includes( 'section' ) || key.includes( 'column' ) || key.includes( 'spacer' ) ) {
+		if (
+			key.includes('container') ||
+			key.includes('grid') ||
+			key.includes('section') ||
+			key.includes('column') ||
+			key.includes('spacer')
+		) {
 			return 'navigator';
 		}
 
-		if ( key.includes( 'component' ) ) {
+		if (key.includes('component')) {
 			return 'component';
 		}
 
-		if ( key.includes( 'assignment' ) ) {
+		if (key.includes('assignment')) {
 			return 'assignment';
 		}
 
@@ -239,12 +269,7 @@
 			<span class="sr-only">{searchPlaceholder}</span>
 			<div class="elements-panel__search-input">
 				<EditorShellIcon name="search" title={searchPlaceholder} />
-				<input
-					class="builder-shell-input"
-					value={searchValue}
-					placeholder={searchPlaceholder}
-					oninput={handleSearch}
-				/>
+				<input class="builder-shell-input" value={searchValue} placeholder={searchPlaceholder} oninput={handleSearch} />
 			</div>
 		</label>
 
@@ -257,10 +282,10 @@
 						class="elements-panel__category builder-shell-button"
 						disabled={category.disabled}
 						title={category.title ?? category.label}
-						onclick={() => selectCategory( category.id, category.disabled )}
+						onclick={() => selectCategory(category.id, category.disabled)}
 					>
 						<span class="elements-panel__category-icon">
-							<EditorShellIcon name={getCategoryIcon( category )} title={category.label} />
+							<EditorShellIcon name={getCategoryIcon(category)} title={category.label} />
 						</span>
 						<span>{category.label}</span>
 						{#if category.dirty}
@@ -281,13 +306,13 @@
 						<header class="elements-panel__group-header">
 							<div class="elements-panel__group-title">
 								<span class="elements-panel__group-icon">
-									<EditorShellIcon name={getGroupIcon( group )} title={group.label} />
+									<EditorShellIcon name={getGroupIcon(group)} title={group.label} />
 								</span>
 								<div class="elements-panel__group-copy">
 									<h3>{group.label}</h3>
-								{#if group.description}
-									<p>{group.description}</p>
-								{/if}
+									{#if group.description}
+										<p>{group.description}</p>
+									{/if}
 								</div>
 							</div>
 							<div class="elements-panel__group-actions">
@@ -295,7 +320,11 @@
 									<span class="builder-shell-badge builder-shell-badge--neutral">{group.badge}</span>
 								{/if}
 								{#if group.actionLabel}
-									<button type="button" class="builder-shell-button builder-shell-button--ghost" onclick={() => onGroupAction( group )}>
+									<button
+										type="button"
+										class="builder-shell-button builder-shell-button--ghost"
+										onclick={() => onGroupAction(group)}
+									>
 										{group.actionLabel}
 									</button>
 								{/if}
@@ -309,8 +338,8 @@
 									{tile}
 									{documentId}
 									{useDnd}
-									icon={getTileIcon( tile )}
-									toneClass={getTileTone( tile )}
+									icon={getTileIcon(tile)}
+									toneClass={getTileTone(tile)}
 									onLegacyPointerDown={onTilePointerDown}
 									onLegacyDragStart={beginDrag}
 									onClick={onTileClick}
@@ -426,9 +455,9 @@
 		gap: var(--builder-shell-space-8);
 		min-block-size: 36px;
 		padding-inline: 9px;
-		border: 1px solid rgba( 255, 255, 255, 0.08 );
+		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 3px;
-		background: rgba( 255, 255, 255, 0.03 );
+		background: rgba(255, 255, 255, 0.03);
 		box-shadow: none;
 		color: var(--builder-shell-toolbar-text);
 	}
@@ -458,8 +487,8 @@
 		font-weight: 600;
 		text-transform: none;
 		letter-spacing: 0;
-		border: 1px solid rgba( 255, 255, 255, 0.08 );
-		background: rgba( 255, 255, 255, 0.04 );
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: rgba(255, 255, 255, 0.04);
 		color: var(--builder-shell-toolbar-text-muted);
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -468,10 +497,12 @@
 	}
 
 	.elements-panel__category.active {
-		border-color: rgba( 255, 255, 255, 0.1 );
-		background: rgba( 255, 255, 255, 0.08 );
+		border-color: rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.08);
 		color: var(--builder-shell-toolbar-text);
-		box-shadow: inset 0 -2px 0 var(--builder-shell-accent), inset 0 1px 0 rgba( 255, 255, 255, 0.04 );
+		box-shadow:
+			inset 0 -2px 0 var(--builder-shell-accent),
+			inset 0 1px 0 rgba(255, 255, 255, 0.04);
 	}
 
 	.elements-panel__category-icon {
@@ -492,7 +523,7 @@
 		block-size: 18px;
 		padding: 0 0.35rem;
 		border-radius: 999px;
-		background: rgba( 255, 255, 255, 0.08 );
+		background: rgba(255, 255, 255, 0.08);
 		font-style: normal;
 		font-size: 10px;
 		flex-shrink: 0;
@@ -518,7 +549,7 @@
 		inline-size: 100%;
 		padding: 10px 0 0;
 		border: 0;
-		border-top: 1px solid rgba( 255, 255, 255, 0.08 );
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 0;
 		background: transparent;
 		min-inline-size: 0;
@@ -570,7 +601,7 @@
 
 	.elements-panel__tiles {
 		display: grid;
-		grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 10px;
 		min-inline-size: 0;
 	}
@@ -579,9 +610,9 @@
 		display: grid;
 		gap: var(--builder-shell-space-8);
 		padding: var(--builder-shell-space-12);
-		border: 1px dashed rgba( 255, 255, 255, 0.16 );
+		border: 1px dashed rgba(255, 255, 255, 0.16);
 		border-radius: 4px;
-		background: rgba( 255, 255, 255, 0.03 );
+		background: rgba(255, 255, 255, 0.03);
 	}
 
 	@media (max-width: 900px) {
@@ -592,7 +623,7 @@
 		}
 
 		.elements-panel__tiles {
-			grid-template-columns: minmax( 0, 1fr );
+			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 </style>

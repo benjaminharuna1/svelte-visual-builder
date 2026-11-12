@@ -6,23 +6,23 @@ export interface StoredMediaAsset {
 }
 
 export interface MediaStorage {
-	putObject: ( key: string, body: Uint8Array, contentType: string ) => Promise<StoredMediaAsset>;
-	deleteObject: ( key: string ) => Promise<void>;
-	getPublicUrl: ( key: string ) => string;
+	putObject: (key: string, body: Uint8Array, contentType: string) => Promise<StoredMediaAsset>;
+	deleteObject: (key: string) => Promise<void>;
+	getPublicUrl: (key: string) => string;
 }
 
-export function createInMemoryMediaStorage( publicBaseUrl = '/api/media/assets' ): MediaStorage {
+export function createInMemoryMediaStorage(publicBaseUrl = '/api/media/assets'): MediaStorage {
 	const objects = new Map<string, StoredMediaAsset & { body: Uint8Array }>();
 	return {
-		async putObject( key, body, contentType ) {
+		async putObject(key, body, contentType) {
 			const asset = {
 				key,
-				url: `${ publicBaseUrl.replace( /\/$/, '' ) }/${ encodeURIComponent( key ) }`,
+				url: `${publicBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(key)}`,
 				contentType,
 				size: body.byteLength,
 				body,
 			};
-			objects.set( key, asset );
+			objects.set(key, asset);
 			return {
 				key: asset.key,
 				url: asset.url,
@@ -30,11 +30,11 @@ export function createInMemoryMediaStorage( publicBaseUrl = '/api/media/assets' 
 				size: asset.size,
 			};
 		},
-		async deleteObject( key ) {
-			objects.delete( key );
+		async deleteObject(key) {
+			objects.delete(key);
 		},
-		getPublicUrl( key ) {
-			return objects.get( key )?.url ?? `${ publicBaseUrl.replace( /\/$/, '' ) }/${ encodeURIComponent( key ) }`;
+		getPublicUrl(key) {
+			return objects.get(key)?.url ?? `${publicBaseUrl.replace(/\/$/, '')}/${encodeURIComponent(key)}`;
 		},
 	};
 }
@@ -44,12 +44,12 @@ export interface S3CompatibleMediaStorageConfig {
 	publicBaseUrl: string;
 }
 
-export function createS3CompatibleMediaStorage( config: S3CompatibleMediaStorageConfig ): MediaStorage {
+export function createS3CompatibleMediaStorage(config: S3CompatibleMediaStorageConfig): MediaStorage {
 	return {
-		async putObject( key, body, contentType ) {
+		async putObject(key, body, contentType) {
 			return {
 				key,
-				url: `${ config.publicBaseUrl.replace( /\/$/, '' ) }/${ key }`,
+				url: `${config.publicBaseUrl.replace(/\/$/, '')}/${key}`,
 				contentType,
 				size: body.byteLength,
 			};
@@ -57,8 +57,8 @@ export function createS3CompatibleMediaStorage( config: S3CompatibleMediaStorage
 		async deleteObject() {
 			return;
 		},
-		getPublicUrl( key ) {
-			return `${ config.publicBaseUrl.replace( /\/$/, '' ) }/${ key }`;
+		getPublicUrl(key) {
+			return `${config.publicBaseUrl.replace(/\/$/, '')}/${key}`;
 		},
 	};
 }

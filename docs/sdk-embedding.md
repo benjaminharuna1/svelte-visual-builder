@@ -144,10 +144,7 @@ export function createCmsBuilderExtension() {
 	});
 }
 
-const registry = applyBuilderHostExtension(
-	createBuilderRegistry(),
-	createCmsBuilderExtension()
-);
+const registry = applyBuilderHostExtension(createBuilderRegistry(), createCmsBuilderExtension());
 
 const runtimeComponents = createRuntimeComponentMap({
 	'booking-widget': BookingWidget,
@@ -186,7 +183,7 @@ const model = renderPublishedDocument({
 		session,
 	},
 	media: {
-		resolveAssetUrl: (asset) => typeof asset === 'object' && asset && 'url' in asset ? String(asset.url) : undefined,
+		resolveAssetUrl: (asset) => (typeof asset === 'object' && asset && 'url' in asset ? String(asset.url) : undefined),
 	},
 	cssIsolation: {
 		rootSelector: '#published-page',

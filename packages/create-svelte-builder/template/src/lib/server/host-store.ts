@@ -26,9 +26,9 @@ type StoredProject = {
 
 const stores = new Map<string, StoredProject>();
 
-export function getHostProjectStore( projectId = starterProjectId ): StoredProject {
-	const existing = stores.get( projectId );
-	if ( existing ) {
+export function getHostProjectStore(projectId = starterProjectId): StoredProject {
+	const existing = stores.get(projectId);
+	if (existing) {
 		return existing;
 	}
 	const project = createStarterProject();
@@ -40,7 +40,7 @@ export function getHostProjectStore( projectId = starterProjectId ): StoredProje
 		revisions: [
 			{
 				id: 'published-initial',
-				documentId: project.documents[ 0 ]?.id ?? 'home',
+				documentId: project.documents[0]?.id ?? 'home',
 				kind: 'published',
 				label: 'Initial publish',
 				createdAt: now,
@@ -48,18 +48,18 @@ export function getHostProjectStore( projectId = starterProjectId ): StoredProje
 				project,
 			},
 		],
-		media: project.media.map( ( asset ) => ( {
+		media: project.media.map((asset) => ({
 			...asset,
 			mimeType: typeof asset.meta.mimeType === 'string' ? asset.meta.mimeType : undefined,
 			createdAt: now,
-		} ) ),
+		})),
 	};
-	stores.set( projectId, store );
+	stores.set(projectId, store);
 	return store;
 }
 
-export function readHostProject( projectId?: string ) {
-	const store = getHostProjectStore( projectId );
+export function readHostProject(projectId?: string) {
+	const store = getHostProjectStore(projectId);
 	return {
 		project: store.project,
 		status: {
@@ -70,16 +70,19 @@ export function readHostProject( projectId?: string ) {
 	};
 }
 
-export function saveHostProject( projectId: string, input: {
-	project: BuilderPackage;
-	expectedVersionToken?: string;
-	force?: boolean;
-	reason?: string;
-	revisionKind?: DocumentRevision['kind'];
-	revisionId?: string;
-} ) {
-	const store = getHostProjectStore( projectId );
-	if ( input.expectedVersionToken && input.expectedVersionToken !== store.versionToken && !input.force ) {
+export function saveHostProject(
+	projectId: string,
+	input: {
+		project: BuilderPackage;
+		expectedVersionToken?: string;
+		force?: boolean;
+		reason?: string;
+		revisionKind?: DocumentRevision['kind'];
+		revisionId?: string;
+	},
+) {
+	const store = getHostProjectStore(projectId);
+	if (input.expectedVersionToken && input.expectedVersionToken !== store.versionToken && !input.force) {
 		return {
 			conflict: true,
 			project: store.project,
@@ -89,21 +92,23 @@ export function saveHostProject( projectId: string, input: {
 		};
 	}
 
-	const project = BuilderPackageSchema.parse( input.project );
+	const project = BuilderPackageSchema.parse(input.project);
 	store.project = project;
-	store.versionToken = String( Number( store.versionToken ) + 1 );
+	store.versionToken = String(Number(store.versionToken) + 1);
 	store.updatedAt = new Date().toISOString();
 
-	const kind = input.revisionKind ?? ( input.reason === 'publish' ? 'published' : input.reason === 'autosave' ? 'autosave' : 'draft' );
-	store.revisions.unshift( {
-		id: input.revisionId ?? `${ kind }-${ store.versionToken }`,
-		documentId: project.documents[ 0 ]?.id ?? 'home',
+	const kind =
+		input.revisionKind ??
+		(input.reason === 'publish' ? 'published' : input.reason === 'autosave' ? 'autosave' : 'draft');
+	store.revisions.unshift({
+		id: input.revisionId ?? `${kind}-${store.versionToken}`,
+		documentId: project.documents[0]?.id ?? 'home',
 		kind,
-		label: `${ sentenceCase( kind ) } ${ store.versionToken }`,
+		label: `${sentenceCase(kind)} ${store.versionToken}`,
 		createdAt: store.updatedAt,
 		meta: {},
 		project,
-	} );
+	});
 
 	return {
 		ok: true,
@@ -113,37 +118,37 @@ export function saveHostProject( projectId: string, input: {
 	};
 }
 
-export function listHostRevisions( projectId: string, documentId?: string ): DocumentRevision[] {
-	return getHostProjectStore( projectId ).revisions
-		.filter( ( revision ) => !documentId || revision.documentId === documentId )
-		.map( ( { project: _project, ...revision } ) => revision );
+export function listHostRevisions(projectId: string, documentId?: string): DocumentRevision[] {
+	return getHostProjectStore(projectId)
+		.revisions.filter((revision) => !documentId || revision.documentId === documentId)
+		.map(({ project: _project, ...revision }) => revision);
 }
 
-export function restoreHostRevision( projectId: string, revisionId: string ) {
-	const store = getHostProjectStore( projectId );
-	const revision = store.revisions.find( ( entry ) => entry.id === revisionId );
-	if ( !revision ) {
+export function restoreHostRevision(projectId: string, revisionId: string) {
+	const store = getHostProjectStore(projectId);
+	const revision = store.revisions.find((entry) => entry.id === revisionId);
+	if (!revision) {
 		return undefined;
 	}
 	store.project = revision.project;
-	store.versionToken = String( Number( store.versionToken ) + 1 );
+	store.versionToken = String(Number(store.versionToken) + 1);
 	store.updatedAt = new Date().toISOString();
-	return readHostProject( projectId );
+	return readHostProject(projectId);
 }
 
-export function listHostMedia( projectId: string ) {
-	return getHostProjectStore( projectId ).media;
+export function listHostMedia(projectId: string) {
+	return getHostProjectStore(projectId).media;
 }
 
-export async function uploadHostMedia( projectId: string, file: File ) {
-	const store = getHostProjectStore( projectId );
-	const bytes = new Uint8Array( await file.arrayBuffer() );
-	const id = `upload-${ crypto.randomUUID() }`;
+export async function uploadHostMedia(projectId: string, file: File) {
+	const store = getHostProjectStore(projectId);
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	const id = `upload-${crypto.randomUUID()}`;
 	const asset: StoredMedia = {
 		id,
 		kind: file.type === 'image/svg+xml' ? 'svg' : 'image',
-		url: `/api/media/${ id }`,
-		alt: file.name.replace( /\.[^.]+$/, '' ),
+		url: `/api/media/${id}`,
+		alt: file.name.replace(/\.[^.]+$/, ''),
 		title: file.name,
 		bytes,
 		mimeType: file.type,
@@ -155,52 +160,49 @@ export async function uploadHostMedia( projectId: string, file: File ) {
 			source: 'upload',
 		},
 	};
-	store.media.unshift( asset );
-	store.project.media = [
-		...store.project.media.filter( ( entry ) => entry.id !== asset.id ),
-		asset,
-	];
+	store.media.unshift(asset);
+	store.project.media = [...store.project.media.filter((entry) => entry.id !== asset.id), asset];
 	return asset;
 }
 
-export function updateHostMedia( projectId: string, assetId: string, patch: Partial<StoredMedia> ) {
-	const store = getHostProjectStore( projectId );
-	const existing = store.media.find( ( asset ) => asset.id === assetId );
-	if ( !existing ) {
+export function updateHostMedia(projectId: string, assetId: string, patch: Partial<StoredMedia>) {
+	const store = getHostProjectStore(projectId);
+	const existing = store.media.find((asset) => asset.id === assetId);
+	if (!existing) {
 		return undefined;
 	}
-	Object.assign( existing, patch, {
+	Object.assign(existing, patch, {
 		id: assetId,
 		meta: {
 			...existing.meta,
 			title: patch.title ?? existing.title,
 			caption: patch.meta?.caption ?? existing.meta.caption,
 		},
-	} );
-	store.project.media = store.project.media.map( ( asset ) => asset.id === assetId ? existing : asset );
+	});
+	store.project.media = store.project.media.map((asset) => (asset.id === assetId ? existing : asset));
 	return existing;
 }
 
-export function deleteHostMedia( projectId: string, assetId: string ) {
-	const store = getHostProjectStore( projectId );
-	store.media = store.media.filter( ( asset ) => asset.id !== assetId );
-	store.project.media = store.project.media.filter( ( asset ) => asset.id !== assetId );
+export function deleteHostMedia(projectId: string, assetId: string) {
+	const store = getHostProjectStore(projectId);
+	store.media = store.media.filter((asset) => asset.id !== assetId);
+	store.project.media = store.project.media.filter((asset) => asset.id !== assetId);
 }
 
-export function readHostMediaAsset( assetId: string ) {
-	for ( const store of stores.values() ) {
-		const asset = store.media.find( ( entry ) => entry.id === assetId );
-		if ( asset ) {
+export function readHostMediaAsset(assetId: string) {
+	for (const store of stores.values()) {
+		const asset = store.media.find((entry) => entry.id === assetId);
+		if (asset) {
 			return asset;
 		}
 	}
-	if ( assetId === 'starter-logo' ) {
+	if (assetId === 'starter-logo') {
 		const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="320" height="180" rx="20" fill="#0f172a"/><circle cx="86" cy="90" r="42" fill="#d946ef"/><path d="M142 68h112v18H142zm0 34h84v18h-84z" fill="#f8fafc"/></svg>`;
 		return {
 			id: 'starter-logo',
 			kind: 'svg',
 			url: '/api/media/starter-logo',
-			bytes: Buffer.from( svg ),
+			bytes: Buffer.from(svg),
 			mimeType: 'image/svg+xml',
 			meta: {},
 		} satisfies StoredMedia;
@@ -208,6 +210,6 @@ export function readHostMediaAsset( assetId: string ) {
 	return undefined;
 }
 
-function sentenceCase( value: string ) {
-	return value.charAt( 0 ).toUpperCase() + value.slice( 1 );
+function sentenceCase(value: string) {
+	return value.charAt(0).toUpperCase() + value.slice(1);
 }

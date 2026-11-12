@@ -5,11 +5,11 @@ export const embedSmokeProjectId = 'embed-smoke';
 export const embedSmokeDocumentId = 'embed-home';
 
 export function createEmbedSmokeProject(): BuilderPackage {
-	const page = createDocument( 'page', 'Embedded Home', 'embedded-home' );
+	const page = createDocument('page', 'Embedded Home', 'embedded-home');
 	page.id = embedSmokeDocumentId;
 	page.status = 'published';
 	page.root = [
-		createNode( {
+		createNode({
 			id: 'embed-hero',
 			type: 'container',
 			name: 'Host-owned hero',
@@ -26,17 +26,17 @@ export function createEmbedSmokeProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createNode( {
+				createNode({
 					type: 'heading',
 					props: { text: 'Embedded Builder Host', level: 'h1', align: 'left' },
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'paragraph',
 					props: {
 						text: 'This page is rendered from a separate SvelteKit host that only imports public builder packages.',
 					},
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'image',
 					props: {
 						src: '/api/media/embed-logo',
@@ -54,20 +54,24 @@ export function createEmbedSmokeProject(): BuilderPackage {
 						stateBreakpoints: {},
 						customCss: '',
 					},
-				} ),
+				}),
 			],
-		} ),
+		}),
 	];
 
-	const project = createBuilderPackage( 'Embed Smoke Host', [ page ], [
-		createThemeAssignment( {
-			documentId: page.id,
-			slot: 'page',
-			status: 'published',
-			pathname: '/published/embed-home',
-			label: 'Embedded Home',
-		} ),
-	] );
+	const project = createBuilderPackage(
+		'Embed Smoke Host',
+		[page],
+		[
+			createThemeAssignment({
+				documentId: page.id,
+				slot: 'page',
+				status: 'published',
+				pathname: '/published/embed-home',
+				label: 'Embedded Home',
+			}),
+		],
+	);
 	project.media = [
 		{
 			id: 'embed-logo',

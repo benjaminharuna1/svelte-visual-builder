@@ -11,31 +11,30 @@
 	export let bodyPadding = 'var(--builder-shell-space-12)';
 	export let bodyGap = 'var(--builder-shell-space-12)';
 	export let bodyScrollable = true;
-	export let onTogglePanel: ( open?: boolean ) => void = () => {};
+	export let onTogglePanel: (open?: boolean) => void = () => {};
 
 	let LoadedHistoryPanelShell: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './HistoryPanelShell.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./HistoryPanelShell.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedHistoryPanelShell = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
-
+	});
 </script>
 
 {#if LoadedHistoryPanelShell}

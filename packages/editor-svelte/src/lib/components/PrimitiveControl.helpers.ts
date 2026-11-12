@@ -125,147 +125,156 @@ interface ParsedMeasurementToken {
 	unit: string | undefined;
 }
 
-export function resolvePrimitiveControl( input: PrimitiveControlInput, label = '', description = '' ): PrimitiveControlResolved {
-	const source = getSource( input );
-	const kind = resolveKind( source );
-	const options = readOptions( source );
-	const tabs = readTabs( source );
-	const units = readUnits( source );
-	const section = isSectionPrimitive( source ) ? source : undefined;
-	const stateTabs = Array.isArray( source?.stateTabs ) ? [ ...source.stateTabs ] : [];
+export function resolvePrimitiveControl(
+	input: PrimitiveControlInput,
+	label = '',
+	description = '',
+): PrimitiveControlResolved {
+	const source = getSource(input);
+	const kind = resolveKind(source);
+	const options = readOptions(source);
+	const tabs = readTabs(source);
+	const units = readUnits(source);
+	const section = isSectionPrimitive(source) ? source : undefined;
+	const stateTabs = Array.isArray(source?.stateTabs) ? [...source.stateTabs] : [];
 
 	return {
 		kind,
-		label: label || readString( source, 'label' ) || '',
-		description: description || readString( source, 'description' ),
-		placeholder: readString( source, 'placeholder' ),
-		fieldType: readFieldType( source ),
+		label: label || readString(source, 'label') || '',
+		description: description || readString(source, 'description'),
+		placeholder: readString(source, 'placeholder'),
+		fieldType: readFieldType(source),
 		primitive: input ?? undefined,
 		stateTabs,
-		responsive: readBoolean( source, 'responsive' ),
-		stateful: readBoolean( source, 'stateful' ),
-		tokenAware: readBoolean( source, 'tokenAware' ),
+		responsive: readBoolean(source, 'responsive'),
+		stateful: readBoolean(source, 'stateful'),
+		tokenAware: readBoolean(source, 'tokenAware'),
 		options,
 		tabs,
 		units,
-		multiple: readBoolean( source, 'multiple' ),
-		showInput: readBoolean( source, 'showInput', true ),
-		showUnit: readBoolean( source, 'showUnit', true ),
-		showRange: readBoolean( source, 'showRange', true ),
-		showReset: readBoolean( source, 'showReset', true ),
-		allowCustomUnit: readBoolean( source, 'allowCustomUnit' ),
-		linked: readBoolean( source, 'linked' ),
-		range: readBoolean( source, 'range' ),
-		handles: readValue( source, 'handles' ) as 'single' | 'range' | undefined,
-		assetType: readValue( source, 'assetType' ) as 'image' | 'video' | 'file' | undefined,
-		allowDynamic: readBoolean( source, 'allowDynamic' ),
-		showUpload: readBoolean( source, 'showUpload', true ),
-		showReplace: readBoolean( source, 'showReplace', true ),
-		showRemove: readBoolean( source, 'showRemove', true ),
-		showLibrary: readBoolean( source, 'showLibrary', true ),
-		showNewTab: readBoolean( source, 'showNewTab', true ),
-		showNoFollow: readBoolean( source, 'showNoFollow', true ),
-		showDownload: readBoolean( source, 'showDownload' ),
-		showCustomAttributes: readBoolean( source, 'showCustomAttributes', true ),
-		showLinkIcon: readBoolean( source, 'showLinkIcon', true ),
-		allowClear: readBoolean( source, 'allowClear', true ),
-		searchable: readBoolean( source, 'searchable' ),
-		size: readValue( source, 'size' ) as 'small' | 'medium' | 'large' | undefined,
-		orientation: readValue( source, 'orientation' ) as 'horizontal' | 'vertical' | undefined,
-		layout: readValue( source, 'layout' ) as 'inline' | 'grid' | 'stack' | undefined,
-		iconPosition: readValue( source, 'iconPosition' ) as 'start' | 'top' | 'end' | undefined,
-		presentation: readValue( source, 'presentation' ) as 'icon-label' | 'icon-only' | 'label-only' | undefined,
-		columns: readValue( source, 'columns' ) as number | undefined,
-		collapsible: readBoolean( section, 'collapsible' ),
-		defaultCollapsed: readBoolean( section, 'defaultCollapsed' ),
-		density: ( readValue( section, 'density' ) as 'compact' | 'default' | undefined ) ?? 'compact',
+		multiple: readBoolean(source, 'multiple'),
+		showInput: readBoolean(source, 'showInput', true),
+		showUnit: readBoolean(source, 'showUnit', true),
+		showRange: readBoolean(source, 'showRange', true),
+		showReset: readBoolean(source, 'showReset', true),
+		allowCustomUnit: readBoolean(source, 'allowCustomUnit'),
+		linked: readBoolean(source, 'linked'),
+		range: readBoolean(source, 'range'),
+		handles: readValue(source, 'handles') as 'single' | 'range' | undefined,
+		assetType: readValue(source, 'assetType') as 'image' | 'video' | 'file' | undefined,
+		allowDynamic: readBoolean(source, 'allowDynamic'),
+		showUpload: readBoolean(source, 'showUpload', true),
+		showReplace: readBoolean(source, 'showReplace', true),
+		showRemove: readBoolean(source, 'showRemove', true),
+		showLibrary: readBoolean(source, 'showLibrary', true),
+		showNewTab: readBoolean(source, 'showNewTab', true),
+		showNoFollow: readBoolean(source, 'showNoFollow', true),
+		showDownload: readBoolean(source, 'showDownload'),
+		showCustomAttributes: readBoolean(source, 'showCustomAttributes', true),
+		showLinkIcon: readBoolean(source, 'showLinkIcon', true),
+		allowClear: readBoolean(source, 'allowClear', true),
+		searchable: readBoolean(source, 'searchable'),
+		size: readValue(source, 'size') as 'small' | 'medium' | 'large' | undefined,
+		orientation: readValue(source, 'orientation') as 'horizontal' | 'vertical' | undefined,
+		layout: readValue(source, 'layout') as 'inline' | 'grid' | 'stack' | undefined,
+		iconPosition: readValue(source, 'iconPosition') as 'start' | 'top' | 'end' | undefined,
+		presentation: readValue(source, 'presentation') as 'icon-label' | 'icon-only' | 'label-only' | undefined,
+		columns: readValue(source, 'columns') as number | undefined,
+		collapsible: readBoolean(section, 'collapsible'),
+		defaultCollapsed: readBoolean(section, 'defaultCollapsed'),
+		density: (readValue(section, 'density') as 'compact' | 'default' | undefined) ?? 'compact',
 		section,
 	};
 }
 
-export function isTokenLikeValue( value: unknown ): boolean {
-	return typeof value === 'string' && ( value.startsWith( 'var(' ) || value.startsWith( 'token:' ) || value.startsWith( 'theme:' ) || value.startsWith( 'global:' ) );
+export function isTokenLikeValue(value: unknown): boolean {
+	return (
+		typeof value === 'string' &&
+		(value.startsWith('var(') ||
+			value.startsWith('token:') ||
+			value.startsWith('theme:') ||
+			value.startsWith('global:'))
+	);
 }
 
-export function stringifyPrimitiveValue( value: unknown ): string {
-	if ( value === null || value === undefined ) {
+export function stringifyPrimitiveValue(value: unknown): string {
+	if (value === null || value === undefined) {
 		return '';
 	}
 
-	if ( typeof value === 'string' ) {
+	if (typeof value === 'string') {
 		return value;
 	}
 
-	if ( typeof value === 'number' || typeof value === 'boolean' ) {
-		return String( value );
+	if (typeof value === 'number' || typeof value === 'boolean') {
+		return String(value);
 	}
 
 	try {
-		return JSON.stringify( value, null, 2 );
+		return JSON.stringify(value, null, 2);
 	} catch {
-		return String( value );
+		return String(value);
 	}
 }
 
-export function parseJsonLikeValue( value: string ): JsonValue {
+export function parseJsonLikeValue(value: string): JsonValue {
 	const trimmed = value.trim();
-	if ( !trimmed ) {
+	if (!trimmed) {
 		return '';
 	}
 
-	if ( trimmed === 'true' ) {
+	if (trimmed === 'true') {
 		return true;
 	}
 
-	if ( trimmed === 'false' ) {
+	if (trimmed === 'false') {
 		return false;
 	}
 
-	if ( trimmed === 'null' ) {
+	if (trimmed === 'null') {
 		return null;
 	}
 
-	if ( /^-?\d+(\.\d+)?$/.test( trimmed ) ) {
-		return Number( trimmed );
+	if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+		return Number(trimmed);
 	}
 
 	try {
-		return JSON.parse( trimmed ) as JsonValue;
+		return JSON.parse(trimmed) as JsonValue;
 	} catch {
 		return trimmed;
 	}
 }
 
-export function normalizeDimensionsValue( value: unknown, fallbackUnit = 'px' ): PrimitiveDimensionsValue {
-	const structuredRecord = parseStructuredValueRecord( value );
-	if ( structuredRecord ) {
-		return normalizeDimensionsValue( structuredRecord, fallbackUnit );
+export function normalizeDimensionsValue(value: unknown, fallbackUnit = 'px'): PrimitiveDimensionsValue {
+	const structuredRecord = parseStructuredValueRecord(value);
+	if (structuredRecord) {
+		return normalizeDimensionsValue(structuredRecord, fallbackUnit);
 	}
 
-	if ( value && typeof value === 'object' && !Array.isArray( value ) ) {
+	if (value && typeof value === 'object' && !Array.isArray(value)) {
 		const record = value as Record<string, unknown>;
-		const explicitSides = [ record.top, record.right, record.bottom, record.left ]
-			.map( ( entry ) => parseMeasurementToken( stringifyPrimitiveValue( entry ) ) )
-			.filter( ( entry ) => entry.raw );
-		const sharedUnit = explicitSides.length > 0 && explicitSides.every( ( entry ) => entry.unit === explicitSides[ 0 ]?.unit )
-			? explicitSides[ 0 ]?.unit
-			: undefined;
-		const resolvedUnit = typeof record.unit === 'string' && record.unit
-			? record.unit
-			: sharedUnit ?? fallbackUnit;
+		const explicitSides = [record.top, record.right, record.bottom, record.left]
+			.map((entry) => parseMeasurementToken(stringifyPrimitiveValue(entry)))
+			.filter((entry) => entry.raw);
+		const sharedUnit =
+			explicitSides.length > 0 && explicitSides.every((entry) => entry.unit === explicitSides[0]?.unit)
+				? explicitSides[0]?.unit
+				: undefined;
+		const resolvedUnit = typeof record.unit === 'string' && record.unit ? record.unit : (sharedUnit ?? fallbackUnit);
 
 		return {
-			top: normalizeMeasurementInput( record.top, resolvedUnit ),
-			right: normalizeMeasurementInput( record.right, resolvedUnit ),
-			bottom: normalizeMeasurementInput( record.bottom, resolvedUnit ),
-			left: normalizeMeasurementInput( record.left, resolvedUnit ),
+			top: normalizeMeasurementInput(record.top, resolvedUnit),
+			right: normalizeMeasurementInput(record.right, resolvedUnit),
+			bottom: normalizeMeasurementInput(record.bottom, resolvedUnit),
+			left: normalizeMeasurementInput(record.left, resolvedUnit),
 			unit: resolvedUnit,
-			linked: Boolean( record.linked ),
+			linked: Boolean(record.linked),
 		};
 	}
 
-	const scalar = stringifyPrimitiveValue( value ).trim();
-	if ( !scalar ) {
+	const scalar = stringifyPrimitiveValue(value).trim();
+	if (!scalar) {
 		return {
 			top: '',
 			right: '',
@@ -276,85 +285,86 @@ export function normalizeDimensionsValue( value: unknown, fallbackUnit = 'px' ):
 		};
 	}
 
-	const shorthandTokens = splitCssShorthand( scalar );
-	const tokens = expandBoxTokens( shorthandTokens );
-	const parsedTokens = tokens.map( parseMeasurementToken );
-	const sharedUnit = parsedTokens.length > 0 && parsedTokens.every( ( entry ) => entry.unit === parsedTokens[ 0 ]?.unit )
-		? parsedTokens[ 0 ]?.unit
-		: undefined;
+	const shorthandTokens = splitCssShorthand(scalar);
+	const tokens = expandBoxTokens(shorthandTokens);
+	const parsedTokens = tokens.map(parseMeasurementToken);
+	const sharedUnit =
+		parsedTokens.length > 0 && parsedTokens.every((entry) => entry.unit === parsedTokens[0]?.unit)
+			? parsedTokens[0]?.unit
+			: undefined;
 	const resolvedUnit = sharedUnit ?? fallbackUnit;
 	return {
-		top: normalizeMeasurementInput( parsedTokens[ 0 ]?.raw ?? '', resolvedUnit ),
-		right: normalizeMeasurementInput( parsedTokens[ 1 ]?.raw ?? '', resolvedUnit ),
-		bottom: normalizeMeasurementInput( parsedTokens[ 2 ]?.raw ?? '', resolvedUnit ),
-		left: normalizeMeasurementInput( parsedTokens[ 3 ]?.raw ?? '', resolvedUnit ),
+		top: normalizeMeasurementInput(parsedTokens[0]?.raw ?? '', resolvedUnit),
+		right: normalizeMeasurementInput(parsedTokens[1]?.raw ?? '', resolvedUnit),
+		bottom: normalizeMeasurementInput(parsedTokens[2]?.raw ?? '', resolvedUnit),
+		left: normalizeMeasurementInput(parsedTokens[3]?.raw ?? '', resolvedUnit),
 		unit: resolvedUnit,
-		linked: shorthandTokens.length < 4 && areAllEqual( [
-			normalizeMeasurementInput( parsedTokens[ 0 ]?.raw ?? '', resolvedUnit ),
-			normalizeMeasurementInput( parsedTokens[ 1 ]?.raw ?? '', resolvedUnit ),
-			normalizeMeasurementInput( parsedTokens[ 2 ]?.raw ?? '', resolvedUnit ),
-			normalizeMeasurementInput( parsedTokens[ 3 ]?.raw ?? '', resolvedUnit ),
-		] ),
+		linked:
+			shorthandTokens.length < 4 &&
+			areAllEqual([
+				normalizeMeasurementInput(parsedTokens[0]?.raw ?? '', resolvedUnit),
+				normalizeMeasurementInput(parsedTokens[1]?.raw ?? '', resolvedUnit),
+				normalizeMeasurementInput(parsedTokens[2]?.raw ?? '', resolvedUnit),
+				normalizeMeasurementInput(parsedTokens[3]?.raw ?? '', resolvedUnit),
+			]),
 	};
 }
 
-export function normalizeSliderValue( value: unknown, fallbackUnit = '' ): PrimitiveSliderValue {
-	const structuredRecord = parseStructuredValueRecord( value );
-	if ( structuredRecord ) {
-		return normalizeSliderValue( structuredRecord, fallbackUnit );
+export function normalizeSliderValue(value: unknown, fallbackUnit = ''): PrimitiveSliderValue {
+	const structuredRecord = parseStructuredValueRecord(value);
+	if (structuredRecord) {
+		return normalizeSliderValue(structuredRecord, fallbackUnit);
 	}
 
-	if ( value && typeof value === 'object' && !Array.isArray( value ) ) {
+	if (value && typeof value === 'object' && !Array.isArray(value)) {
 		const record = value as Record<string, unknown>;
-		const resolvedUnit = typeof record.unit === 'string' && record.unit
-			? record.unit
-			: fallbackUnit || undefined;
+		const resolvedUnit = typeof record.unit === 'string' && record.unit ? record.unit : fallbackUnit || undefined;
 		return {
-			value: normalizeSliderScalar( record.value, resolvedUnit ),
+			value: normalizeSliderScalar(record.value, resolvedUnit),
 			unit: resolvedUnit,
 			start: record.start as number | string | undefined,
 			end: record.end as number | string | undefined,
 		};
 	}
 
-	const parsed = parseMeasurementToken( stringifyPrimitiveValue( value ) );
-	const resolvedUnit = parsed.unit ?? ( fallbackUnit || undefined );
+	const parsed = parseMeasurementToken(stringifyPrimitiveValue(value));
+	const resolvedUnit = parsed.unit ?? (fallbackUnit || undefined);
 	return {
-		value: normalizeSliderScalar( parsed.raw, resolvedUnit ),
+		value: normalizeSliderScalar(parsed.raw, resolvedUnit),
 		unit: resolvedUnit,
 	};
 }
 
-export function normalizeUrlValue( value: unknown ): PrimitiveUrlValue {
-	const structuredRecord = parseStructuredValueRecord( value );
-	if ( structuredRecord ) {
-		return normalizeUrlValue( structuredRecord );
+export function normalizeUrlValue(value: unknown): PrimitiveUrlValue {
+	const structuredRecord = parseStructuredValueRecord(value);
+	if (structuredRecord) {
+		return normalizeUrlValue(structuredRecord);
 	}
 
-	if ( value && typeof value === 'object' && !Array.isArray( value ) ) {
+	if (value && typeof value === 'object' && !Array.isArray(value)) {
 		const record = value as Record<string, unknown>;
 		return {
 			url: typeof record.url === 'string' ? record.url : typeof record.href === 'string' ? record.href : undefined,
-			newTab: Boolean( record.newTab ?? record.openInNewTab ),
-			noFollow: Boolean( record.noFollow ?? record.relNoFollow ),
-			download: Boolean( record.download ),
+			newTab: Boolean(record.newTab ?? record.openInNewTab),
+			noFollow: Boolean(record.noFollow ?? record.relNoFollow),
+			download: Boolean(record.download),
 			customAttributes: typeof record.customAttributes === 'string' ? record.customAttributes : undefined,
 			linkIcon: typeof record.linkIcon === 'string' ? record.linkIcon : undefined,
 		};
 	}
 
 	return {
-		url: typeof value === 'string' ? unwrapCssUrlValue( value ) : undefined,
+		url: typeof value === 'string' ? unwrapCssUrlValue(value) : undefined,
 	};
 }
 
-export function normalizeMediaValue( value: unknown ): PrimitiveMediaValue {
-	const structuredRecord = parseStructuredValueRecord( value );
-	if ( structuredRecord ) {
-		return normalizeMediaValue( structuredRecord );
+export function normalizeMediaValue(value: unknown): PrimitiveMediaValue {
+	const structuredRecord = parseStructuredValueRecord(value);
+	if (structuredRecord) {
+		return normalizeMediaValue(structuredRecord);
 	}
 
-	if ( value && typeof value === 'object' && !Array.isArray( value ) ) {
+	if (value && typeof value === 'object' && !Array.isArray(value)) {
 		const record = value as Record<string, unknown>;
 		return {
 			src: typeof record.src === 'string' ? record.src : typeof record.url === 'string' ? record.url : undefined,
@@ -369,51 +379,57 @@ export function normalizeMediaValue( value: unknown ): PrimitiveMediaValue {
 	};
 }
 
-export function serializeSliderValue( value: PrimitiveSliderValue, fallbackUnit = '' ): string {
+export function serializeSliderValue(value: PrimitiveSliderValue, fallbackUnit = ''): string {
 	const resolvedUnit = value.unit ?? fallbackUnit;
-	return serializeMeasurementInput( value.value, resolvedUnit );
+	return serializeMeasurementInput(value.value, resolvedUnit);
 }
 
-export function serializeDimensionsValue( value: PrimitiveDimensionsValue, fallbackUnit = 'px' ): string {
+export function serializeDimensionsValue(value: PrimitiveDimensionsValue, fallbackUnit = 'px'): string {
 	const resolvedUnit = value.unit ?? fallbackUnit;
-	const top = serializeMeasurementInput( value.top, resolvedUnit );
-	const right = serializeMeasurementInput( value.right ?? value.top, resolvedUnit );
-	const bottom = serializeMeasurementInput( value.bottom ?? value.top, resolvedUnit );
-	const left = serializeMeasurementInput( value.left ?? value.right ?? value.top, resolvedUnit );
-	const tokens = [ top, right, bottom, left ].map( ( entry ) => entry.trim() );
-	if ( tokens.every( ( entry ) => !entry ) ) {
+	const top = serializeMeasurementInput(value.top, resolvedUnit);
+	const right = serializeMeasurementInput(value.right ?? value.top, resolvedUnit);
+	const bottom = serializeMeasurementInput(value.bottom ?? value.top, resolvedUnit);
+	const left = serializeMeasurementInput(value.left ?? value.right ?? value.top, resolvedUnit);
+	const tokens = [top, right, bottom, left].map((entry) => entry.trim());
+	if (tokens.every((entry) => !entry)) {
 		return '';
 	}
 
-	if ( tokens.every( ( entry ) => entry === tokens[ 0 ] ) ) {
-		return value.linked === false ? tokens.join( ' ' ) : tokens[ 0 ] ?? '';
+	if (tokens.every((entry) => entry === tokens[0])) {
+		return value.linked === false ? tokens.join(' ') : (tokens[0] ?? '');
 	}
 
-	if ( tokens[ 0 ] === tokens[ 2 ] && tokens[ 1 ] === tokens[ 3 ] ) {
-		return `${ tokens[ 0 ] ?? '' } ${ tokens[ 1 ] ?? '' }`.trim();
+	if (tokens[0] === tokens[2] && tokens[1] === tokens[3]) {
+		return `${tokens[0] ?? ''} ${tokens[1] ?? ''}`.trim();
 	}
 
-	if ( tokens[ 1 ] === tokens[ 3 ] ) {
-		return `${ tokens[ 0 ] ?? '' } ${ tokens[ 1 ] ?? '' } ${ tokens[ 2 ] ?? '' }`.trim();
+	if (tokens[1] === tokens[3]) {
+		return `${tokens[0] ?? ''} ${tokens[1] ?? ''} ${tokens[2] ?? ''}`.trim();
 	}
 
-	return tokens.join( ' ' );
+	return tokens.join(' ');
 }
 
-export function serializeUrlValue( value: PrimitiveUrlValue ): string {
-	return String( value.url ?? '' ).trim();
+export function serializeUrlValue(value: PrimitiveUrlValue): string {
+	return String(value.url ?? '').trim();
 }
 
-export function serializeMediaValue( value: PrimitiveMediaValue ): string {
-	return String( value.src ?? '' ).trim();
+export function serializeMediaValue(value: PrimitiveMediaValue): string {
+	return String(value.src ?? '').trim();
 }
 
-function getSource( input: PrimitiveControlInput ): Record<string, unknown> {
-	if ( !input ) {
+function getSource(input: PrimitiveControlInput): Record<string, unknown> {
+	if (!input) {
 		return {};
 	}
 
-	if ( typeof input === 'object' && input && 'primitive' in input && input.primitive && typeof input.primitive === 'object' ) {
+	if (
+		typeof input === 'object' &&
+		input &&
+		'primitive' in input &&
+		input.primitive &&
+		typeof input.primitive === 'object'
+	) {
 		const source = input as BuilderControlFieldDefinition & {
 			primitive: Record<string, unknown>;
 			label?: string;
@@ -434,34 +450,34 @@ function getSource( input: PrimitiveControlInput ): Record<string, unknown> {
 			stateful: source.stateful,
 			tokenAware: source.tokenAware,
 			stateTabs: source.stateTabs,
-			controlType: source.controlType ?? readFieldType( source.primitive ),
+			controlType: source.controlType ?? readFieldType(source.primitive),
 		};
 	}
 
 	return input as unknown as Record<string, unknown>;
 }
 
-function splitCssShorthand( value: string ): string[] {
+function splitCssShorthand(value: string): string[] {
 	const tokens: string[] = [];
 	let current = '';
 	let depth = 0;
 
-	for ( const character of value.trim() ) {
-		if ( character === '(' ) {
+	for (const character of value.trim()) {
+		if (character === '(') {
 			depth += 1;
 			current += character;
 			continue;
 		}
 
-		if ( character === ')' ) {
-			depth = Math.max( 0, depth - 1 );
+		if (character === ')') {
+			depth = Math.max(0, depth - 1);
 			current += character;
 			continue;
 		}
 
-		if ( /\s/.test( character ) && depth === 0 ) {
-			if ( current.trim() ) {
-				tokens.push( current.trim() );
+		if (/\s/.test(character) && depth === 0) {
+			if (current.trim()) {
+				tokens.push(current.trim());
 				current = '';
 			}
 			continue;
@@ -470,48 +486,48 @@ function splitCssShorthand( value: string ): string[] {
 		current += character;
 	}
 
-	if ( current.trim() ) {
-		tokens.push( current.trim() );
+	if (current.trim()) {
+		tokens.push(current.trim());
 	}
 
 	return tokens;
 }
 
-function unwrapCssUrlValue( value: string ): string {
+function unwrapCssUrlValue(value: string): string {
 	const trimmed = value.trim();
-	const match = trimmed.match( /^url\((.*)\)$/i );
-	if ( !match ) {
+	const match = trimmed.match(/^url\((.*)\)$/i);
+	if (!match) {
 		return trimmed;
 	}
 
-	const inner = match[ 1 ]?.trim() ?? '';
-	if ( ( inner.startsWith( '"' ) && inner.endsWith( '"' ) ) || ( inner.startsWith( '\'' ) && inner.endsWith( '\'' ) ) ) {
-		return inner.slice( 1, -1 );
+	const inner = match[1]?.trim() ?? '';
+	if ((inner.startsWith('"') && inner.endsWith('"')) || (inner.startsWith("'") && inner.endsWith("'"))) {
+		return inner.slice(1, -1);
 	}
 
 	return inner;
 }
 
-function expandBoxTokens( tokens: string[] ): string[] {
-	if ( tokens.length <= 1 ) {
-		const token = tokens[ 0 ] ?? '';
-		return [ token, token, token, token ];
+function expandBoxTokens(tokens: string[]): string[] {
+	if (tokens.length <= 1) {
+		const token = tokens[0] ?? '';
+		return [token, token, token, token];
 	}
 
-	if ( tokens.length === 2 ) {
-		return [ tokens[ 0 ] ?? '', tokens[ 1 ] ?? '', tokens[ 0 ] ?? '', tokens[ 1 ] ?? '' ];
+	if (tokens.length === 2) {
+		return [tokens[0] ?? '', tokens[1] ?? '', tokens[0] ?? '', tokens[1] ?? ''];
 	}
 
-	if ( tokens.length === 3 ) {
-		return [ tokens[ 0 ] ?? '', tokens[ 1 ] ?? '', tokens[ 2 ] ?? '', tokens[ 1 ] ?? '' ];
+	if (tokens.length === 3) {
+		return [tokens[0] ?? '', tokens[1] ?? '', tokens[2] ?? '', tokens[1] ?? ''];
 	}
 
-	return tokens.slice( 0, 4 );
+	return tokens.slice(0, 4);
 }
 
-function parseMeasurementToken( value: string ): ParsedMeasurementToken {
+function parseMeasurementToken(value: string): ParsedMeasurementToken {
 	const raw = value.trim();
-	if ( !raw ) {
+	if (!raw) {
 		return {
 			raw: '',
 			value: '',
@@ -519,12 +535,12 @@ function parseMeasurementToken( value: string ): ParsedMeasurementToken {
 		};
 	}
 
-	const match = raw.match( /^(-?(?:\d+|\d*\.\d+))(?:([a-z%]+))$/i );
-	if ( match ) {
+	const match = raw.match(/^(-?(?:\d+|\d*\.\d+))(?:([a-z%]+))$/i);
+	if (match) {
 		return {
 			raw,
-			value: match[ 1 ] ?? raw,
-			unit: match[ 2 ] ? match[ 2 ].toLowerCase() : undefined,
+			value: match[1] ?? raw,
+			unit: match[2] ? match[2].toLowerCase() : undefined,
 		};
 	}
 
@@ -535,97 +551,99 @@ function parseMeasurementToken( value: string ): ParsedMeasurementToken {
 	};
 }
 
-function normalizeMeasurementInput( value: unknown, fallbackUnit = '' ): string {
-	const parsed = parseMeasurementToken( stringifyPrimitiveValue( value ) );
-	if ( parsed.unit && parsed.unit === fallbackUnit ) {
+function normalizeMeasurementInput(value: unknown, fallbackUnit = ''): string {
+	const parsed = parseMeasurementToken(stringifyPrimitiveValue(value));
+	if (parsed.unit && parsed.unit === fallbackUnit) {
 		return parsed.value;
 	}
 
 	return parsed.raw;
 }
 
-function normalizeSliderScalar( value: unknown, fallbackUnit?: string ): number | string | undefined {
-	if ( typeof value === 'number' ) {
+function normalizeSliderScalar(value: unknown, fallbackUnit?: string): number | string | undefined {
+	if (typeof value === 'number') {
 		return value;
 	}
 
-	const parsed = parseMeasurementToken( stringifyPrimitiveValue( value ) );
-	if ( !parsed.raw ) {
+	const parsed = parseMeasurementToken(stringifyPrimitiveValue(value));
+	if (!parsed.raw) {
 		return undefined;
 	}
 
-	if ( parsed.unit && parsed.unit === fallbackUnit ) {
+	if (parsed.unit && parsed.unit === fallbackUnit) {
 		return parsed.value;
 	}
 
-	if ( /^-?(?:\d+|\d*\.\d+)$/.test( parsed.raw ) ) {
-		return Number( parsed.raw );
+	if (/^-?(?:\d+|\d*\.\d+)$/.test(parsed.raw)) {
+		return Number(parsed.raw);
 	}
 
 	return parsed.raw;
 }
 
-function serializeMeasurementInput( value: unknown, fallbackUnit = '' ): string {
-	const parsed = parseMeasurementToken( stringifyPrimitiveValue( value ) );
-	if ( !parsed.raw ) {
+function serializeMeasurementInput(value: unknown, fallbackUnit = ''): string {
+	const parsed = parseMeasurementToken(stringifyPrimitiveValue(value));
+	if (!parsed.raw) {
 		return '';
 	}
 
-	if ( parsed.unit ) {
+	if (parsed.unit) {
 		return parsed.raw;
 	}
 
-	if ( fallbackUnit && /^-?(?:\d+|\d*\.\d+)$/.test( parsed.raw ) ) {
-		return `${ parsed.raw }${ fallbackUnit }`;
+	if (fallbackUnit && /^-?(?:\d+|\d*\.\d+)$/.test(parsed.raw)) {
+		return `${parsed.raw}${fallbackUnit}`;
 	}
 
 	return parsed.raw;
 }
 
-function areAllEqual( values: string[] ): boolean {
-	return values.every( ( entry ) => entry === ( values[ 0 ] ?? '' ) );
+function areAllEqual(values: string[]): boolean {
+	return values.every((entry) => entry === (values[0] ?? ''));
 }
 
-function parseStructuredValueRecord( value: unknown ): Record<string, unknown> | undefined {
-	if ( typeof value !== 'string' ) {
+function parseStructuredValueRecord(value: unknown): Record<string, unknown> | undefined {
+	if (typeof value !== 'string') {
 		return undefined;
 	}
 
 	const trimmed = value.trim();
-	if ( !trimmed.startsWith( '{' ) || !trimmed.endsWith( '}' ) ) {
+	if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
 		return undefined;
 	}
 
 	try {
-		const parsed = JSON.parse( trimmed ) as unknown;
-		return parsed && typeof parsed === 'object' && !Array.isArray( parsed ) ? parsed as Record<string, unknown> : undefined;
+		const parsed = JSON.parse(trimmed) as unknown;
+		return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+			? (parsed as Record<string, unknown>)
+			: undefined;
 	} catch {
 		return undefined;
 	}
 }
 
-function resolveKind( source: Record<string, unknown> | undefined ): PrimitiveControlResolved['kind'] {
-	if ( !source ) {
+function resolveKind(source: Record<string, unknown> | undefined): PrimitiveControlResolved['kind'] {
+	if (!source) {
 		return 'generic';
 	}
 
-	if ( typeof source.kind === 'string' ) {
+	if (typeof source.kind === 'string') {
 		return source.kind as PrimitiveControlResolved['kind'];
 	}
 
-	if ( typeof source.controlType === 'string' ) {
-		return mapFieldTypeToKind( source.controlType as BuilderFieldType );
+	if (typeof source.controlType === 'string') {
+		return mapFieldTypeToKind(source.controlType as BuilderFieldType);
 	}
 
-	if ( typeof source.type === 'string' ) {
-		return mapFieldTypeToKind( source.type as BuilderFieldType );
+	if (typeof source.type === 'string') {
+		return mapFieldTypeToKind(source.type as BuilderFieldType);
 	}
 
 	return 'generic';
 }
 
-function mapFieldTypeToKind( type: BuilderFieldType ): PrimitiveControlResolved['kind'] {
-	switch ( type ) {
+function mapFieldTypeToKind(type: BuilderFieldType): PrimitiveControlResolved['kind'] {
+	switch (type) {
 		case 'select':
 			return 'select';
 		case 'toggle':
@@ -649,101 +667,122 @@ function mapFieldTypeToKind( type: BuilderFieldType ): PrimitiveControlResolved[
 	}
 }
 
-function readFieldType( source: Record<string, unknown> | undefined ): BuilderFieldType | undefined {
-	if ( !source ) {
+function readFieldType(source: Record<string, unknown> | undefined): BuilderFieldType | undefined {
+	if (!source) {
 		return undefined;
 	}
 
-	return typeof source.fieldType === 'string' ? source.fieldType as BuilderFieldType : typeof source.controlType === 'string' ? source.controlType as BuilderFieldType : typeof source.type === 'string' ? source.type as BuilderFieldType : undefined;
+	return typeof source.fieldType === 'string'
+		? (source.fieldType as BuilderFieldType)
+		: typeof source.controlType === 'string'
+			? (source.controlType as BuilderFieldType)
+			: typeof source.type === 'string'
+				? (source.type as BuilderFieldType)
+				: undefined;
 }
 
-function readString( source: Record<string, unknown> | undefined, key: string ): string | undefined {
-	if ( !source ) {
+function readString(source: Record<string, unknown> | undefined, key: string): string | undefined {
+	if (!source) {
 		return undefined;
 	}
-	return typeof source[ key ] === 'string' ? source[ key ] as string : undefined;
+	return typeof source[key] === 'string' ? (source[key] as string) : undefined;
 }
 
-function readBoolean( source: Record<string, unknown> | undefined, key: string, defaultValue = false ): boolean {
-	if ( !source ) {
+function readBoolean(source: Record<string, unknown> | undefined, key: string, defaultValue = false): boolean {
+	if (!source) {
 		return defaultValue;
 	}
-	if ( typeof source[ key ] === 'boolean' ) {
-		return source[ key ] as boolean;
+	if (typeof source[key] === 'boolean') {
+		return source[key] as boolean;
 	}
 
 	return defaultValue;
 }
 
-function readValue( source: Record<string, unknown> | undefined, key: string ): unknown {
-	if ( !source ) {
+function readValue(source: Record<string, unknown> | undefined, key: string): unknown {
+	if (!source) {
 		return undefined;
 	}
-	return source[ key ];
+	return source[key];
 }
 
-function readOptions( source: Record<string, unknown> | undefined ): BuilderControlOption[] {
-	if ( !source ) {
+function readOptions(source: Record<string, unknown> | undefined): BuilderControlOption[] {
+	if (!source) {
 		return [];
 	}
 	const options = source.options;
-	if ( Array.isArray( options ) ) {
-		return options.filter( ( option ): option is BuilderControlOption => Boolean( option && typeof option === 'object' && 'value' in option ) ).map( ( option ) => ( {
-			label: String( ( option as BuilderControlOption ).label ?? ( option as { value?: string } ).value ?? '' ),
-			value: String( ( option as BuilderControlOption ).value ?? '' ),
-			icon: ( option as BuilderControlOption ).icon,
-			description: ( option as BuilderControlOption ).description,
-			badge: ( option as BuilderControlOption ).badge,
-			disabled: ( option as BuilderControlOption ).disabled,
-		} ) );
+	if (Array.isArray(options)) {
+		return options
+			.filter((option): option is BuilderControlOption =>
+				Boolean(option && typeof option === 'object' && 'value' in option),
+			)
+			.map((option) => ({
+				label: String((option as BuilderControlOption).label ?? (option as { value?: string }).value ?? ''),
+				value: String((option as BuilderControlOption).value ?? ''),
+				icon: (option as BuilderControlOption).icon,
+				description: (option as BuilderControlOption).description,
+				badge: (option as BuilderControlOption).badge,
+				disabled: (option as BuilderControlOption).disabled,
+			}));
 	}
 
 	return [];
 }
 
-function readTabs( source: Record<string, unknown> | undefined ): BuilderControlTabsItem[] {
-	if ( !source ) {
+function readTabs(source: Record<string, unknown> | undefined): BuilderControlTabsItem[] {
+	if (!source) {
 		return [];
 	}
 	const items = source.items;
-	if ( Array.isArray( items ) ) {
-		return items.filter( ( item ): item is BuilderControlTabsItem => Boolean( item && typeof item === 'object' && 'id' in item ) ).map( ( item ) => ( {
-			id: String( ( item as BuilderControlTabsItem ).id ?? '' ),
-			label: String( ( item as BuilderControlTabsItem ).label ?? '' ),
-			icon: ( item as BuilderControlTabsItem ).icon,
-			description: ( item as BuilderControlTabsItem ).description,
-			badge: ( item as BuilderControlTabsItem ).badge,
-			disabled: ( item as BuilderControlTabsItem ).disabled,
-		} ) );
+	if (Array.isArray(items)) {
+		return items
+			.filter((item): item is BuilderControlTabsItem => Boolean(item && typeof item === 'object' && 'id' in item))
+			.map((item) => ({
+				id: String((item as BuilderControlTabsItem).id ?? ''),
+				label: String((item as BuilderControlTabsItem).label ?? ''),
+				icon: (item as BuilderControlTabsItem).icon,
+				description: (item as BuilderControlTabsItem).description,
+				badge: (item as BuilderControlTabsItem).badge,
+				disabled: (item as BuilderControlTabsItem).disabled,
+			}));
 	}
 
 	return [];
 }
 
-function readUnits( source: Record<string, unknown> | undefined ): BuilderControlSliderUnit[] {
-	if ( !source ) {
+function readUnits(source: Record<string, unknown> | undefined): BuilderControlSliderUnit[] {
+	if (!source) {
 		return [];
 	}
 	const units = source.units;
-	if ( Array.isArray( units ) ) {
-		return units.filter( ( unit ): unit is BuilderControlSliderUnit => Boolean( unit && typeof unit === 'object' && 'value' in unit ) ).map( ( unit ) => ( {
-			label: String( ( unit as BuilderControlSliderUnit ).label ?? ( unit as { value?: string } ).value ?? '' ),
-			value: String( ( unit as BuilderControlSliderUnit ).value ?? '' ),
-			shortLabel: ( unit as BuilderControlSliderUnit ).shortLabel,
-		} ) );
+	if (Array.isArray(units)) {
+		return units
+			.filter((unit): unit is BuilderControlSliderUnit => Boolean(unit && typeof unit === 'object' && 'value' in unit))
+			.map((unit) => ({
+				label: String((unit as BuilderControlSliderUnit).label ?? (unit as { value?: string }).value ?? ''),
+				value: String((unit as BuilderControlSliderUnit).value ?? ''),
+				shortLabel: (unit as BuilderControlSliderUnit).shortLabel,
+			}));
 	}
 
 	return [];
 }
 
-function isSectionPrimitive( source: Record<string, unknown> | undefined ): source is Record<string, unknown> & BuilderControlSectionPrimitive {
-	if ( !source ) {
+function isSectionPrimitive(
+	source: Record<string, unknown> | undefined,
+): source is Record<string, unknown> & BuilderControlSectionPrimitive {
+	if (!source) {
 		return false;
 	}
 
-	return source.kind === 'section' || ( typeof source.collapsible === 'boolean' && typeof source.defaultCollapsed === 'boolean' && typeof source.density === 'string' );
+	return (
+		source.kind === 'section' ||
+		(typeof source.collapsible === 'boolean' &&
+			typeof source.defaultCollapsed === 'boolean' &&
+			typeof source.density === 'string')
+	);
 }
 
-function isControlFieldDefinition( input: PrimitiveControlInput ): input is BuilderControlFieldDefinition {
-	return Boolean( input && typeof input === 'object' && 'primitive' in input && 'type' in input && 'path' in input );
+function isControlFieldDefinition(input: PrimitiveControlInput): input is BuilderControlFieldDefinition {
+	return Boolean(input && typeof input === 'object' && 'primitive' in input && 'type' in input && 'path' in input);
 }

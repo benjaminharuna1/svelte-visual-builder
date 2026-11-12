@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { buildCanvasGeometryIndex, createCanvasGeometryState, getCanvasGeometryKey } from '../src/index';
 
-describe( 'canvas geometry state', () => {
-	it( 'builds ordered container and slot indexes from a snapshot', () => {
+describe('canvas geometry state', () => {
+	it('builds ordered container and slot indexes from a snapshot', () => {
 		const nodeBounds = [
 			{
 				nodeId: 'root-container',
@@ -14,7 +14,7 @@ describe( 'canvas geometry state', () => {
 				index: 0,
 				rect: { top: 0, left: 0, right: 800, bottom: 600, width: 800, height: 600 },
 				acceptsChildren: true,
-				slotIds: [ 'content', 'sidebar' ],
+				slotIds: ['content', 'sidebar'],
 				editable: false,
 			},
 			{
@@ -84,7 +84,7 @@ describe( 'canvas geometry state', () => {
 				ownerId: undefined,
 				slot: 'page',
 				rect: { top: 0, left: 0, right: 900, bottom: 900, width: 900, height: 900 },
-				childNodeIds: [ 'root-container' ],
+				childNodeIds: ['root-container'],
 				acceptsMultiple: true,
 				isRoot: true,
 			},
@@ -102,47 +102,43 @@ describe( 'canvas geometry state', () => {
 				ownerId: 'root-container',
 				slot: 'content',
 				rect: { top: 120, left: 120, right: 440, bottom: 340, width: 320, height: 220 },
-				childNodeIds: [ 'slot-child-b', 'slot-child-a' ],
+				childNodeIds: ['slot-child-b', 'slot-child-a'],
 				acceptsMultiple: true,
 				isRoot: false,
 			},
 		];
 
-		const index = buildCanvasGeometryIndex( nodeBounds, slotBounds );
+		const index = buildCanvasGeometryIndex(nodeBounds, slotBounds);
 
-		expect( index.nodeBoundsById.get( 'heading-a' )?.nodeType ).toBe( 'heading' );
-		expect( index.containersByDocument.get( 'doc-1' )?.map( ( entry ) => entry.nodeId ) ).toEqual( [
+		expect(index.nodeBoundsById.get('heading-a')?.nodeType).toBe('heading');
+		expect(index.containersByDocument.get('doc-1')?.map((entry) => entry.nodeId)).toEqual([
 			'nested-container',
 			'root-container',
-		] );
-		expect( index.nonRootSlotsByDocument.get( 'doc-1' )?.map( ( entry ) => entry.slot ) ).toEqual( [
-			'sidebar',
-			'content',
-		] );
-		expect( index.childBoundsByContainer.get( getCanvasGeometryKey( 'doc-1', 'root-container' ) )?.map( ( entry ) => entry.nodeId ) ).toEqual( [
-			'heading-a',
-			'heading-b',
-			'nested-container',
-		] );
-		expect( index.childBoundsBySlot.get( getCanvasGeometryKey( 'doc-1', 'root-container', 'content' ) )?.map( ( entry ) => entry.nodeId ) ).toEqual( [
-			'slot-child-a',
-			'slot-child-b',
-		] );
-	} );
+		]);
+		expect(index.nonRootSlotsByDocument.get('doc-1')?.map((entry) => entry.slot)).toEqual(['sidebar', 'content']);
+		expect(
+			index.childBoundsByContainer.get(getCanvasGeometryKey('doc-1', 'root-container'))?.map((entry) => entry.nodeId),
+		).toEqual(['heading-a', 'heading-b', 'nested-container']);
+		expect(
+			index.childBoundsBySlot
+				.get(getCanvasGeometryKey('doc-1', 'root-container', 'content'))
+				?.map((entry) => entry.nodeId),
+		).toEqual(['slot-child-a', 'slot-child-b']);
+	});
 
-	it( 'tracks snapshot versions while keeping a safe empty default state', () => {
+	it('tracks snapshot versions while keeping a safe empty default state', () => {
 		const state = createCanvasGeometryState();
-		expect( state.renderVersion ).toBe( 0 );
-		expect( state.snapshotVersion ).toBe( 0 );
-		expect( state.index.nodeBoundsById.size ).toBe( 0 );
+		expect(state.renderVersion).toBe(0);
+		expect(state.snapshotVersion).toBe(0);
+		expect(state.index.nodeBoundsById.size).toBe(0);
 
-		const snapshotState = createCanvasGeometryState( {
+		const snapshotState = createCanvasGeometryState({
 			renderVersion: 7,
 			version: 3,
 			nodeBounds: [],
 			slotBounds: [],
-		} );
-		expect( snapshotState.renderVersion ).toBe( 7 );
-		expect( snapshotState.snapshotVersion ).toBe( 3 );
-	} );
-} );
+		});
+		expect(snapshotState.renderVersion).toBe(7);
+		expect(snapshotState.snapshotVersion).toBe(3);
+	});
+});

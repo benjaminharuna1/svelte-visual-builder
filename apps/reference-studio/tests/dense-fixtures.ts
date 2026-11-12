@@ -3,4 +3,4 @@ export const denseFixtureCases = [
 	{ fixture: 'dense-500', minimumNodes: 500 },
 ] as const;
 
-export type DenseFixtureCase = typeof denseFixtureCases[number];
+export type DenseFixtureCase = (typeof denseFixtureCases)[number];

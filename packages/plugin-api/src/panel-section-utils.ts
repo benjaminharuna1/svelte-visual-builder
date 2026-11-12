@@ -16,7 +16,7 @@ export function contentSection(
 	label: string,
 	fields: BuilderFieldDefinition[],
 ): BuilderPanelSectionDefinition {
-	return sectionField( id, label, fields, 'content' );
+	return sectionField(id, label, fields, 'content');
 }
 
 export function styleSection(
@@ -24,7 +24,7 @@ export function styleSection(
 	label: string,
 	fields: BuilderFieldDefinition[],
 ): BuilderPanelSectionDefinition {
-	return sectionField( id, label, fields, 'style' );
+	return sectionField(id, label, fields, 'style');
 }
 
 export function advancedSection(
@@ -32,48 +32,94 @@ export function advancedSection(
 	label: string,
 	fields: BuilderFieldDefinition[],
 ): BuilderPanelSectionDefinition {
-	return sectionField( id, label, fields, 'advanced' );
+	return sectionField(id, label, fields, 'advanced');
 }
 
-export function textField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function textField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'text', ...options };
 }
 
-export function richTextField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function richTextField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'rich-text', ...options };
 }
 
-export function textareaField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function textareaField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'textarea', ...options };
 }
 
-export function numberField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function numberField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'number', ...options };
 }
 
-export function urlField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function urlField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'url', ...options };
 }
 
-export function imageField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function imageField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'image', ...options };
 }
 
-export function jsonField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function jsonField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'json', ...options };
 }
 
-export function selectField( id: string, label: string, path: string, values: SelectOption[], options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type' | 'options'>> = {} ): BuilderFieldDefinition {
+export function selectField(
+	id: string,
+	label: string,
+	path: string,
+	values: SelectOption[],
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type' | 'options'>> = {},
+): BuilderFieldDefinition {
 	return {
 		id,
 		label,
 		path,
 		type: 'select',
-		options: values.map( ( value ) => typeof value === 'string' ? { label: value.toUpperCase(), value } : value ),
+		options: values.map((value) => (typeof value === 'string' ? { label: value.toUpperCase(), value } : value)),
 		...options,
 	};
 }
 
-export function toggleField( id: string, label: string, path: string, options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {} ): BuilderFieldDefinition {
+export function toggleField(
+	id: string,
+	label: string,
+	path: string,
+	options: Partial<Omit<BuilderFieldDefinition, 'id' | 'label' | 'path' | 'type'>> = {},
+): BuilderFieldDefinition {
 	return { id, label, path, type: 'toggle', ...options };
 }

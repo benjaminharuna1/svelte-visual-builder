@@ -13,29 +13,32 @@
 	export let sortableGroup = '';
 	export let onDuplicate: () => void = () => {};
 	export let onRemove: () => void = () => {};
-	export let onUpdateField: ( field: StructuredCollectionFieldSpec, nextValue: string | boolean | number ) => void = () => {};
+	export let onUpdateField: (
+		field: StructuredCollectionFieldSpec,
+		nextValue: string | boolean | number,
+	) => void = () => {};
 
-	const sortable = createSortable( {
+	const sortable = createSortable({
 		id: itemKey,
 		group: sortableGroup,
 		index,
-	} );
+	});
 
-	function fieldValue( field: StructuredCollectionFieldSpec ): string {
-		const rawValue = item[ field.key ];
-		if ( field.type === 'toggle' ) {
+	function fieldValue(field: StructuredCollectionFieldSpec): string {
+		const rawValue = item[field.key];
+		if (field.type === 'toggle') {
 			return rawValue === true || rawValue === 'true' ? 'true' : 'false';
 		}
 
-		if ( field.type === 'number' ) {
-			return typeof rawValue === 'number' ? String( rawValue ) : typeof rawValue === 'string' ? rawValue : '';
+		if (field.type === 'number') {
+			return typeof rawValue === 'number' ? String(rawValue) : typeof rawValue === 'string' ? rawValue : '';
 		}
 
-		return typeof rawValue === 'string' ? rawValue : String( rawValue ?? '' );
+		return typeof rawValue === 'string' ? rawValue : String(rawValue ?? '');
 	}
 
-	function fieldChecked( field: StructuredCollectionFieldSpec ): boolean {
-		const rawValue = item[ field.key ];
+	function fieldChecked(field: StructuredCollectionFieldSpec): boolean {
+		const rawValue = item[field.key];
 		return rawValue === true || rawValue === 'true';
 	}
 </script>
@@ -51,7 +54,7 @@
 	<div class="structured-collection__item-header">
 		<div class="structured-collection__item-meta">
 			<strong>{spec.itemLabel} {index + 1}</strong>
-			<small>{String( item.label ?? item.title ?? item.src ?? item.id ?? spec.itemLabel )}</small>
+			<small>{String(item.label ?? item.title ?? item.src ?? item.id ?? spec.itemLabel)}</small>
 		</div>
 		<div class="structured-collection__item-actions">
 			<button
@@ -80,26 +83,26 @@
 					<textarea
 						rows="3"
 						placeholder={field.placeholder}
-						value={fieldValue( field )}
-						oninput={( event ) => onUpdateField( field, ( event.currentTarget as HTMLTextAreaElement ).value )}
+						value={fieldValue(field)}
+						oninput={(event) => onUpdateField(field, (event.currentTarget as HTMLTextAreaElement).value)}
 					></textarea>
 				{:else if field.type === 'toggle'}
 					<input
 						type="checkbox"
-						checked={fieldChecked( field )}
-						onchange={( event ) => onUpdateField( field, ( event.currentTarget as HTMLInputElement ).checked )}
+						checked={fieldChecked(field)}
+						onchange={(event) => onUpdateField(field, (event.currentTarget as HTMLInputElement).checked)}
 					/>
 				{:else if field.type === 'number'}
 					<input
 						type="number"
 						placeholder={field.placeholder}
-						value={fieldValue( field )}
-						oninput={( event ) => onUpdateField( field, ( event.currentTarget as HTMLInputElement ).valueAsNumber || 0 )}
+						value={fieldValue(field)}
+						oninput={(event) => onUpdateField(field, (event.currentTarget as HTMLInputElement).valueAsNumber || 0)}
 					/>
 				{:else if field.type === 'select'}
 					<select
-						value={fieldValue( field )}
-						onchange={( event ) => onUpdateField( field, ( event.currentTarget as HTMLSelectElement ).value )}
+						value={fieldValue(field)}
+						onchange={(event) => onUpdateField(field, (event.currentTarget as HTMLSelectElement).value)}
 					>
 						{#each field.options ?? [] as option (option.value)}
 							<option value={option.value}>{option.label}</option>
@@ -109,8 +112,8 @@
 					<input
 						type="text"
 						placeholder={field.placeholder}
-						value={fieldValue( field )}
-						oninput={( event ) => onUpdateField( field, ( event.currentTarget as HTMLInputElement ).value )}
+						value={fieldValue(field)}
+						oninput={(event) => onUpdateField(field, (event.currentTarget as HTMLInputElement).value)}
 					/>
 				{/if}
 			</label>
@@ -131,7 +134,9 @@
 
 	.structured-collection__item--dragging {
 		opacity: 0.8;
-		box-shadow: 0 0 0 1px var(--builder-shell-accent), 0 14px 30px rgba( 0, 0, 0, 0.18 );
+		box-shadow:
+			0 0 0 1px var(--builder-shell-accent),
+			0 14px 30px rgba(0, 0, 0, 0.18);
 	}
 
 	.structured-collection__item--droptarget {

@@ -15,21 +15,36 @@
 	export let bodyPadding = 'var(--builder-shell-space-12)';
 	export let bodyGap = 'var(--builder-shell-space-12)';
 	export let bodyScrollable = true;
-	export let onTogglePanel: ( open?: boolean ) => void = () => {};
+	export let onTogglePanel: (open?: boolean) => void = () => {};
 </script>
 
 <EditorShellTokens>
 	<PanelShell {surface} {width} {bodyPadding} {bodyGap} {bodyScrollable}>
 		<svelte:fragment slot="header">
-			<PanelHeaderCompact title={title} subtitle={subtitle} leadingIcon="history" leadingLabel="History" showLeading={false} centered={false}>
+			<PanelHeaderCompact
+				{title}
+				{subtitle}
+				leadingIcon="history"
+				leadingLabel="History"
+				showLeading={false}
+				centered={false}
+			>
 				<svelte:fragment slot="actions">
 					{#if saveState}
-						<span class={`builder-shell-badge builder-shell-badge--${saveStateTone} history-panel-shell__header-badge`}>{saveState}</span>
+						<span class={`builder-shell-badge builder-shell-badge--${saveStateTone} history-panel-shell__header-badge`}
+							>{saveState}</span
+						>
 					{/if}
 					{#if documentTitle}
-						<span class="builder-shell-badge builder-shell-badge--dark history-panel-shell__header-badge">{documentTitle}</span>
+						<span class="builder-shell-badge builder-shell-badge--dark history-panel-shell__header-badge"
+							>{documentTitle}</span
+						>
 					{/if}
-					<button type="button" class="builder-shell-button builder-shell-button--dark history-panel-shell__toggle" onclick={() => onTogglePanel( !panelOpen )}>
+					<button
+						type="button"
+						class="builder-shell-button builder-shell-button--dark history-panel-shell__toggle"
+						onclick={() => onTogglePanel(!panelOpen)}
+					>
 						{panelOpen ? 'Hide' : 'Show'}
 					</button>
 					<slot name="header-actions" />

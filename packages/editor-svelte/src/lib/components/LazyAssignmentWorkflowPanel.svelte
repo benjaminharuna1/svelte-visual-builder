@@ -5,42 +5,42 @@
 	let LoadedAssignmentWorkflowPanel: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './AssignmentWorkflowPanel.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./AssignmentWorkflowPanel.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedAssignmentWorkflowPanel = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let activeDocument: BuilderDocument;
 	export let projectAssignments: ThemeAssignment[] = [];
 	export let documentsById: Map<string, BuilderDocument> = new Map();
 	export let activeEntryId: string | undefined = undefined;
-	export let onPreviewAssignment: ( assignment: ThemeAssignment ) => void = () => {};
-	export let onOpenAssignment: ( assignment: ThemeAssignment ) => void = () => {};
-	export let onCreateAssignment: ( draft: {
+	export let onPreviewAssignment: (assignment: ThemeAssignment) => void = () => {};
+	export let onOpenAssignment: (assignment: ThemeAssignment) => void = () => {};
+	export let onCreateAssignment: (draft: {
 		slot: ThemeAssignment['slot'];
 		pathname?: string;
 		priority: number;
 		status: ThemeAssignment['status'];
 		routePattern?: string;
-	} ) => void = () => {};
-	export let onUpdateAssignment: ( assignment: ThemeAssignment, patch: Partial<ThemeAssignment> ) => void = () => {};
-	export let onUpdateAssignmentRoutePattern: ( assignment: ThemeAssignment, value: string ) => void = () => {};
-	export let onDeleteAssignment: ( assignmentId: string ) => void = () => {};
+	}) => void = () => {};
+	export let onUpdateAssignment: (assignment: ThemeAssignment, patch: Partial<ThemeAssignment>) => void = () => {};
+	export let onUpdateAssignmentRoutePattern: (assignment: ThemeAssignment, value: string) => void = () => {};
+	export let onDeleteAssignment: (assignmentId: string) => void = () => {};
 </script>
 
 {#if LoadedAssignmentWorkflowPanel}

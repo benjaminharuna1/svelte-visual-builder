@@ -4,25 +4,25 @@
 	let LoadedInlineRichTextEditor: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './InlineRichTextEditor.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./InlineRichTextEditor.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedInlineRichTextEditor = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let value: string | null | undefined = '';
 	export let valueMode: 'auto' | 'html' | 'text' = 'auto';
@@ -30,7 +30,12 @@
 	export let showBubbleMenu = true;
 	export let showToolbar = true;
 	export let autofocus = false;
-	export let onChange: ( detail: { mode: 'html' | 'text'; value: string; html: string; text: string } ) => void = () => {};
+	export let onChange: (detail: {
+		mode: 'html' | 'text';
+		value: string;
+		html: string;
+		text: string;
+	}) => void = () => {};
 	export let onBlur: () => void = () => {};
 	export let onFocus: () => void = () => {};
 </script>

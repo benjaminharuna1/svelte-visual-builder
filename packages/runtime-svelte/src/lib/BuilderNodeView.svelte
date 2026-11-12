@@ -38,11 +38,7 @@
 		resolvePopupBehavior,
 		resolveTabItems,
 	} from './runtime';
-	import type {
-		BuilderCanvasGeometryEmitter,
-		BuilderGeometryNodeMeta,
-		BuilderGeometrySlotMeta,
-	} from './geometry';
+	import type { BuilderCanvasGeometryEmitter, BuilderGeometryNodeMeta, BuilderGeometrySlotMeta } from './geometry';
 	import { BUILDER_GEOMETRY_CONTEXT } from './geometry';
 
 	let {
@@ -69,53 +65,65 @@
 		record?: Record<string, unknown>;
 	} = $props();
 
-	const geometryEmitter = getContext<BuilderCanvasGeometryEmitter | undefined>( BUILDER_GEOMETRY_CONTEXT );
+	const geometryEmitter = getContext<BuilderCanvasGeometryEmitter | undefined>(BUILDER_GEOMETRY_CONTEXT);
 
-	const definition = $derived( getElementDefinition( node, model ) );
-	const resolvedProps = $derived( resolveNodeProps( node, model, record ) );
-	const resolvedAttributes = $derived( resolveNodeAttributes( node, model, record ) );
-	const nodeStyle = $derived( getNodeStyle( node, model, record ) );
-	const nodeClasses = $derived( getNodeClassNames( node, model ) );
-	const runtimeVisible = $derived( isNodeVisible( node, model, record ) );
-	const authoringHidden = $derived( model.authoringMode && !runtimeVisible );
-	const visible = $derived( runtimeVisible || model.authoringMode );
-	const customRuntimeComponent = $derived( model.runtimeComponents.get( node.type ) );
-	const slotDefinitions = $derived( definition?.runtime.slots ?? [] );
-	const slotIds = $derived( slotDefinitions.map( ( entry ) => entry.id ) );
-	const acceptsChildren = $derived( ( definition?.runtime.acceptsChildren ?? false ) || node.children.length > 0 || slotIds.length > 0 );
-	const isContainerSurface = $derived( node.type === 'container' || node.type === 'grid-container' );
-	const hasInlineTextContent = $derived( typeof resolvedProps.text === 'string' && resolvedProps.text.trim().length > 0 );
-	const hasCustomContainerPadding = $derived( isContainerSurface && Boolean( node.styles.base?.padding ) );
+	const definition = $derived(getElementDefinition(node, model));
+	const resolvedProps = $derived(resolveNodeProps(node, model, record));
+	const resolvedAttributes = $derived(resolveNodeAttributes(node, model, record));
+	const nodeStyle = $derived(getNodeStyle(node, model, record));
+	const nodeClasses = $derived(getNodeClassNames(node, model));
+	const runtimeVisible = $derived(isNodeVisible(node, model, record));
+	const authoringHidden = $derived(model.authoringMode && !runtimeVisible);
+	const visible = $derived(runtimeVisible || model.authoringMode);
+	const customRuntimeComponent = $derived(model.runtimeComponents.get(node.type));
+	const slotDefinitions = $derived(definition?.runtime.slots ?? []);
+	const slotIds = $derived(slotDefinitions.map((entry) => entry.id));
+	const acceptsChildren = $derived(
+		(definition?.runtime.acceptsChildren ?? false) || node.children.length > 0 || slotIds.length > 0,
+	);
+	const isContainerSurface = $derived(node.type === 'container' || node.type === 'grid-container');
+	const hasInlineTextContent = $derived(typeof resolvedProps.text === 'string' && resolvedProps.text.trim().length > 0);
+	const hasCustomContainerPadding = $derived(isContainerSurface && Boolean(node.styles.base?.padding));
 	const defaultContainerPadding = 'padding: 20px;';
 	const containerStyle = $derived(
 		hasCustomContainerPadding
 			? nodeStyle
 			: isContainerSurface
-				? [ nodeStyle, defaultContainerPadding ].filter( Boolean ).join( ' ' )
+				? [nodeStyle, defaultContainerPadding].filter(Boolean).join(' ')
 				: nodeStyle,
 	);
-	const shouldShowContainerDropPlaceholder = $derived( model.authoringMode && isContainerSurface && !node.children.length && !slotDefinitions.length && !hasInlineTextContent );
+	const shouldShowContainerDropPlaceholder = $derived(
+		model.authoringMode &&
+			isContainerSurface &&
+			!node.children.length &&
+			!slotDefinitions.length &&
+			!hasInlineTextContent,
+	);
 	const inlineEditingMode = $derived<BuilderInlineEditingMode | undefined>(
-		resolveBuilderInlineEditingMode( node.type, definition?.runtime.supportsInlineEditing ),
+		resolveBuilderInlineEditingMode(node.type, definition?.runtime.supportsInlineEditing),
 	);
-	const inlineEditable = $derived( Boolean( inlineEditingMode ) );
-	const expandedComponentRoots = $derived( node.type === 'component-instance' ? expandComponentInstance( node, model ) : [] );
+	const inlineEditable = $derived(Boolean(inlineEditingMode));
+	const expandedComponentRoots = $derived(
+		node.type === 'component-instance' ? expandComponentInstance(node, model) : [],
+	);
 	const expandedComponentDocumentId = $derived(
-		node.type === 'component-instance'
-			? String( node.props.componentId ?? '' ) || documentId
-			: documentId,
+		node.type === 'component-instance' ? String(node.props.componentId ?? '') || documentId : documentId,
 	);
-	const tabItems = $derived( resolveTabItems( node, resolvedProps ) );
-	const accordionItems = $derived( resolveAccordionItems( node, resolvedProps ) );
-	const menuItems = $derived( resolveMenuItems( resolvedProps ) );
-	const galleryImages = $derived( resolveGalleryImages( resolvedProps ) );
-	const carouselSlides = $derived( resolveCarouselSlides( resolvedProps ) );
-	const popupBehavior = $derived( resolvePopupBehavior( resolvedProps ) );
-	const collectionRecords = $derived( node.type === 'loop' ? resolveCollectionRecords( node, model ) : [] );
-	const generatedFormFields = $derived( resolveGeneratedFormFieldShells( resolvedProps ) );
-	const directFormFieldShell = $derived( isNativeFormFieldNode( node ) ? resolveFormFieldShell( node, resolvedProps ) : undefined );
-	const childFieldNodes = $derived( node.type === 'form' ? node.children.filter( ( child: BuilderNode ) => isNativeFormFieldNode( child ) ) : [] );
-	const nodeGeometry = $derived( {
+	const tabItems = $derived(resolveTabItems(node, resolvedProps));
+	const accordionItems = $derived(resolveAccordionItems(node, resolvedProps));
+	const menuItems = $derived(resolveMenuItems(resolvedProps));
+	const galleryImages = $derived(resolveGalleryImages(resolvedProps));
+	const carouselSlides = $derived(resolveCarouselSlides(resolvedProps));
+	const popupBehavior = $derived(resolvePopupBehavior(resolvedProps));
+	const collectionRecords = $derived(node.type === 'loop' ? resolveCollectionRecords(node, model) : []);
+	const generatedFormFields = $derived(resolveGeneratedFormFieldShells(resolvedProps));
+	const directFormFieldShell = $derived(
+		isNativeFormFieldNode(node) ? resolveFormFieldShell(node, resolvedProps) : undefined,
+	);
+	const childFieldNodes = $derived(
+		node.type === 'form' ? node.children.filter((child: BuilderNode) => isNativeFormFieldNode(child)) : [],
+	);
+	const nodeGeometry = $derived({
 		nodeId: node.id,
 		documentId,
 		nodeType: node.type,
@@ -125,39 +133,39 @@
 		acceptsChildren,
 		slotIds,
 		editable: inlineEditable,
-	} satisfies BuilderGeometryNodeMeta );
-	const customRuntimeAttributes = $derived( getAttributeBag() );
-	const customRuntimeClassName = $derived( customRuntimeAttributes.class ?? '' );
-	const customRuntimeStyle = $derived( customRuntimeAttributes.style ?? nodeStyle );
+	} satisfies BuilderGeometryNodeMeta);
+	const customRuntimeAttributes = $derived(getAttributeBag());
+	const customRuntimeClassName = $derived(customRuntimeAttributes.class ?? '');
+	const customRuntimeStyle = $derived(customRuntimeAttributes.style ?? nodeStyle);
 
-	let activeTabIndex = $state( 0 );
-	let openAccordionIndexes = $state<number[]>( [] );
-	let carouselIndex = $state( 0 );
-	let popupOpen = $state( true );
-	let formStatus = $state<'idle' | 'success'>( 'idle' );
+	let activeTabIndex = $state(0);
+	let openAccordionIndexes = $state<number[]>([]);
+	let carouselIndex = $state(0);
+	let popupOpen = $state(true);
+	let formStatus = $state<'idle' | 'success'>('idle');
 
-	$effect( () => {
-		activeTabIndex = resolveInitialTabIndex( node, resolvedProps );
-	} );
+	$effect(() => {
+		activeTabIndex = resolveInitialTabIndex(node, resolvedProps);
+	});
 
-	$effect( () => {
-		openAccordionIndexes = resolveInitialAccordionIndexes( node, resolvedProps );
-	} );
+	$effect(() => {
+		openAccordionIndexes = resolveInitialAccordionIndexes(node, resolvedProps);
+	});
 
-	$effect( () => {
+	$effect(() => {
 		carouselIndex = 0;
-	} );
+	});
 
-	$effect( () => {
+	$effect(() => {
 		popupOpen = true;
 		formStatus = 'idle';
-	} );
+	});
 
-	function handleSelect( event: MouseEvent ) {
+	function handleSelect(event: MouseEvent) {
 		void event;
 	}
 
-	function handleHoverEnter( event: PointerEvent ) {
+	function handleHoverEnter(event: PointerEvent) {
 		void event;
 	}
 
@@ -165,18 +173,18 @@
 		return;
 	}
 
-	function getAttributeBag( extra: Record<string, string | undefined> = {} ) {
+	function getAttributeBag(extra: Record<string, string | undefined> = {}) {
 		const { class: extraClass, ...extraAttributes } = extra;
-		const className = compactClassName( [
+		const className = compactClassName([
 			'builder-node',
-			`builder-node--${ node.type }`,
+			`builder-node--${node.type}`,
 			nodeClasses,
 			authoringHidden ? 'builder-node--authoring-hidden' : undefined,
 			extraClass,
-		] );
+		]);
 
-		return compactAttributes( {
-			...mergeNodeClassAttribute( resolvedAttributes, className ),
+		return compactAttributes({
+			...mergeNodeClassAttribute(resolvedAttributes, className),
 			...extraAttributes,
 			style: extraAttributes.style ?? nodeStyle,
 			'data-builder-node': node.id,
@@ -185,59 +193,59 @@
 			'data-builder-parent': parentId,
 			'data-builder-slot': slot,
 			'data-builder-root-slot': rootSlot,
-			'data-builder-index': String( index ),
-			'data-builder-accepts-children': String( acceptsChildren ),
-			'data-builder-empty-container': String( shouldShowContainerDropPlaceholder ),
-			'data-builder-slot-ids': slotIds.join( ',' ),
-			'data-builder-editable': String( inlineEditable ),
+			'data-builder-index': String(index),
+			'data-builder-accepts-children': String(acceptsChildren),
+			'data-builder-empty-container': String(shouldShowContainerDropPlaceholder),
+			'data-builder-slot-ids': slotIds.join(','),
+			'data-builder-editable': String(inlineEditable),
 			'data-builder-inline-mode': inlineEditingMode,
 			'data-builder-runtime-hidden': authoringHidden ? 'true' : undefined,
-		} );
+		});
 	}
 
-	function renderPlainText( value: JsonValue | undefined ): string {
-		return typeof value === 'string' ? value : String( value ?? '' );
+	function renderPlainText(value: JsonValue | undefined): string {
+		return typeof value === 'string' ? value : String(value ?? '');
 	}
 
-	function renderHtml( value: JsonValue | undefined, profile: 'inline' | 'rich' = 'rich' ): string {
-		return sanitizeBuilderHtml( renderPlainText( value ), {
+	function renderHtml(value: JsonValue | undefined, profile: 'inline' | 'rich' = 'rich'): string {
+		return sanitizeBuilderHtml(renderPlainText(value), {
 			profile,
 			trusted: model.trustedHtml,
-		} );
+		});
 	}
 
-	function renderUrl( value: JsonValue | undefined ): string {
-		return sanitizeBuilderUrl( renderPlainText( value ) );
+	function renderUrl(value: JsonValue | undefined): string {
+		return sanitizeBuilderUrl(renderPlainText(value));
 	}
 
-	function renderLinkRel( rel: string | undefined, target: string | undefined ): string | undefined {
-		if ( target !== '_blank' ) {
+	function renderLinkRel(rel: string | undefined, target: string | undefined): string | undefined {
+		if (target !== '_blank') {
 			return rel;
 		}
-		return [ ...new Set( [ ...( rel ?? '' ).split( /\s+/ ), 'noopener', 'noreferrer' ].filter( Boolean ) ) ].join( ' ' );
+		return [...new Set([...(rel ?? '').split(/\s+/), 'noopener', 'noreferrer'].filter(Boolean))].join(' ');
 	}
 
-	function toggleAccordionIndex( nextIndex: number ) {
-		if ( node.type === 'toggle' ) {
-			openAccordionIndexes = openAccordionIndexes.includes( nextIndex )
-				? openAccordionIndexes.filter( ( value ) => value !== nextIndex )
-				: [ ...openAccordionIndexes, nextIndex ];
+	function toggleAccordionIndex(nextIndex: number) {
+		if (node.type === 'toggle') {
+			openAccordionIndexes = openAccordionIndexes.includes(nextIndex)
+				? openAccordionIndexes.filter((value) => value !== nextIndex)
+				: [...openAccordionIndexes, nextIndex];
 			return;
 		}
 
-		openAccordionIndexes = openAccordionIndexes.includes( nextIndex ) ? [] : [ nextIndex ];
+		openAccordionIndexes = openAccordionIndexes.includes(nextIndex) ? [] : [nextIndex];
 	}
 
-	function cycleCarousel( direction: -1 | 1 ) {
-		if ( !carouselSlides.length ) {
+	function cycleCarousel(direction: -1 | 1) {
+		if (!carouselSlides.length) {
 			carouselIndex = 0;
 			return;
 		}
 
-		carouselIndex = ( carouselIndex + direction + carouselSlides.length ) % carouselSlides.length;
+		carouselIndex = (carouselIndex + direction + carouselSlides.length) % carouselSlides.length;
 	}
 
-	function submitForm( event: SubmitEvent ) {
+	function submitForm(event: SubmitEvent) {
 		event.preventDefault();
 		formStatus = 'success';
 	}
@@ -247,50 +255,51 @@
 	}
 
 	function handlePopupOverlayClick() {
-		if ( popupBehavior.closeOnOverlay ) {
+		if (popupBehavior.closeOnOverlay) {
 			dismissPopup();
 		}
 	}
 
-	function compactAttributes( attributes: Record<string, string | undefined> ): Record<string, string> {
+	function compactAttributes(attributes: Record<string, string | undefined>): Record<string, string> {
 		return Object.fromEntries(
-			Object.entries( attributes ).filter( ( [ , value ] ) => value !== undefined && value !== '' ),
+			Object.entries(attributes).filter(([, value]) => value !== undefined && value !== ''),
 		) as Record<string, string>;
 	}
 
 	function compactClassName(values: Array<string | undefined>): string {
-		return values.filter( Boolean ).join( ' ' );
+		return values.filter(Boolean).join(' ');
 	}
 
 	function isAccordionItemOpen(indexToCheck: number): boolean {
-		return openAccordionIndexes.includes( indexToCheck );
+		return openAccordionIndexes.includes(indexToCheck);
 	}
 
 	function getPopupDialogStyle(): string {
-		const overlayColor = renderPlainText( resolvedProps.overlayBackdrop ) || 'rgba(15, 23, 42, 0.45)';
-		const width = renderPlainText( popupBehavior.width ) || '720px';
-		return [
-			`--builder-popup-prop-width:${ width };`,
-			`--builder-popup-overlay:${ overlayColor };`,
-		].join( ' ' );
+		const overlayColor = renderPlainText(resolvedProps.overlayBackdrop) || 'rgba(15, 23, 42, 0.45)';
+		const width = renderPlainText(popupBehavior.width) || '720px';
+		return [`--builder-popup-prop-width:${width};`, `--builder-popup-overlay:${overlayColor};`].join(' ');
 	}
 
 	function getCollectionRecordKey(recordValue: Record<string, unknown>, recordIndex: number): string {
 		const candidate = recordValue.id ?? recordValue.slug ?? recordValue.title;
 		return typeof candidate === 'string' || typeof candidate === 'number'
-			? `${ node.id }-${ candidate }`
-			: `${ node.id }-record-${ recordIndex }`;
+			? `${node.id}-${candidate}`
+			: `${node.id}-record-${recordIndex}`;
 	}
 
-	function bindNodeGeometry( element: HTMLElement, meta: BuilderGeometryNodeMeta ) {
-		return geometryEmitter?.registerNode( element, meta );
+	function bindNodeGeometry(element: HTMLElement, meta: BuilderGeometryNodeMeta) {
+		return geometryEmitter?.registerNode(element, meta);
 	}
 
-	function bindSlotGeometry( element: HTMLElement, meta: BuilderGeometrySlotMeta ) {
-		return geometryEmitter?.registerSlot( element, meta );
+	function bindSlotGeometry(element: HTMLElement, meta: BuilderGeometrySlotMeta) {
+		return geometryEmitter?.registerSlot(element, meta);
 	}
 
-	function createSlotGeometryMeta( slotId: string | undefined, acceptsMultiple = true, childNodeIds: string[] = [] ): BuilderGeometrySlotMeta {
+	function createSlotGeometryMeta(
+		slotId: string | undefined,
+		acceptsMultiple = true,
+		childNodeIds: string[] = [],
+	): BuilderGeometrySlotMeta {
 		return {
 			documentId,
 			ownerId: node.id,
@@ -301,9 +310,9 @@
 		};
 	}
 
-	function resolveHeadingTag( value: JsonValue ) {
-		const candidate = renderPlainText( value );
-		return [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ].includes( candidate ) ? candidate : 'h2';
+	function resolveHeadingTag(value: JsonValue) {
+		const candidate = renderPlainText(value);
+		return ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(candidate) ? candidate : 'h2';
 	}
 
 	function getChildNodes() {
@@ -314,7 +323,9 @@
 {#if visible}
 	{#if node.type === 'component-instance'}
 		<div
-			{...getAttributeBag( { class: compactClassName( [ 'builder-node', 'builder-node--component-instance', nodeClasses ] ) } )}
+			{...getAttributeBag({
+				class: compactClassName(['builder-node', 'builder-node--component-instance', nodeClasses]),
+			})}
 			use:bindNodeGeometry={nodeGeometry}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
@@ -328,9 +339,9 @@
 						documentId={expandedComponentDocumentId}
 						parentId={node.id}
 						index={componentIndex}
-						rootSlot={rootSlot}
+						{rootSlot}
 						bridgeEvents={false}
-						record={record}
+						{record}
 					/>
 				{/each}
 			</div>
@@ -357,12 +368,12 @@
 					<BuilderNodeView
 						node={child}
 						{model}
-						documentId={documentId}
+						{documentId}
 						parentId={node.id}
 						index={childIndex}
-						rootSlot={rootSlot}
-						bridgeEvents={bridgeEvents}
-						record={record}
+						{rootSlot}
+						{bridgeEvents}
+						{record}
 					/>
 				{/each}
 
@@ -372,21 +383,25 @@
 						data-builder-slot-owner={node.id}
 						data-builder-slot={slotDefinition.id}
 						data-builder-document={documentId}
-						data-builder-multiple={String( slotDefinition.multiple ?? true )}
-						use:bindSlotGeometry={createSlotGeometryMeta( slotDefinition.id, slotDefinition.multiple ?? true, ( node.slots[ slotDefinition.id ] ?? [] ).map( ( child ) => child.id ) )}
+						data-builder-multiple={String(slotDefinition.multiple ?? true)}
+						use:bindSlotGeometry={createSlotGeometryMeta(
+							slotDefinition.id,
+							slotDefinition.multiple ?? true,
+							(node.slots[slotDefinition.id] ?? []).map((child) => child.id),
+						)}
 					>
-						{#if ( node.slots[ slotDefinition.id ] ?? [] ).length}
-							{#each node.slots[ slotDefinition.id ] ?? [] as slotNode, slotIndex (slotNode.id)}
+						{#if (node.slots[slotDefinition.id] ?? []).length}
+							{#each node.slots[slotDefinition.id] ?? [] as slotNode, slotIndex (slotNode.id)}
 								<BuilderNodeView
 									node={slotNode}
 									{model}
-									documentId={documentId}
+									{documentId}
 									parentId={node.id}
 									slot={slotDefinition.id}
 									index={slotIndex}
-									rootSlot={rootSlot}
-									bridgeEvents={bridgeEvents}
-									record={record}
+									{rootSlot}
+									{bridgeEvents}
+									{record}
 								/>
 							{/each}
 						{:else if model.authoringMode}
@@ -401,29 +416,33 @@
 		</div>
 	{:else if node.type === 'heading'}
 		<svelte:element
-			this={resolveHeadingTag( resolvedProps.level )}
-			{...getAttributeBag( { 'data-builder-inline-content': inlineEditable ? 'true' : undefined } )}
+			this={resolveHeadingTag(resolvedProps.level)}
+			{...getAttributeBag({ 'data-builder-inline-content': inlineEditable ? 'true' : undefined })}
 			use:bindNodeGeometry={nodeGeometry}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
-			onpointerleave={handleHoverLeave}
-		>{@html renderHtml( resolvedProps.text, 'inline' )}</svelte:element>
+			onpointerleave={handleHoverLeave}>{@html renderHtml(resolvedProps.text, 'inline')}</svelte:element
+		>
 	{:else if node.type === 'paragraph'}
 		<p
-			{...getAttributeBag( { 'data-builder-inline-content': inlineEditable ? 'true' : undefined } )}
+			{...getAttributeBag({ 'data-builder-inline-content': inlineEditable ? 'true' : undefined })}
 			use:bindNodeGeometry={nodeGeometry}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderHtml( resolvedProps.text, 'inline' )}</p>
+		>
+			{@html renderHtml(resolvedProps.text, 'inline')}
+		</p>
 	{:else if node.type === 'text-editor'}
 		<div
-			{...getAttributeBag( { 'data-builder-inline-content': inlineEditable ? 'true' : undefined } )}
+			{...getAttributeBag({ 'data-builder-inline-content': inlineEditable ? 'true' : undefined })}
 			use:bindNodeGeometry={nodeGeometry}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderHtml( resolvedProps.text, 'inline' )}</div>
+		>
+			{@html renderHtml(resolvedProps.text, 'inline')}
+		</div>
 	{:else if node.type === 'blockquote'}
 		<blockquote
 			{...getAttributeBag()}
@@ -432,19 +451,19 @@
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			<p
-				data-builder-inline-content={inlineEditable ? 'true' : undefined}
-			>{@html renderHtml( resolvedProps.text, 'inline' )}</p>
-			{#if renderPlainText( resolvedProps.cite )}
-				<cite>{renderPlainText( resolvedProps.cite )}</cite>
+			<p data-builder-inline-content={inlineEditable ? 'true' : undefined}>
+				{@html renderHtml(resolvedProps.text, 'inline')}
+			</p>
+			{#if renderPlainText(resolvedProps.cite)}
+				<cite>{renderPlainText(resolvedProps.cite)}</cite>
 			{/if}
 		</blockquote>
 	{:else if node.type === 'image'}
 		<img
 			{...getAttributeBag()}
 			use:bindNodeGeometry={nodeGeometry}
-			src={renderUrl( resolvedProps.src )}
-			alt={renderPlainText( resolvedProps.alt )}
+			src={renderUrl(resolvedProps.src)}
+			alt={renderPlainText(resolvedProps.alt)}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
@@ -453,12 +472,12 @@
 		<a
 			{...getAttributeBag()}
 			use:bindNodeGeometry={nodeGeometry}
-			href={renderUrl( resolvedProps.href ) || '#'}
+			href={renderUrl(resolvedProps.href) || '#'}
 			role="button"
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
-			onpointerleave={handleHoverLeave}
-		>{renderPlainText( resolvedProps.text ) || 'Button'}</a>
+			onpointerleave={handleHoverLeave}>{renderPlainText(resolvedProps.text) || 'Button'}</a
+		>
 	{:else if node.type === 'divider'}
 		<hr
 			{...getAttributeBag()}
@@ -475,7 +494,7 @@
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			<video controls src={renderUrl( resolvedProps.src )}>
+			<video controls src={renderUrl(resolvedProps.src)}>
 				<track kind="captions" />
 			</video>
 		</div>
@@ -486,7 +505,9 @@
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderHtml( resolvedProps.markup )}</div>
+		>
+			{@html renderHtml(resolvedProps.markup)}
+		</div>
 	{:else if node.type === 'icon'}
 		<div
 			{...getAttributeBag()}
@@ -495,7 +516,7 @@
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			<span class="builder-icon__symbol">{renderPlainText( resolvedProps.symbol ) || 'star'}</span>
+			<span class="builder-icon__symbol">{renderPlainText(resolvedProps.symbol) || 'star'}</span>
 		</div>
 	{:else if node.type === 'icon-box'}
 		<article
@@ -505,10 +526,10 @@
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			<div class="builder-icon-box__icon">{renderPlainText( resolvedProps.symbol ) || 'spark'}</div>
+			<div class="builder-icon-box__icon">{renderPlainText(resolvedProps.symbol) || 'spark'}</div>
 			<div class="builder-icon-box__copy">
-				<strong>{renderPlainText( resolvedProps.title )}</strong>
-				<p>{@html renderHtml( resolvedProps.text, 'inline' )}</p>
+				<strong>{renderPlainText(resolvedProps.title)}</strong>
+				<p>{@html renderHtml(resolvedProps.text, 'inline')}</p>
 			</div>
 		</article>
 	{:else if node.type === 'list'}
@@ -519,8 +540,8 @@
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			{#each Array.isArray( resolvedProps.items ) ? resolvedProps.items : [] as item, itemIndex (`${node.id}-item-${itemIndex}`)}
-				<li>{renderPlainText( item )}</li>
+			{#each Array.isArray(resolvedProps.items) ? resolvedProps.items : [] as item, itemIndex (`${node.id}-item-${itemIndex}`)}
+				<li>{renderPlainText(item)}</li>
 			{/each}
 		</ul>
 	{:else if node.type === 'tabs'}
@@ -537,7 +558,11 @@
 				data-builder-slot="triggers"
 				data-builder-document={documentId}
 				data-builder-multiple="true"
-				use:bindSlotGeometry={createSlotGeometryMeta( 'triggers', true, ( node.slots.triggers ?? [] ).map( ( child ) => child.id ) )}
+				use:bindSlotGeometry={createSlotGeometryMeta(
+					'triggers',
+					true,
+					(node.slots.triggers ?? []).map((child) => child.id),
+				)}
 			>
 				{#each tabItems as item, tabIndex (item.id)}
 					<button
@@ -553,12 +578,12 @@
 								<BuilderNodeView
 									node={triggerNode}
 									{model}
-									documentId={documentId}
+									{documentId}
 									parentId={node.id}
 									slot="triggers"
 									index={triggerIndex}
-									bridgeEvents={bridgeEvents}
-									record={record}
+									{bridgeEvents}
+									{record}
 								/>
 							{/each}
 						{:else}
@@ -567,13 +592,17 @@
 					</button>
 				{/each}
 			</div>
-		<div
-			class="builder-tabs__panels"
-			data-builder-slot-owner={node.id}
-			data-builder-slot="panels"
-			data-builder-document={documentId}
-			data-builder-multiple="true"
-			use:bindSlotGeometry={createSlotGeometryMeta( 'panels', true, ( node.slots.panels ?? [] ).map( ( child ) => child.id ) )}
+			<div
+				class="builder-tabs__panels"
+				data-builder-slot-owner={node.id}
+				data-builder-slot="panels"
+				data-builder-document={documentId}
+				data-builder-multiple="true"
+				use:bindSlotGeometry={createSlotGeometryMeta(
+					'panels',
+					true,
+					(node.slots.panels ?? []).map((child) => child.id),
+				)}
 			>
 				{#each tabItems as item, tabIndex (item.id)}
 					<div class:hidden={tabIndex !== activeTabIndex} class="builder-tabs__panel">
@@ -582,16 +611,16 @@
 								<BuilderNodeView
 									node={panelNode}
 									{model}
-									documentId={documentId}
+									{documentId}
 									parentId={node.id}
 									slot="panels"
 									index={panelIndex}
-									bridgeEvents={bridgeEvents}
-									record={record}
+									{bridgeEvents}
+									{record}
 								/>
 							{/each}
 						{:else if item.content}
-							<div class="builder-tabs__panel-copy">{@html renderHtml( item.content )}</div>
+							<div class="builder-tabs__panel-copy">{@html renderHtml(item.content)}</div>
 						{:else if model.authoringMode}
 							<div class="builder-empty-view builder-empty-view--slot" aria-hidden="true">
 								<span class="builder-empty-view__label">+ Drop Items</span>
@@ -612,12 +641,12 @@
 		>
 			{#each accordionItems as item, itemIndex (item.id)}
 				<article class="builder-accordion__item">
-					<button type="button" onclick={() => toggleAccordionIndex( itemIndex )}>
+					<button type="button" onclick={() => toggleAccordionIndex(itemIndex)}>
 						<span>{item.title}</span>
-						<span>{isAccordionItemOpen( itemIndex ) ? '−' : '+'}</span>
+						<span>{isAccordionItemOpen(itemIndex) ? '−' : '+'}</span>
 					</button>
-					{#if isAccordionItemOpen( itemIndex )}
-						<div class="builder-accordion__body">{@html renderHtml( item.body )}</div>
+					{#if isAccordionItemOpen(itemIndex)}
+						<div class="builder-accordion__body">{@html renderHtml(item.body)}</div>
 					{/if}
 				</article>
 			{/each}
@@ -633,11 +662,17 @@
 			<ul class="builder-menu__list">
 				{#each menuItems as item (item.id)}
 					<li>
-						<a href={renderUrl( item.href )} target={item.target} rel={renderLinkRel( item.rel, item.target )}>{item.label}</a>
+						<a href={renderUrl(item.href)} target={item.target} rel={renderLinkRel(item.rel, item.target)}
+							>{item.label}</a
+						>
 						{#if item.children.length}
 							<ul>
 								{#each item.children as child (child.id)}
-									<li><a href={renderUrl( child.href )} target={child.target} rel={renderLinkRel( child.rel, child.target )}>{child.label}</a></li>
+									<li>
+										<a href={renderUrl(child.href)} target={child.target} rel={renderLinkRel(child.rel, child.target)}
+											>{child.label}</a
+										>
+									</li>
 								{/each}
 							</ul>
 						{/if}
@@ -656,7 +691,7 @@
 			<div class="builder-gallery">
 				{#each galleryImages as image (image.id)}
 					<figure>
-						<img src={renderUrl( image.src )} alt={image.alt} />
+						<img src={renderUrl(image.src)} alt={image.alt} />
 						{#if image.caption}
 							<figcaption>{image.caption}</figcaption>
 						{/if}
@@ -674,11 +709,11 @@
 		>
 			{#if carouselSlides.length}
 				<div class="builder-carousel__viewport">
-					<button type="button" class="builder-carousel__nav" onclick={() => cycleCarousel( -1 )}>Prev</button>
+					<button type="button" class="builder-carousel__nav" onclick={() => cycleCarousel(-1)}>Prev</button>
 					{#each carouselSlides as slide, slideIndex (slide.id)}
 						<article class:hidden={slideIndex !== carouselIndex} class="builder-carousel__slide">
 							{#if slide.src}
-								<img src={renderUrl( slide.src )} alt={slide.alt ?? slide.title} />
+								<img src={renderUrl(slide.src)} alt={slide.alt ?? slide.title} />
 							{/if}
 							<div class="builder-carousel__copy">
 								<strong>{slide.title}</strong>
@@ -686,12 +721,12 @@
 									<p>{slide.text}</p>
 								{/if}
 								{#if slide.ctaHref && slide.ctaLabel}
-									<a href={renderUrl( slide.ctaHref )}>{slide.ctaLabel}</a>
+									<a href={renderUrl(slide.ctaHref)}>{slide.ctaLabel}</a>
 								{/if}
 							</div>
 						</article>
 					{/each}
-					<button type="button" class="builder-carousel__nav" onclick={() => cycleCarousel( 1 )}>Next</button>
+					<button type="button" class="builder-carousel__nav" onclick={() => cycleCarousel(1)}>Next</button>
 				</div>
 			{/if}
 		</section>
@@ -709,20 +744,24 @@
 				data-builder-slot="item"
 				data-builder-document={documentId}
 				data-builder-multiple="true"
-				use:bindSlotGeometry={createSlotGeometryMeta( 'item', true, ( node.slots.item ?? [] ).map( ( child ) => child.id ) )}
+				use:bindSlotGeometry={createSlotGeometryMeta(
+					'item',
+					true,
+					(node.slots.item ?? []).map((child) => child.id),
+				)}
 			>
 				{#if collectionRecords.length}
-					{#each collectionRecords as collectionRecord, recordIndex (getCollectionRecordKey( collectionRecord, recordIndex ))}
+					{#each collectionRecords as collectionRecord, recordIndex (getCollectionRecordKey(collectionRecord, recordIndex))}
 						<div class="builder-loop__record">
 							{#each node.slots.item ?? [] as itemNode, itemIndex (itemNode.id)}
 								<BuilderNodeView
 									node={itemNode}
 									{model}
-									documentId={documentId}
+									{documentId}
 									parentId={node.id}
 									slot="item"
 									index={itemIndex}
-									bridgeEvents={bridgeEvents}
+									{bridgeEvents}
 									record={collectionRecord}
 								/>
 							{/each}
@@ -735,23 +774,27 @@
 						data-builder-slot="empty"
 						data-builder-document={documentId}
 						data-builder-multiple="true"
-						use:bindSlotGeometry={createSlotGeometryMeta( 'empty', true, ( node.slots.empty ?? [] ).map( ( child ) => child.id ) )}
+						use:bindSlotGeometry={createSlotGeometryMeta(
+							'empty',
+							true,
+							(node.slots.empty ?? []).map((child) => child.id),
+						)}
 					>
-						{#if ( node.slots.empty ?? [] ).length}
+						{#if (node.slots.empty ?? []).length}
 							{#each node.slots.empty ?? [] as emptyNode, emptyIndex (emptyNode.id)}
 								<BuilderNodeView
 									node={emptyNode}
 									{model}
-									documentId={documentId}
+									{documentId}
 									parentId={node.id}
 									slot="empty"
 									index={emptyIndex}
-									bridgeEvents={bridgeEvents}
-									record={record}
+									{bridgeEvents}
+									{record}
 								/>
 							{/each}
 						{:else}
-							<p>{renderPlainText( resolvedProps.emptyText ) || 'No content found'}</p>
+							<p>{renderPlainText(resolvedProps.emptyText) || 'No content found'}</p>
 						{/if}
 					</div>
 				{/if}
@@ -760,16 +803,22 @@
 	{:else if node.type === 'popup-root'}
 		{#if popupOpen}
 			<div
-				{...getAttributeBag( {
-					class: compactClassName( [ 'builder-node', 'builder-node--popup-root', nodeClasses, overlayIsTopmost ? 'is-topmost' : 'is-stacked' ] ),
-					style: `${ nodeStyle } ${ getPopupDialogStyle() }`,
-				} )}
+				{...getAttributeBag({
+					class: compactClassName([
+						'builder-node',
+						'builder-node--popup-root',
+						nodeClasses,
+						overlayIsTopmost ? 'is-topmost' : 'is-stacked',
+					]),
+					style: `${nodeStyle} ${getPopupDialogStyle()}`,
+				})}
 				use:bindNodeGeometry={nodeGeometry}
 				onclick={handleSelect}
 				onpointerenter={handleHoverEnter}
 				onpointerleave={handleHoverLeave}
 			>
-				<button type="button" class="builder-popup__overlay" aria-label="Close popup" onclick={handlePopupOverlayClick}></button>
+				<button type="button" class="builder-popup__overlay" aria-label="Close popup" onclick={handlePopupOverlayClick}
+				></button>
 				<div class="builder-popup__dialog">
 					<header class="builder-popup__header">
 						<strong>{popupBehavior.title}</strong>
@@ -782,11 +831,11 @@
 							<BuilderNodeView
 								node={child}
 								{model}
-								documentId={documentId}
+								{documentId}
 								parentId={node.id}
 								index={childIndex}
-								bridgeEvents={bridgeEvents}
-								record={record}
+								{bridgeEvents}
+								{record}
 							/>
 						{/each}
 					</div>
@@ -808,33 +857,58 @@
 						<BuilderNodeView
 							node={child}
 							{model}
-							documentId={documentId}
+							{documentId}
 							parentId={node.id}
 							index={childIndex}
-							bridgeEvents={bridgeEvents}
-							record={record}
+							{bridgeEvents}
+							{record}
 						/>
-						{/each}
+					{/each}
 				{:else}
 					{#each generatedFormFields as field (field.id)}
 						<div class="builder-form__generated">
 							{#if field.kind === 'textarea'}
-								<label><span>{field.label}</span><textarea name={field.name} placeholder={field.placeholder} rows={field.rows ?? 4}></textarea></label>
+								<label
+									><span>{field.label}</span><textarea
+										name={field.name}
+										placeholder={field.placeholder}
+										rows={field.rows ?? 4}
+									></textarea></label
+								>
 							{:else if field.kind === 'select'}
-								<label><span>{field.label}</span><select name={field.name}>{#each field.options as option (option.value)}<option value={option.value}>{option.label}</option>{/each}</select></label>
+								<label
+									><span>{field.label}</span><select name={field.name}
+										>{#each field.options as option (option.value)}<option value={option.value}>{option.label}</option
+											>{/each}</select
+									></label
+								>
 							{:else if field.kind === 'checkbox'}
-								<label class="builder-form__choice"><input type="checkbox" name={field.name} checked={field.checked} /><span>{field.label}</span></label>
+								<label class="builder-form__choice"
+									><input type="checkbox" name={field.name} checked={field.checked} /><span>{field.label}</span></label
+								>
 							{:else if field.kind === 'radio'}
-								<fieldset><legend>{field.legend ?? field.label}</legend>{#each field.options as option (option.value)}<label class="builder-form__choice"><input type="radio" name={field.name} value={option.value} /><span>{option.label}</span></label>{/each}</fieldset>
+								<fieldset>
+									<legend>{field.legend ?? field.label}</legend>{#each field.options as option (option.value)}<label
+											class="builder-form__choice"
+											><input type="radio" name={field.name} value={option.value} /><span>{option.label}</span></label
+										>{/each}
+								</fieldset>
 							{:else if field.kind === 'hidden'}
 								<input type="hidden" name={field.name} value={field.value} />
 							{:else if field.kind === 'submit'}
 								<button type="submit">{field.text ?? field.label ?? 'Submit'}</button>
 							{:else}
-								<label><span>{field.label}</span><input type={field.kind} name={field.name} placeholder={field.placeholder} value={field.value} /></label>
+								<label
+									><span>{field.label}</span><input
+										type={field.kind}
+										name={field.name}
+										placeholder={field.placeholder}
+										value={field.value}
+									/></label
+								>
 							{/if}
 						</div>
-						{/each}
+					{/each}
 					{#if model.authoringMode && !generatedFormFields.length}
 						<div class="builder-empty-view builder-empty-view--slot" aria-hidden="true">
 							<span class="builder-empty-view__label">+ Drop Items</span>
@@ -844,7 +918,9 @@
 				{/if}
 			</div>
 			{#if formStatus === 'success'}
-				<p class="builder-form__status">{renderPlainText( resolvedProps.successMessage ) || 'Form submitted in preview mode.'}</p>
+				<p class="builder-form__status">
+					{renderPlainText(resolvedProps.successMessage) || 'Form submitted in preview mode.'}
+				</p>
 			{/if}
 		</form>
 	{:else if directFormFieldShell}
@@ -856,44 +932,73 @@
 			onpointerleave={handleHoverLeave}
 		>
 			{#if directFormFieldShell.kind === 'textarea'}
-				<label><span>{directFormFieldShell.label}</span><textarea name={directFormFieldShell.name} placeholder={directFormFieldShell.placeholder} rows={directFormFieldShell.rows ?? 4}></textarea></label>
+				<label
+					><span>{directFormFieldShell.label}</span><textarea
+						name={directFormFieldShell.name}
+						placeholder={directFormFieldShell.placeholder}
+						rows={directFormFieldShell.rows ?? 4}
+					></textarea></label
+				>
 			{:else if directFormFieldShell.kind === 'select'}
-				<label><span>{directFormFieldShell.label}</span><select name={directFormFieldShell.name}>{#each directFormFieldShell.options as option (option.value)}<option value={option.value}>{option.label}</option>{/each}</select></label>
+				<label
+					><span>{directFormFieldShell.label}</span><select name={directFormFieldShell.name}
+						>{#each directFormFieldShell.options as option (option.value)}<option value={option.value}
+								>{option.label}</option
+							>{/each}</select
+					></label
+				>
 			{:else if directFormFieldShell.kind === 'checkbox'}
-				<label class="builder-form__choice"><input type="checkbox" name={directFormFieldShell.name} checked={directFormFieldShell.checked} /><span>{directFormFieldShell.label}</span></label>
+				<label class="builder-form__choice"
+					><input type="checkbox" name={directFormFieldShell.name} checked={directFormFieldShell.checked} /><span
+						>{directFormFieldShell.label}</span
+					></label
+				>
 			{:else if directFormFieldShell.kind === 'radio'}
-				<fieldset><legend>{directFormFieldShell.legend ?? directFormFieldShell.label}</legend>{#each directFormFieldShell.options as option (option.value)}<label class="builder-form__choice"><input type="radio" name={directFormFieldShell.name} value={option.value} /><span>{option.label}</span></label>{/each}</fieldset>
+				<fieldset>
+					<legend>{directFormFieldShell.legend ?? directFormFieldShell.label}</legend
+					>{#each directFormFieldShell.options as option (option.value)}<label class="builder-form__choice"
+							><input type="radio" name={directFormFieldShell.name} value={option.value} /><span>{option.label}</span
+							></label
+						>{/each}
+				</fieldset>
 			{:else if directFormFieldShell.kind === 'hidden'}
 				<input type="hidden" name={directFormFieldShell.name} value={directFormFieldShell.value} />
 			{:else if directFormFieldShell.kind === 'submit'}
 				<button type="button">{directFormFieldShell.text ?? directFormFieldShell.label ?? 'Submit'}</button>
 			{:else}
-				<label><span>{directFormFieldShell.label}</span><input type={directFormFieldShell.kind} name={directFormFieldShell.name} placeholder={directFormFieldShell.placeholder} value={directFormFieldShell.value} /></label>
+				<label
+					><span>{directFormFieldShell.label}</span><input
+						type={directFormFieldShell.kind}
+						name={directFormFieldShell.name}
+						placeholder={directFormFieldShell.placeholder}
+						value={directFormFieldShell.value}
+					/></label
+				>
 			{/if}
 		</div>
 	{:else}
 		<svelte:element
 			this={definition?.runtime.tag ?? 'div'}
-			{...getAttributeBag( { style: containerStyle } )}
+			{...getAttributeBag({ style: containerStyle })}
 			use:bindNodeGeometry={nodeGeometry}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			{#if renderPlainText( resolvedProps.text ) && !node.children.length && !slotDefinitions.length}
-				<span class="builder-node__text">{renderPlainText( resolvedProps.text )}</span>
+			{#if renderPlainText(resolvedProps.text) && !node.children.length && !slotDefinitions.length}
+				<span class="builder-node__text">{renderPlainText(resolvedProps.text)}</span>
 			{/if}
 
 			{#each node.children as child, childIndex (child.id)}
 				<BuilderNodeView
 					node={child}
 					{model}
-					documentId={documentId}
+					{documentId}
 					parentId={node.id}
 					index={childIndex}
-					rootSlot={rootSlot}
-					bridgeEvents={bridgeEvents}
-					record={record}
+					{rootSlot}
+					{bridgeEvents}
+					{record}
 				/>
 			{/each}
 
@@ -903,21 +1008,25 @@
 					data-builder-slot-owner={node.id}
 					data-builder-slot={slotDefinition.id}
 					data-builder-document={documentId}
-					data-builder-multiple={String( slotDefinition.multiple ?? true )}
-					use:bindSlotGeometry={createSlotGeometryMeta( slotDefinition.id, slotDefinition.multiple ?? true, ( node.slots[ slotDefinition.id ] ?? [] ).map( ( child ) => child.id ) )}
+					data-builder-multiple={String(slotDefinition.multiple ?? true)}
+					use:bindSlotGeometry={createSlotGeometryMeta(
+						slotDefinition.id,
+						slotDefinition.multiple ?? true,
+						(node.slots[slotDefinition.id] ?? []).map((child) => child.id),
+					)}
 				>
-					{#if ( node.slots[ slotDefinition.id ] ?? [] ).length}
-						{#each node.slots[ slotDefinition.id ] ?? [] as slotNode, slotIndex (slotNode.id)}
+					{#if (node.slots[slotDefinition.id] ?? []).length}
+						{#each node.slots[slotDefinition.id] ?? [] as slotNode, slotIndex (slotNode.id)}
 							<BuilderNodeView
 								node={slotNode}
 								{model}
-								documentId={documentId}
+								{documentId}
 								parentId={node.id}
 								slot={slotDefinition.id}
 								index={slotIndex}
-								rootSlot={rootSlot}
-								bridgeEvents={bridgeEvents}
-								record={record}
+								{rootSlot}
+								{bridgeEvents}
+								{record}
 							/>
 						{/each}
 					{:else if model.authoringMode}
@@ -951,7 +1060,7 @@
 	}
 
 	.builder-node--authoring-hidden::after {
-		content: "Hidden";
+		content: 'Hidden';
 		position: absolute;
 		inset: 0;
 		display: grid;

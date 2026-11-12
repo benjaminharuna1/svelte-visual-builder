@@ -4,6 +4,6 @@ import { readHostProject } from '$lib/server/host-store';
 export function load() {
 	return {
 		projectId: starterProjectId,
-		...readHostProject( starterProjectId ),
+		...readHostProject(starterProjectId),
 	};
 }

@@ -6,7 +6,14 @@
 	import DocumentModeBrowser from './LazyDocumentModeBrowser.svelte';
 	import MenuPanel from './LazyMenuPanel.svelte';
 
-	type SiteEditorEntry = { id: string; label: string; route: string; templateType: string; documentId: string; slot: string };
+	type SiteEditorEntry = {
+		id: string;
+		label: string;
+		route: string;
+		templateType: string;
+		documentId: string;
+		slot: string;
+	};
 	type PreviewPreset = { id: string; label: string; pathname: string; query: string };
 
 	export let sections: PanelTabItem[] = [];
@@ -28,40 +35,38 @@
 	export let editingContext: 'master' | 'instance' | 'detached' | undefined = undefined;
 	export let editingComponentDocumentId: string | undefined = undefined;
 	export let variant: 'sidebar' | 'workspace' = 'sidebar';
-	export let onChangeSection: ( sectionId: string ) => void = () => {};
-	export let onChangeDocumentFilter: ( value: DocumentKind | 'all' ) => void = () => {};
-	export let onOpenDocument: ( documentId: string, mode?: EditorMode ) => void = () => {};
-	export let onOpenSiteEditorEntry: ( entry: SiteEditorEntry ) => void = () => {};
-	export let onOpenPreviewPreset: ( preset: PreviewPreset ) => void = () => {};
-	export let onPreviewAssignment: ( assignment: ThemeAssignment ) => void = () => {};
-	export let onOpenAssignment: ( assignment: ThemeAssignment ) => void = () => {};
-	export let onCreateAssignment: ( draft: {
+	export let onChangeSection: (sectionId: string) => void = () => {};
+	export let onChangeDocumentFilter: (value: DocumentKind | 'all') => void = () => {};
+	export let onOpenDocument: (documentId: string, mode?: EditorMode) => void = () => {};
+	export let onOpenSiteEditorEntry: (entry: SiteEditorEntry) => void = () => {};
+	export let onOpenPreviewPreset: (preset: PreviewPreset) => void = () => {};
+	export let onPreviewAssignment: (assignment: ThemeAssignment) => void = () => {};
+	export let onOpenAssignment: (assignment: ThemeAssignment) => void = () => {};
+	export let onCreateAssignment: (draft: {
 		slot: ThemeAssignment['slot'];
 		pathname?: string;
 		priority: number;
 		status: ThemeAssignment['status'];
 		routePattern?: string;
-	} ) => void = () => {};
-	export let onUpdateAssignment: ( assignment: ThemeAssignment, patch: Partial<ThemeAssignment> ) => void = () => {};
-	export let onUpdateAssignmentRoutePattern: ( assignment: ThemeAssignment, value: string ) => void = () => {};
-	export let onDeleteAssignment: ( assignmentId: string ) => void = () => {};
-	export let onInsertComponentInstance: ( componentId: string ) => void = () => {};
+	}) => void = () => {};
+	export let onUpdateAssignment: (assignment: ThemeAssignment, patch: Partial<ThemeAssignment>) => void = () => {};
+	export let onUpdateAssignmentRoutePattern: (assignment: ThemeAssignment, value: string) => void = () => {};
+	export let onDeleteAssignment: (assignmentId: string) => void = () => {};
+	export let onInsertComponentInstance: (componentId: string) => void = () => {};
 	export let onDetachInstance: () => void = () => {};
-	export let onRelinkInstance: ( componentId: string, preserveOverrides?: boolean ) => void = () => {};
+	export let onRelinkInstance: (componentId: string, preserveOverrides?: boolean) => void = () => {};
 </script>
 
 <div class={`builder-management-menu builder-management-menu--${variant}`}>
-	<MenuPanel
-		surface="dark"
-		bodyScrollable={variant === 'workspace'}
-		{sections}
-		activeSection={activeSection}
-		onChangeSection={onChangeSection}
-	>
+	<MenuPanel surface="dark" bodyScrollable={variant === 'workspace'} {sections} {activeSection} {onChangeSection}>
 		<div slot="summary" class="builder-management-menu__stats">
 			<span class="builder-management-menu__stat"><strong>{documents.length}</strong><small>Documents</small></span>
-			<span class="builder-management-menu__stat"><strong>{siteEditorEntries.length}</strong><small>Site entries</small></span>
-			<span class:builder-management-menu__stat--warn={importWarnings.length > 0} class="builder-management-menu__stat"><strong>{importWarnings.length}</strong><small>Import warnings</small></span>
+			<span class="builder-management-menu__stat"
+				><strong>{siteEditorEntries.length}</strong><small>Site entries</small></span
+			>
+			<span class:builder-management-menu__stat--warn={importWarnings.length > 0} class="builder-management-menu__stat"
+				><strong>{importWarnings.length}</strong><small>Import warnings</small></span
+			>
 		</div>
 
 		<div slot="documents" class="builder-management-menu__card">
@@ -72,7 +77,11 @@
 				</div>
 				<label class="builder-management-menu__filter">
 					<span>Filter</span>
-					<select value={documentFilter} onchange={(event) => onChangeDocumentFilter( ( event.currentTarget as HTMLSelectElement ).value as DocumentKind | 'all' )}>
+					<select
+						value={documentFilter}
+						onchange={(event) =>
+							onChangeDocumentFilter((event.currentTarget as HTMLSelectElement).value as DocumentKind | 'all')}
+					>
 						<option value="all">all</option>
 						{#each creatableKinds as kind}
 							<option value={kind}>{kind}</option>
@@ -80,7 +89,7 @@
 					</select>
 				</label>
 			</div>
-			<DocumentModeBrowser documents={filteredDocuments} activeDocumentId={activeDocumentId} activeMode={activeMode} onOpenDocument={onOpenDocument} />
+			<DocumentModeBrowser documents={filteredDocuments} {activeDocumentId} {activeMode} {onOpenDocument} />
 		</div>
 
 		<svelte:fragment slot="site-editor">
@@ -92,7 +101,11 @@
 					</div>
 					<div class="builder-management-menu__entry-grid">
 						{#each siteEditorEntries as entry (entry.id)}
-							<button type="button" class="builder-management-menu__entry-card" onclick={() => onOpenSiteEditorEntry( entry )}>
+							<button
+								type="button"
+								class="builder-management-menu__entry-card"
+								onclick={() => onOpenSiteEditorEntry(entry)}
+							>
 								<strong>{entry.label}</strong>
 								<span>{entry.templateType}</span>
 								<small>{entry.route}</small>
@@ -102,7 +115,10 @@
 				</section>
 			{:else}
 				<section class="builder-management-menu__card builder-management-menu__empty">
-					<div class="builder-management-menu__stack-header"><h3>Site Editor</h3><p>No site-editor entries are available for this project.</p></div>
+					<div class="builder-management-menu__stack-header">
+						<h3>Site Editor</h3>
+						<p>No site-editor entries are available for this project.</p>
+					</div>
 				</section>
 			{/if}
 		</svelte:fragment>
@@ -110,10 +126,17 @@
 		<svelte:fragment slot="preview-presets">
 			{#if previewPresets.length}
 				<section class="builder-management-menu__card">
-					<div class="builder-management-menu__stack-header"><h3>Preview Presets</h3><p>Jump the preview frame without leaving the builder.</p></div>
+					<div class="builder-management-menu__stack-header">
+						<h3>Preview Presets</h3>
+						<p>Jump the preview frame without leaving the builder.</p>
+					</div>
 					<div class="builder-management-menu__preset-list">
 						{#each previewPresets as preset (preset.id)}
-							<button type="button" class="builder-management-menu__preset-button" onclick={() => onOpenPreviewPreset( preset )}>
+							<button
+								type="button"
+								class="builder-management-menu__preset-button"
+								onclick={() => onOpenPreviewPreset(preset)}
+							>
 								<span>{preset.label}</span>
 								<small>{preset.pathname}{preset.query ? `?${preset.query}` : ''}</small>
 							</button>
@@ -122,29 +145,38 @@
 				</section>
 			{:else}
 				<section class="builder-management-menu__card builder-management-menu__empty">
-					<div class="builder-management-menu__stack-header"><h3>Preview Presets</h3><p>No preview presets have been registered by the host.</p></div>
+					<div class="builder-management-menu__stack-header">
+						<h3>Preview Presets</h3>
+						<p>No preview presets have been registered by the host.</p>
+					</div>
 				</section>
 			{/if}
 		</svelte:fragment>
 
 		<section slot="assignments" class="builder-management-menu__card">
-			<div class="builder-management-menu__stack-header"><h3>Assignments</h3><p>Theme-builder assignments stay in the same workspace.</p></div>
+			<div class="builder-management-menu__stack-header">
+				<h3>Assignments</h3>
+				<p>Theme-builder assignments stay in the same workspace.</p>
+			</div>
 			<AssignmentWorkflowPanel
 				{activeDocument}
 				{documentsById}
-				projectAssignments={projectAssignments}
-				activeEntryId={activeEntryId}
-				onPreviewAssignment={onPreviewAssignment}
-				onOpenAssignment={onOpenAssignment}
-				onCreateAssignment={onCreateAssignment}
-				onUpdateAssignment={onUpdateAssignment}
-				onUpdateAssignmentRoutePattern={onUpdateAssignmentRoutePattern}
-				onDeleteAssignment={onDeleteAssignment}
+				{projectAssignments}
+				{activeEntryId}
+				{onPreviewAssignment}
+				{onOpenAssignment}
+				{onCreateAssignment}
+				{onUpdateAssignment}
+				{onUpdateAssignmentRoutePattern}
+				{onDeleteAssignment}
 			/>
 		</section>
 
 		<section slot="components" class="builder-management-menu__card">
-			<div class="builder-management-menu__stack-header"><h3>Components</h3><p>Open masters, insert instances, and manage detach or relink flows.</p></div>
+			<div class="builder-management-menu__stack-header">
+				<h3>Components</h3>
+				<p>Open masters, insert instances, and manage detach or relink flows.</p>
+			</div>
 			<ComponentWorkflowPanel
 				{documents}
 				{activeDocument}
@@ -152,17 +184,20 @@
 				{selectedNode}
 				{editingContext}
 				{editingComponentDocumentId}
-				onOpenDocument={onOpenDocument}
-				onInsertComponentInstance={onInsertComponentInstance}
-				onDetachInstance={onDetachInstance}
-				onRelinkInstance={onRelinkInstance}
+				{onOpenDocument}
+				{onInsertComponentInstance}
+				{onDetachInstance}
+				{onRelinkInstance}
 			/>
 		</section>
 
 		<svelte:fragment slot="import-diagnostics">
 			{#if importWarnings.length}
 				<section class="builder-management-menu__card">
-					<div class="builder-management-menu__stack-header"><h3>Import Diagnostics</h3><p>Parity gaps and compat warnings from imported Elementor content.</p></div>
+					<div class="builder-management-menu__stack-header">
+						<h3>Import Diagnostics</h3>
+						<p>Parity gaps and compat warnings from imported Elementor content.</p>
+					</div>
 					<ul class="builder-management-menu__warning-list">
 						{#each importWarnings as warning, index (`${index}-${warning}`)}
 							<li>{warning}</li>
@@ -171,7 +206,10 @@
 				</section>
 			{:else}
 				<section class="builder-management-menu__card builder-management-menu__empty">
-					<div class="builder-management-menu__stack-header"><h3>Import Diagnostics</h3><p>No import warnings for the current project.</p></div>
+					<div class="builder-management-menu__stack-header">
+						<h3>Import Diagnostics</h3>
+						<p>No import warnings for the current project.</p>
+					</div>
 				</section>
 			{/if}
 		</svelte:fragment>
@@ -189,8 +227,7 @@
 	.builder-management-menu--workspace {
 		padding: 12px;
 		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)),
-			var(--builder-shell-gray-900);
+			linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0)), var(--builder-shell-gray-900);
 	}
 
 	.builder-management-menu--workspace :global(.builder-panel-shell) {
@@ -358,7 +395,9 @@
 		border-color: transparent;
 		background: rgba(208, 4, 212, 0.16);
 		color: #ffffff;
-		box-shadow: inset 0 -2px 0 var(--builder-shell-accent), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+		box-shadow:
+			inset 0 -2px 0 var(--builder-shell-accent),
+			inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 	}
 
 	.builder-management-menu__entry-card small,

@@ -5,11 +5,11 @@ export const starterProjectId = 'starter';
 export const starterDocumentId = 'home';
 
 export function createStarterProject(): BuilderPackage {
-	const page = createDocument( 'page', 'Home', 'home' );
+	const page = createDocument('page', 'Home', 'home');
 	page.id = starterDocumentId;
 	page.status = 'published';
 	page.root = [
-		createNode( {
+		createNode({
 			id: 'starter-hero',
 			type: 'container',
 			name: 'Starter hero',
@@ -26,24 +26,24 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createNode( {
+				createNode({
 					type: 'heading',
 					props: { text: 'Svelte Builder Starter', level: 'h1', align: 'left' },
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'paragraph',
 					props: {
 						text: 'Edit this page in the visual builder, then open the published route to see the rendered result.',
 					},
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'button',
 					props: {
 						text: 'View published page',
 						href: '/published/home',
 					},
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'image',
 					props: {
 						src: '/api/media/starter-logo',
@@ -61,20 +61,24 @@ export function createStarterProject(): BuilderPackage {
 						stateBreakpoints: {},
 						customCss: '',
 					},
-				} ),
+				}),
 			],
-		} ),
+		}),
 	];
 
-	const project = createBuilderPackage( 'Svelte Builder Starter', [ page ], [
-		createThemeAssignment( {
-			documentId: page.id,
-			slot: 'page',
-			status: 'published',
-			pathname: '/published/home',
-			label: 'Home',
-		} ),
-	] );
+	const project = createBuilderPackage(
+		'Svelte Builder Starter',
+		[page],
+		[
+			createThemeAssignment({
+				documentId: page.id,
+				slot: 'page',
+				status: 'published',
+				pathname: '/published/home',
+				label: 'Home',
+			}),
+		],
+	);
 	project.media = [
 		{
 			id: 'starter-logo',

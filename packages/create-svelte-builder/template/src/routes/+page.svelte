@@ -35,76 +35,76 @@
 		},
 	};
 
-	onMount( async () => {
-		const editorModule = await import( '@builder/editor-svelte' );
+	onMount(async () => {
+		const editorModule = await import('@builder/editor-svelte');
 		canvasComponent = editorModule.BuilderCanvas;
 
-		const integration = createSvelteKitBuilderIntegration<BuilderPackage>( {
+		const integration = createSvelteKitBuilderIntegration<BuilderPackage>({
 			previewContext,
 			permissions: readPermissions(),
 			persistence: {
 				loadProject: async () => {
-					const payload = await fetchJson( `/api/projects/${ data.projectId }` );
+					const payload = await fetchJson(`/api/projects/${data.projectId}`);
 					return payload.project;
 				},
-				saveAutosave: async ( project, context ) => saveProjectSnapshot( project, context ),
-				saveDraft: async ( project, context ) => saveProjectSnapshot( project, context ),
-				publish: async ( project, context ) => saveProjectSnapshot( project, { ...context, reason: 'publish' } ),
-				restoreRevision: async ( revisionId ) => {
-					const payload = await fetchJson( `/api/projects/${ data.projectId }`, {
+				saveAutosave: async (project, context) => saveProjectSnapshot(project, context),
+				saveDraft: async (project, context) => saveProjectSnapshot(project, context),
+				publish: async (project, context) => saveProjectSnapshot(project, { ...context, reason: 'publish' }),
+				restoreRevision: async (revisionId) => {
+					const payload = await fetchJson(`/api/projects/${data.projectId}`, {
 						method: 'POST',
 						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify( { restoreRevisionId: revisionId } ),
-					} );
+						body: JSON.stringify({ restoreRevisionId: revisionId }),
+					});
 					return payload.project;
 				},
 				listRevisions: async () => {
-					const payload = await fetchJson( `/api/projects/${ data.projectId }?include=revisions` );
+					const payload = await fetchJson(`/api/projects/${data.projectId}?include=revisions`);
 					return payload.revisions ?? [];
 				},
 				getSaveStatus: async () => {
-					const payload = await fetchJson( `/api/projects/${ data.projectId }` );
+					const payload = await fetchJson(`/api/projects/${data.projectId}`);
 					return payload.status;
 				},
 			},
 			media: {
 				listAssets: async () => {
-					const payload = await fetchJson( `/api/projects/${ data.projectId }/media` );
+					const payload = await fetchJson(`/api/projects/${data.projectId}/media`);
 					return payload.assets ?? [];
 				},
-				uploadAsset: async ( file ) => {
+				uploadAsset: async (file) => {
 					const form = new FormData();
-					form.set( 'file', file );
-					const payload = await fetchJson( `/api/projects/${ data.projectId }/media`, {
+					form.set('file', file);
+					const payload = await fetchJson(`/api/projects/${data.projectId}/media`, {
 						method: 'POST',
 						body: form,
-					} );
+					});
 					return payload.asset;
 				},
-				updateAsset: async ( assetId, patch ) => {
-					const payload = await fetchJson( `/api/projects/${ data.projectId }/media`, {
+				updateAsset: async (assetId, patch) => {
+					const payload = await fetchJson(`/api/projects/${data.projectId}/media`, {
 						method: 'PATCH',
 						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify( { assetId, patch } ),
-					} );
+						body: JSON.stringify({ assetId, patch }),
+					});
 					return payload.asset;
 				},
-				deleteAsset: async ( assetId ) => {
-					await fetchJson( `/api/projects/${ data.projectId }/media`, {
+				deleteAsset: async (assetId) => {
+					await fetchJson(`/api/projects/${data.projectId}/media`, {
 						method: 'DELETE',
 						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify( { assetId } ),
-					} );
+						body: JSON.stringify({ assetId }),
+					});
 				},
-				resolveAssetUrl: ( asset ) => typeof asset === 'string' ? asset : asset.url,
+				resolveAssetUrl: (asset) => (typeof asset === 'string' ? asset : asset.url),
 			},
 			aiSettings: {
-				loadSettings: async () => ( { provider: 'custom', baseUrl: '/mock-ai/v1', model: 'mock-model' } ),
+				loadSettings: async () => ({ provider: 'custom', baseUrl: '/mock-ai/v1', model: 'mock-model' }),
 				saveSettings: async () => {},
 			},
-		} );
+		});
 
-		const sdk = createBuilderHostSdk( {
+		const sdk = createBuilderHostSdk({
 			adapter: integration.adapter,
 			persistence: integration.editor.persistence.host,
 			media: integration.editor.media.adapter,
@@ -112,66 +112,66 @@
 			aiSettings: integration.editor.ai.settings as unknown as Parameters<typeof createBuilderHostSdk>[0]['aiSettings'],
 			previewContext,
 			hooks: {
-				onProjectChange: ( project ) => pushHook( `project:${ project.name }` ),
-				onDocumentChange: ( document ) => pushHook( `document:${ document.title }` ),
-				onSelectionChange: ( selected ) => pushHook( `selection:${ selected.length }` ),
-				onSaveStateChange: ( state ) => pushHook( `save:${ state }` ),
-				onPublish: () => pushHook( 'publish' ),
-				onError: ( error ) => pushHook( `error:${ error.message }` ),
+				onProjectChange: (project) => pushHook(`project:${project.name}`),
+				onDocumentChange: (document) => pushHook(`document:${document.title}`),
+				onSelectionChange: (selected) => pushHook(`selection:${selected.length}`),
+				onSaveStateChange: (state) => pushHook(`save:${state}`),
+				onPublish: () => pushHook('publish'),
+				onError: (error) => pushHook(`error:${error.message}`),
 			},
-		} );
+		});
 
-		editor = sdk.createEditor( data.project, {
+		editor = sdk.createEditor(data.project, {
 			initialState: {
-				activeDocumentId: data.project.documents[ 0 ]?.id,
+				activeDocumentId: data.project.documents[0]?.id,
 			},
 			features: {
 				shellVariant: 'v3',
 			},
-		} );
+		});
 		ready = true;
-	} );
+	});
 
-	async function saveProjectSnapshot( project: BuilderPackage, context: Record<string, unknown> | undefined ) {
-		const payload = await fetchJson( `/api/projects/${ data.projectId }`, {
+	async function saveProjectSnapshot(project: BuilderPackage, context: Record<string, unknown> | undefined) {
+		const payload = await fetchJson(`/api/projects/${data.projectId}`, {
 			method: 'POST',
 			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify( {
+			body: JSON.stringify({
 				project,
 				expectedVersionToken: context?.expectedVersionToken,
 				force: context?.force === true,
 				revisionId: context?.revisionId,
 				revisionKind: context?.revisionKind,
 				reason: context?.reason,
-			} ),
-		} );
+			}),
+		});
 		return payload;
 	}
 
-	async function fetchJson( url: string, init?: RequestInit ) {
-		const response = await fetch( url, init );
-		const payload = await response.json().catch( () => ( {} ) );
-		if ( !response.ok ) {
-			throw new Error( payload.error ?? payload.message ?? `Host request failed with ${ response.status }.` );
+	async function fetchJson(url: string, init?: RequestInit) {
+		const response = await fetch(url, init);
+		const payload = await response.json().catch(() => ({}));
+		if (!response.ok) {
+			throw new Error(payload.error ?? payload.message ?? `Host request failed with ${response.status}.`);
 		}
 		return payload;
 	}
 
 	function readPermissions() {
-		const query = new URLSearchParams( window.location.search );
-		const denied = query.getAll( 'deny' );
+		const query = new URLSearchParams(window.location.search);
+		const denied = query.getAll('deny');
 		return {
-			editProject: !denied.includes( 'edit' ) || 'Host denied project editing.',
-			publish: !denied.includes( 'publish' ) || 'Host denied publishing.',
-			uploadMedia: !denied.includes( 'media' ) || 'Host denied media uploads.',
-			deleteMedia: !denied.includes( 'media' ) || 'Host denied media deletion.',
-			useAi: !denied.includes( 'ai' ) || 'Host denied AI usage.',
+			editProject: !denied.includes('edit') || 'Host denied project editing.',
+			publish: !denied.includes('publish') || 'Host denied publishing.',
+			uploadMedia: !denied.includes('media') || 'Host denied media uploads.',
+			deleteMedia: !denied.includes('media') || 'Host denied media deletion.',
+			useAi: !denied.includes('ai') || 'Host denied AI usage.',
 			accessDynamicData: true,
 		};
 	}
 
-	function pushHook( message: string ) {
-		hookLog = [ message, ...hookLog ].slice( 0, 8 );
+	function pushHook(message: string) {
+		hookLog = [message, ...hookLog].slice(0, 8);
 	}
 </script>
 
@@ -183,7 +183,7 @@
 	<header class="host-shell__bar">
 		<strong>Svelte Builder Starter</strong>
 		<a href="/published/home" data-testid="runtime-link">Published runtime</a>
-		<span data-testid="hook-log">{hookLog[ 0 ] ?? 'hooks idle'}</span>
+		<span data-testid="hook-log">{hookLog[0] ?? 'hooks idle'}</span>
 	</header>
 	{#if ready && canvasComponent && editor}
 		<svelte:component this={canvasComponent} {editor} />
@@ -203,7 +203,7 @@
 
 	.host-shell {
 		display: grid;
-		grid-template-rows: 40px minmax( 0, 1fr );
+		grid-template-rows: 40px minmax(0, 1fr);
 		height: 100vh;
 		background: #101218;
 	}
@@ -213,7 +213,7 @@
 		align-items: center;
 		gap: 16px;
 		padding: 0 16px;
-		border-bottom: 1px solid rgba( 148, 163, 184, 0.24 );
+		border-bottom: 1px solid rgba(148, 163, 184, 0.24);
 		background: #0f172a;
 		color: #e2e8f0;
 		font-size: 13px;

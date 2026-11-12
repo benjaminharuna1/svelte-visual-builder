@@ -38,36 +38,36 @@ export interface PreviewHostController {
 	destroy: () => void;
 }
 
-function ensurePreviewHostStyle( shadowRoot: ShadowRoot ) {
-	let style = shadowRoot.querySelector<HTMLStyleElement>( 'style[data-builder-preview-host-style]' );
-	if ( style ) {
+function ensurePreviewHostStyle(shadowRoot: ShadowRoot) {
+	let style = shadowRoot.querySelector<HTMLStyleElement>('style[data-builder-preview-host-style]');
+	if (style) {
 		return style;
 	}
 
-	style = document.createElement( 'style' );
+	style = document.createElement('style');
 	style.dataset.builderPreviewHostStyle = 'true';
 	style.textContent = PREVIEW_HOST_STYLE;
-	shadowRoot.append( style );
+	shadowRoot.append(style);
 	return style;
 }
 
-function ensurePreviewHostMountTarget( shadowRoot: ShadowRoot ) {
-	let mountTarget = shadowRoot.querySelector<HTMLElement>( '[data-builder-preview-host-mount]' );
-	if ( mountTarget ) {
+function ensurePreviewHostMountTarget(shadowRoot: ShadowRoot) {
+	let mountTarget = shadowRoot.querySelector<HTMLElement>('[data-builder-preview-host-mount]');
+	if (mountTarget) {
 		return mountTarget;
 	}
 
-	mountTarget = document.createElement( 'div' );
+	mountTarget = document.createElement('div');
 	mountTarget.dataset.builderPreviewHostMount = 'true';
 	mountTarget.className = 'builder-preview-host';
-	shadowRoot.append( mountTarget );
+	shadowRoot.append(mountTarget);
 	return mountTarget;
 }
 
-export function createPreviewHostController( hostElement: HTMLElement ): PreviewHostController {
-	const shadowRoot = hostElement.shadowRoot ?? hostElement.attachShadow( { mode: 'open' } );
-	ensurePreviewHostStyle( shadowRoot );
-	const mountTarget = ensurePreviewHostMountTarget( shadowRoot );
+export function createPreviewHostController(hostElement: HTMLElement): PreviewHostController {
+	const shadowRoot = hostElement.shadowRoot ?? hostElement.attachShadow({ mode: 'open' });
+	ensurePreviewHostStyle(shadowRoot);
+	const mountTarget = ensurePreviewHostMountTarget(shadowRoot);
 
 	return {
 		hostElement,

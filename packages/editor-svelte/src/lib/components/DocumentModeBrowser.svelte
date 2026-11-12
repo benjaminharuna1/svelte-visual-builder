@@ -6,7 +6,7 @@
 	export let documents: BuilderDocument[] = [];
 	export let activeDocumentId = '';
 	export let activeMode: EditorMode = 'page';
-	export let onOpenDocument: ( documentId: string, mode?: EditorMode ) => void = () => {};
+	export let onOpenDocument: (documentId: string, mode?: EditorMode) => void = () => {};
 
 	type DocumentBucket = {
 		kind: BuilderDocument['kind'];
@@ -16,41 +16,41 @@
 		documents: BuilderDocument[];
 	};
 
-	$: groupedDocuments = buildDocumentBuckets( documents );
+	$: groupedDocuments = buildDocumentBuckets(documents);
 
-	function buildDocumentBuckets( source: BuilderDocument[] ): DocumentBucket[] {
+	function buildDocumentBuckets(source: BuilderDocument[]): DocumentBucket[] {
 		const buckets = new Map<BuilderDocument['kind'], DocumentBucket>();
 
-		for ( const document of source ) {
-			if ( !buckets.has( document.kind ) ) {
-				buckets.set( document.kind, {
+		for (const document of source) {
+			if (!buckets.has(document.kind)) {
+				buckets.set(document.kind, {
 					kind: document.kind,
-					label: formatKindLabel( document.kind ),
-					description: describeDocumentKind( document.kind ),
-					modeLabel: describeOpenAction( document ),
+					label: formatKindLabel(document.kind),
+					description: describeDocumentKind(document.kind),
+					modeLabel: describeOpenAction(document),
 					documents: [],
-				} );
+				});
 			}
 
-			buckets.get( document.kind )?.documents.push( document );
+			buckets.get(document.kind)?.documents.push(document);
 		}
 
-		return [ ...buckets.values() ];
+		return [...buckets.values()];
 	}
 
-	function formatKindLabel( kind: BuilderDocument['kind'] ) {
-		switch ( kind ) {
+	function formatKindLabel(kind: BuilderDocument['kind']) {
+		switch (kind) {
 			case 'library-item':
 				return 'Library';
 			case 'kit':
 				return 'Kit';
 			default:
-				return `${ kind.charAt( 0 ).toUpperCase() }${ kind.slice( 1 ) }s`;
+				return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}s`;
 		}
 	}
 
-	function describeDocumentKind( kind: BuilderDocument['kind'] ) {
-		switch ( kind ) {
+	function describeDocumentKind(kind: BuilderDocument['kind']) {
+		switch (kind) {
 			case 'layout':
 				return 'Shared site parts and global structure';
 			case 'template':
@@ -68,12 +68,12 @@
 		}
 	}
 
-	function inferDocumentMode( document: BuilderDocument ): EditorMode {
-		if ( containsLegacyCompat( document.root ) ) {
+	function inferDocumentMode(document: BuilderDocument): EditorMode {
+		if (containsLegacyCompat(document.root)) {
 			return 'legacy-compat';
 		}
 
-		switch ( document.kind ) {
+		switch (document.kind) {
 			case 'layout':
 				return 'layout';
 			case 'template':
@@ -87,18 +87,18 @@
 		}
 	}
 
-	function containsLegacyCompat( nodes: BuilderDocument['root'] ): boolean {
-		for ( const node of nodes ) {
-			if ( node.legacy ) {
+	function containsLegacyCompat(nodes: BuilderDocument['root']): boolean {
+		for (const node of nodes) {
+			if (node.legacy) {
 				return true;
 			}
 
-			if ( node.children.length && containsLegacyCompat( node.children ) ) {
+			if (node.children.length && containsLegacyCompat(node.children)) {
 				return true;
 			}
 
-			for ( const slotNodes of Object.values( node.slots ) as BuilderDocument['root'][] ) {
-				if ( containsLegacyCompat( slotNodes ) ) {
+			for (const slotNodes of Object.values(node.slots) as BuilderDocument['root'][]) {
+				if (containsLegacyCompat(slotNodes)) {
 					return true;
 				}
 			}
@@ -107,8 +107,8 @@
 		return false;
 	}
 
-	function describeOpenAction( document: BuilderDocument ) {
-		switch ( inferDocumentMode( document ) ) {
+	function describeOpenAction(document: BuilderDocument) {
+		switch (inferDocumentMode(document)) {
 			case 'layout':
 				return 'Open layout';
 			case 'template':
@@ -124,8 +124,8 @@
 		}
 	}
 
-	function openDocument( document: BuilderDocument ) {
-		onOpenDocument( document.id, inferDocumentMode( document ) );
+	function openDocument(document: BuilderDocument) {
+		onOpenDocument(document.id, inferDocumentMode(document));
 	}
 </script>
 
@@ -161,15 +161,22 @@
 
 						<div class="document-browser-card__list">
 							{#each bucket.documents as document (document.id)}
-								<article class:active={document.id === activeDocumentId} class="document-browser-card__item builder-shell-card">
+								<article
+									class:active={document.id === activeDocumentId}
+									class="document-browser-card__item builder-shell-card"
+								>
 									<div class="document-browser-card__meta">
 										<span>{document.kind}</span>
 										<strong>{document.title}</strong>
 										<small>/{document.slug}</small>
 									</div>
 									<div class="document-browser-card__actions">
-										<button class="builder-shell-button builder-shell-button--dark" type="button" onclick={() => openDocument( document )}>
-											{describeOpenAction( document )}
+										<button
+											class="builder-shell-button builder-shell-button--dark"
+											type="button"
+											onclick={() => openDocument(document)}
+										>
+											{describeOpenAction(document)}
 										</button>
 									</div>
 								</article>

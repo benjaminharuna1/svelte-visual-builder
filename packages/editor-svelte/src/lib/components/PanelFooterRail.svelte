@@ -11,11 +11,11 @@
 	export let optionsLabel = 'Options';
 	export let optionsDisabled = false;
 	export let showOptions = true;
-	export let onToolAction: ( id: string ) => void = () => {};
+	export let onToolAction: (id: string) => void = () => {};
 	export let onPrimaryAction: () => void = () => {};
 	export let onOptionsAction: () => void = () => {};
 
-	function getToolToneClass( tool: PanelRailTool ) {
+	function getToolToneClass(tool: PanelRailTool) {
 		return tool.tone ? `builder-panel-footer-rail__tool--${tool.tone}` : '';
 	}
 </script>
@@ -26,11 +26,11 @@
 			<button
 				type="button"
 				class:active={tool.active}
-				class={`builder-panel-footer-rail__tool ${getToolToneClass( tool )}`}
+				class={`builder-panel-footer-rail__tool ${getToolToneClass(tool)}`}
 				title={tool.title ?? tool.label}
 				aria-label={tool.label}
 				disabled={tool.disabled}
-				onclick={() => onToolAction( tool.id )}
+				onclick={() => onToolAction(tool.id)}
 			>
 				{#if tool.icon}
 					<span aria-hidden="true" class="builder-panel-footer-rail__icon">{tool.icon}</span>
@@ -48,7 +48,9 @@
 	<div class="builder-panel-footer-rail__save">
 		<div class="builder-panel-footer-rail__status">
 			{#if saveState}
-				<span class={`builder-panel-footer-rail__pill builder-panel-footer-rail__pill--${saveStateTone}`}>{saveState}</span>
+				<span class={`builder-panel-footer-rail__pill builder-panel-footer-rail__pill--${saveStateTone}`}
+					>{saveState}</span
+				>
 			{/if}
 			{#if meta}
 				<small>{meta}</small>
@@ -57,14 +59,26 @@
 		</div>
 
 		<div class="builder-panel-footer-rail__actions">
-			<button type="button" class="builder-panel-footer-rail__publish" disabled={primaryDisabled} onclick={onPrimaryAction}>
+			<button
+				type="button"
+				class="builder-panel-footer-rail__publish"
+				disabled={primaryDisabled}
+				onclick={onPrimaryAction}
+			>
 				{#if primaryBusy}
 					<span aria-hidden="true">...</span>
 				{/if}
 				<span>{primaryBusy ? `${primaryLabel}...` : primaryLabel}</span>
 			</button>
 			{#if showOptions}
-				<button type="button" class="builder-panel-footer-rail__options" disabled={optionsDisabled} title={optionsLabel} aria-label={optionsLabel} onclick={onOptionsAction}>
+				<button
+					type="button"
+					class="builder-panel-footer-rail__options"
+					disabled={optionsDisabled}
+					title={optionsLabel}
+					aria-label={optionsLabel}
+					onclick={onOptionsAction}
+				>
 					<span aria-hidden="true">&gt;</span>
 				</button>
 			{/if}

@@ -22,7 +22,13 @@
 <EditorShellTokens>
 	<PanelShell {surface} {width} {bodyPadding} {bodyGap} {bodyScrollable}>
 		<svelte:fragment slot="header">
-			<PanelHeaderCompact title={title} subtitle={subtitle} leadingIcon="page-settings" leadingLabel="Page settings" showLeading={false}>
+			<PanelHeaderCompact
+				{title}
+				{subtitle}
+				leadingIcon="page-settings"
+				leadingLabel="Page settings"
+				showLeading={false}
+			>
 				<svelte:fragment slot="actions">
 					<slot name="header-actions" />
 				</svelte:fragment>
@@ -86,7 +92,7 @@
 		gap: var(--builder-shell-space-10);
 		padding: var(--builder-shell-space-12);
 		border-color: var(--builder-shell-dark-border);
-		background: linear-gradient( 180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025) );
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.025));
 	}
 
 	.page-settings-panel__summary-heading,

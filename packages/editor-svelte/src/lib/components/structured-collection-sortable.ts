@@ -6,11 +6,11 @@ import type { StructuredCollectionKind } from '../structured-content.js';
 let structuredCollectionInstanceSeed = 0;
 let structuredCollectionRowSeed = 0;
 
-export function createStructuredCollectionInstanceId( kind: StructuredCollectionKind, depth: number ): string {
+export function createStructuredCollectionInstanceId(kind: StructuredCollectionKind, depth: number): string {
 	return `structured-collection-${kind}-${depth}-${++structuredCollectionInstanceSeed}`;
 }
 
-export function createStructuredCollectionRowKey( instanceId: string ): string {
+export function createStructuredCollectionRowKey(instanceId: string): string {
 	return `${instanceId}:row-${++structuredCollectionRowSeed}`;
 }
 
@@ -19,42 +19,34 @@ export function reconcileStructuredCollectionRowKeys(
 	items: Record<string, JsonValue>[],
 	previousKeys: string[],
 ): string[] {
-	return items.map( ( item, index ) => {
+	return items.map((item, index) => {
 		const itemId = typeof item.id === 'string' ? item.id.trim() : '';
-		if ( itemId ) {
+		if (itemId) {
 			return `${instanceId}:item-${itemId}`;
 		}
 
-		return previousKeys[ index ] ?? createStructuredCollectionRowKey( instanceId );
-	} );
+		return previousKeys[index] ?? createStructuredCollectionRowKey(instanceId);
+	});
 }
 
-export function moveStructuredCollectionRowKeys( keys: string[], fromIndex: number, toIndex: number ): string[] {
-	return arrayMove( keys, fromIndex, toIndex );
+export function moveStructuredCollectionRowKeys(keys: string[], fromIndex: number, toIndex: number): string[] {
+	return arrayMove(keys, fromIndex, toIndex);
 }
 
-export function insertStructuredCollectionRowKeys(
-	keys: string[],
-	index: number,
-	instanceId: string,
-): string[] {
-	const next = [ ...keys ];
-	next.splice( index, 0, createStructuredCollectionRowKey( instanceId ) );
+export function insertStructuredCollectionRowKeys(keys: string[], index: number, instanceId: string): string[] {
+	const next = [...keys];
+	next.splice(index, 0, createStructuredCollectionRowKey(instanceId));
 	return next;
 }
 
-export function removeStructuredCollectionRowKeys( keys: string[], index: number ): string[] {
-	const next = [ ...keys ];
-	next.splice( index, 1 );
+export function removeStructuredCollectionRowKeys(keys: string[], index: number): string[] {
+	const next = [...keys];
+	next.splice(index, 1);
 	return next;
 }
 
-export function duplicateStructuredCollectionRowKeys(
-	keys: string[],
-	index: number,
-	instanceId: string,
-): string[] {
-	const next = [ ...keys ];
-	next.splice( index + 1, 0, createStructuredCollectionRowKey( instanceId ) );
+export function duplicateStructuredCollectionRowKeys(keys: string[], index: number, instanceId: string): string[] {
+	const next = [...keys];
+	next.splice(index + 1, 0, createStructuredCollectionRowKey(instanceId));
 	return next;
 }

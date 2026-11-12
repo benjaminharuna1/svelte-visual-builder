@@ -5,25 +5,25 @@
 	let LoadedComponentWorkflowPanel: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './ComponentWorkflowPanel.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./ComponentWorkflowPanel.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedComponentWorkflowPanel = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let documents: BuilderDocument[] = [];
 	export let activeDocument: BuilderDocument;
@@ -31,10 +31,10 @@
 	export let selectedNode: BuilderNode | undefined = undefined;
 	export let editingContext: 'master' | 'instance' | 'detached' | undefined = undefined;
 	export let editingComponentDocumentId: string | undefined = undefined;
-	export let onOpenDocument: ( documentId: string, mode?: EditorMode ) => void = () => {};
-	export let onInsertComponentInstance: ( componentId: string ) => void = () => {};
+	export let onOpenDocument: (documentId: string, mode?: EditorMode) => void = () => {};
+	export let onInsertComponentInstance: (componentId: string) => void = () => {};
 	export let onDetachInstance: () => void = () => {};
-	export let onRelinkInstance: ( componentId: string, preserveOverrides?: boolean ) => void = () => {};
+	export let onRelinkInstance: (componentId: string, preserveOverrides?: boolean) => void = () => {};
 </script>
 
 {#if LoadedComponentWorkflowPanel}

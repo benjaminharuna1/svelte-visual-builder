@@ -1,8 +1,4 @@
-import DOMPurify, {
-	type Config,
-	type ElementHook,
-	type UponSanitizeAttributeHookEvent,
-} from 'isomorphic-dompurify';
+import DOMPurify, { type Config, type ElementHook, type UponSanitizeAttributeHookEvent } from 'isomorphic-dompurify';
 
 export type BuilderHtmlSanitizeProfile = 'inline' | 'rich' | 'svg';
 
@@ -52,9 +48,9 @@ const FORBIDDEN_TAGS = [
 	'template',
 ];
 
-const FORBIDDEN_ATTRIBUTES = new Set( [ 'formaction', 'ping', 'srcdoc' ] );
-const URL_ATTRIBUTES = new Set( [ 'action', 'cite', 'data', 'href', 'poster', 'src', 'xlink:href' ] );
-const SAFE_URL_PROTOCOLS = new Set( [ 'blob:', 'http:', 'https:', 'mailto:', 'tel:' ] );
+const FORBIDDEN_ATTRIBUTES = new Set(['formaction', 'ping', 'srcdoc']);
+const URL_ATTRIBUTES = new Set(['action', 'cite', 'data', 'href', 'poster', 'src', 'xlink:href']);
+const SAFE_URL_PROTOCOLS = new Set(['blob:', 'http:', 'https:', 'mailto:', 'tel:']);
 const SAFE_DATA_IMAGE = /^data:image\/(?:gif|jpe?g|png|webp);base64,[a-z0-9+/=\s]+$/i;
 const EXPLICIT_PROTOCOL = /^[a-z][a-z0-9+.-]*:/i;
 
@@ -62,109 +58,109 @@ let activeOptions: BuilderHtmlSanitizeOptions = {};
 let hooksRegistered = false;
 
 function registerHooks(): void {
-	if ( hooksRegistered ) {
+	if (hooksRegistered) {
 		return;
 	}
 	hooksRegistered = true;
 
-	DOMPurify.addHook( 'uponSanitizeAttribute', ( _node, data: UponSanitizeAttributeHookEvent ) => {
+	DOMPurify.addHook('uponSanitizeAttribute', (_node, data: UponSanitizeAttributeHookEvent) => {
 		const name = data.attrName.toLowerCase();
-		if ( name.startsWith( 'on' ) || FORBIDDEN_ATTRIBUTES.has( name ) ) {
+		if (name.startsWith('on') || FORBIDDEN_ATTRIBUTES.has(name)) {
 			data.keepAttr = false;
 			return;
 		}
-		if ( name === 'style' && activeOptions.allowStyleAttributes === false ) {
+		if (name === 'style' && activeOptions.allowStyleAttributes === false) {
 			data.keepAttr = false;
 			return;
 		}
-		if ( URL_ATTRIBUTES.has( name ) ) {
-			const safeUrl = sanitizeBuilderUrl( data.attrValue, {
+		if (URL_ATTRIBUTES.has(name)) {
+			const safeUrl = sanitizeBuilderUrl(data.attrValue, {
 				allowDataImages: activeOptions.allowDataImages,
-			} );
-			if ( !safeUrl ) {
+			});
+			if (!safeUrl) {
 				data.keepAttr = false;
 				return;
 			}
 			data.attrValue = safeUrl;
 			return;
 		}
-		if ( name === 'srcset' ) {
-			const safeSrcset = sanitizeBuilderSrcset( data.attrValue, {
+		if (name === 'srcset') {
+			const safeSrcset = sanitizeBuilderSrcset(data.attrValue, {
 				allowDataImages: activeOptions.allowDataImages,
-			} );
-			if ( !safeSrcset ) {
+			});
+			if (!safeSrcset) {
 				data.keepAttr = false;
 				return;
 			}
 			data.attrValue = safeSrcset;
 		}
-	} );
+	});
 
-	const afterSanitizeAttributes: ElementHook = ( node ) => {
+	const afterSanitizeAttributes: ElementHook = (node) => {
 		const tag = node.tagName.toLowerCase();
-		if ( ( tag === 'a' || tag === 'area' ) && node.getAttribute( 'target' )?.toLowerCase() === '_blank' ) {
-			node.setAttribute( 'rel', mergeLinkRel( node.getAttribute( 'rel' ) ) );
+		if ((tag === 'a' || tag === 'area') && node.getAttribute('target')?.toLowerCase() === '_blank') {
+			node.setAttribute('rel', mergeLinkRel(node.getAttribute('rel')));
 		}
 	};
-	DOMPurify.addHook( 'afterSanitizeAttributes', afterSanitizeAttributes );
+	DOMPurify.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
 }
 
-export function sanitizeBuilderHtml( html: string, options: BuilderHtmlSanitizeOptions = {} ): string {
-	if ( !html || options.trusted ) {
+export function sanitizeBuilderHtml(html: string, options: BuilderHtmlSanitizeOptions = {}): string {
+	if (!html || options.trusted) {
 		return html;
 	}
 
 	registerHooks();
 	activeOptions = options;
 	try {
-		return DOMPurify.sanitize( html, buildSanitizeConfig( options ) );
+		return DOMPurify.sanitize(html, buildSanitizeConfig(options));
 	} finally {
 		activeOptions = {};
 	}
 }
 
-export function sanitizeBuilderUrl( value: string, options: BuilderUrlSanitizeOptions = {} ): string {
+export function sanitizeBuilderUrl(value: string, options: BuilderUrlSanitizeOptions = {}): string {
 	const trimmed = value.trim();
-	if ( !trimmed ) {
+	if (!trimmed) {
 		return '';
 	}
-	if ( trimmed.startsWith( '#' ) ) {
+	if (trimmed.startsWith('#')) {
 		return trimmed;
 	}
-	if ( /^(?:javascript|vbscript|file|filesystem):/i.test( trimmed ) ) {
+	if (/^(?:javascript|vbscript|file|filesystem):/i.test(trimmed)) {
 		return '';
 	}
-	if ( /^data:/i.test( trimmed ) ) {
-		if ( options.allowDataImages === false ) {
+	if (/^data:/i.test(trimmed)) {
+		if (options.allowDataImages === false) {
 			return '';
 		}
-		return SAFE_DATA_IMAGE.test( trimmed ) ? trimmed : '';
+		return SAFE_DATA_IMAGE.test(trimmed) ? trimmed : '';
 	}
 	try {
-		const url = new URL( trimmed, 'https://builder.invalid' );
-		if ( SAFE_URL_PROTOCOLS.has( url.protocol ) ) {
+		const url = new URL(trimmed, 'https://builder.invalid');
+		if (SAFE_URL_PROTOCOLS.has(url.protocol)) {
 			return trimmed;
 		}
 	} catch {
 		return '';
 	}
-	if ( options.allowRelative !== false && !EXPLICIT_PROTOCOL.test( trimmed ) ) {
+	if (options.allowRelative !== false && !EXPLICIT_PROTOCOL.test(trimmed)) {
 		return trimmed;
 	}
 	return '';
 }
 
-export function sanitizeBuilderSrcset( value: string, options: BuilderUrlSanitizeOptions = {} ): string {
+export function sanitizeBuilderSrcset(value: string, options: BuilderUrlSanitizeOptions = {}): string {
 	return value
-		.split( ',' )
-		.map( ( candidate ) => {
-			const parts = candidate.trim().split( /\s+/ );
+		.split(',')
+		.map((candidate) => {
+			const parts = candidate.trim().split(/\s+/);
 			const url = parts.shift() ?? '';
-			const safeUrl = sanitizeBuilderUrl( url, options );
-			return safeUrl ? [ safeUrl, ...parts ].join( ' ' ) : '';
-		} )
-		.filter( Boolean )
-		.join( ', ' );
+			const safeUrl = sanitizeBuilderUrl(url, options);
+			return safeUrl ? [safeUrl, ...parts].join(' ') : '';
+		})
+		.filter(Boolean)
+		.join(', ');
 }
 
 export function sanitizeBuilderAttributes(
@@ -172,52 +168,52 @@ export function sanitizeBuilderAttributes(
 	options: BuilderUrlSanitizeOptions = {},
 ): Record<string, string> {
 	const sanitized: Record<string, string> = {};
-	for ( const [ name, value ] of Object.entries( attributes ) ) {
+	for (const [name, value] of Object.entries(attributes)) {
 		const normalizedName = name.toLowerCase();
-		if ( normalizedName.startsWith( 'on' ) || FORBIDDEN_ATTRIBUTES.has( normalizedName ) ) {
+		if (normalizedName.startsWith('on') || FORBIDDEN_ATTRIBUTES.has(normalizedName)) {
 			continue;
 		}
-		if ( URL_ATTRIBUTES.has( normalizedName ) ) {
-			const safeUrl = sanitizeBuilderUrl( value, options );
-			if ( safeUrl ) {
-				sanitized[ name ] = safeUrl;
+		if (URL_ATTRIBUTES.has(normalizedName)) {
+			const safeUrl = sanitizeBuilderUrl(value, options);
+			if (safeUrl) {
+				sanitized[name] = safeUrl;
 			}
 			continue;
 		}
-		if ( normalizedName === 'srcset' ) {
-			const safeSrcset = sanitizeBuilderSrcset( value, options );
-			if ( safeSrcset ) {
-				sanitized[ name ] = safeSrcset;
+		if (normalizedName === 'srcset') {
+			const safeSrcset = sanitizeBuilderSrcset(value, options);
+			if (safeSrcset) {
+				sanitized[name] = safeSrcset;
 			}
 			continue;
 		}
-		sanitized[ name ] = value;
+		sanitized[name] = value;
 	}
-	if ( sanitized.target?.toLowerCase() === '_blank' ) {
-		sanitized.rel = mergeLinkRel( sanitized.rel ?? null );
+	if (sanitized.target?.toLowerCase() === '_blank') {
+		sanitized.rel = mergeLinkRel(sanitized.rel ?? null);
 	}
 	return sanitized;
 }
 
-export function sanitizeBuilderCss( css: string ): string {
+export function sanitizeBuilderCss(css: string): string {
 	return css
-		.replaceAll( /@import[\s\S]*?;/gi, '' )
-		.replaceAll( /expression\s*\(/gi, '' )
-		.replaceAll( /(?:behavior|-moz-binding)\s*:/gi, '' )
-		.replaceAll( /url\s*\(\s*["']?\s*(?:javascript|vbscript|data:text\/html)[^)]*\)/gi, 'url()' );
+		.replaceAll(/@import[\s\S]*?;/gi, '')
+		.replaceAll(/expression\s*\(/gi, '')
+		.replaceAll(/(?:behavior|-moz-binding)\s*:/gi, '')
+		.replaceAll(/url\s*\(\s*["']?\s*(?:javascript|vbscript|data:text\/html)[^)]*\)/gi, 'url()');
 }
 
-function buildSanitizeConfig( options: BuilderHtmlSanitizeOptions ): Config {
+function buildSanitizeConfig(options: BuilderHtmlSanitizeOptions): Config {
 	const profile = options.profile ?? 'rich';
 	const config: Config = {
-		ADD_ATTR: [ 'target', 'rel' ],
+		ADD_ATTR: ['target', 'rel'],
 		ALLOW_ARIA_ATTR: true,
 		ALLOW_DATA_ATTR: true,
-		FORBID_ATTR: [ ...FORBIDDEN_ATTRIBUTES ],
-		FORBID_TAGS: [ ...FORBIDDEN_TAGS ],
+		FORBID_ATTR: [...FORBIDDEN_ATTRIBUTES],
+		FORBID_TAGS: [...FORBIDDEN_TAGS],
 	};
-	if ( profile === 'inline' ) {
-		config.ALLOWED_TAGS = [ ...INLINE_TAGS ];
+	if (profile === 'inline') {
+		config.ALLOWED_TAGS = [...INLINE_TAGS];
 		return config;
 	}
 	config.USE_PROFILES = {
@@ -228,9 +224,9 @@ function buildSanitizeConfig( options: BuilderHtmlSanitizeOptions ): Config {
 	return config;
 }
 
-function mergeLinkRel( value: string | null ): string {
-	const tokens = new Set( ( value ?? '' ).split( /\s+/ ).filter( Boolean ) );
-	tokens.add( 'noopener' );
-	tokens.add( 'noreferrer' );
-	return [ ...tokens ].join( ' ' );
+function mergeLinkRel(value: string | null): string {
+	const tokens = new Set((value ?? '').split(/\s+/).filter(Boolean));
+	tokens.add('noopener');
+	tokens.add('noreferrer');
+	return [...tokens].join(' ');
 }

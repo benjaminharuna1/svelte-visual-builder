@@ -4,21 +4,21 @@ import { createEmptyDocument, createNode } from '@builder/schema';
 
 import { createDropIntent, createDropRuleContext, evaluateDropRule } from '../src/lib/drop-rules';
 
-describe( 'drop rules', () => {
-	it( 'rejects self and descendant move targets', () => {
-		const document = createEmptyDocument( 'page', 'Home', 'home' );
+describe('drop rules', () => {
+	it('rejects self and descendant move targets', () => {
+		const document = createEmptyDocument('page', 'Home', 'home');
 		document.root = [
-			createNode( {
+			createNode({
 				id: 'source-container',
 				type: 'container',
 				children: [
-					createNode( {
+					createNode({
 						id: 'nested-container',
 						type: 'container',
-						children: [ createNode( { id: 'hero', type: 'heading', props: { text: 'Hello' } } ) ],
-					} ),
+						children: [createNode({ id: 'hero', type: 'heading', props: { text: 'Hello' } })],
+					}),
 				],
-			} ),
+			}),
 		];
 
 		const selfTarget = {
@@ -55,15 +55,23 @@ describe( 'drop rules', () => {
 			},
 		};
 
-		expect( evaluateDropRule( createDropRuleContext(
-			{ kind: 'canvas-node', nodeId: 'source-container', documentId: document.id },
-			createDropIntent( selfTarget ),
-			document.root,
-		) ) ).toMatchObject( { accepted: false, reason: 'self' } );
-		expect( evaluateDropRule( createDropRuleContext(
-			{ kind: 'canvas-node', nodeId: 'source-container', documentId: document.id },
-			createDropIntent( descendantTarget ),
-			document.root,
-		) ) ).toMatchObject( { accepted: false, reason: 'descendant' } );
-	} );
-} );
+		expect(
+			evaluateDropRule(
+				createDropRuleContext(
+					{ kind: 'canvas-node', nodeId: 'source-container', documentId: document.id },
+					createDropIntent(selfTarget),
+					document.root,
+				),
+			),
+		).toMatchObject({ accepted: false, reason: 'self' });
+		expect(
+			evaluateDropRule(
+				createDropRuleContext(
+					{ kind: 'canvas-node', nodeId: 'source-container', documentId: document.id },
+					createDropIntent(descendantTarget),
+					document.root,
+				),
+			),
+		).toMatchObject({ accepted: false, reason: 'descendant' });
+	});
+});

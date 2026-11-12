@@ -11,38 +11,38 @@
 	let rowElement: HTMLLIElement | null = null;
 	let slotLabel = '';
 
-	$: slotLabel = formatNavigatorSlotLabel( row.slot );
+	$: slotLabel = formatNavigatorSlotLabel(row.slot);
 
-	function measureRow( element: HTMLLIElement ) {
-		virtualizer?.measureElement( element );
+	function measureRow(element: HTMLLIElement) {
+		virtualizer?.measureElement(element);
 
 		return {
 			update() {
-				virtualizer?.measureElement( element );
+				virtualizer?.measureElement(element);
 			},
 			destroy() {
-				virtualizer?.measureElement( null );
+				virtualizer?.measureElement(null);
 			},
 		};
 	}
 
 	function scheduleMeasureRow() {
-		if ( !rowElement || !virtualizer ) {
+		if (!rowElement || !virtualizer) {
 			return;
 		}
 
-		requestAnimationFrame( () => {
-			if ( rowElement ) {
-				virtualizer.measureElement( rowElement );
+		requestAnimationFrame(() => {
+			if (rowElement) {
+				virtualizer.measureElement(rowElement);
 			}
-		} );
+		});
 	}
 </script>
 
 <li
 	bind:this={rowElement}
 	class="navigator__item navigator__slot"
-	style={style}
+	{style}
 	style:--depth={row.depth}
 	data-index={row.rowIndex}
 	use:measureRow
@@ -63,7 +63,7 @@
 		position: relative;
 		display: grid;
 		gap: 0.15rem;
-		padding-left: calc( (var(--depth) - 1) * 0.55rem );
+		padding-left: calc((var(--depth) - 1) * 0.55rem);
 		border-bottom: 1px solid rgba(191, 202, 219, 0.36);
 	}
 
@@ -76,7 +76,7 @@
 		position: absolute;
 		top: 0;
 		bottom: -0.25rem;
-		left: calc( (var(--depth) - 1) * 0.55rem + 0.2rem );
+		left: calc((var(--depth) - 1) * 0.55rem + 0.2rem);
 		width: 1px;
 		background: linear-gradient(180deg, rgba(191, 202, 219, 0.72), rgba(191, 202, 219, 0));
 		pointer-events: none;

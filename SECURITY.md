@@ -21,8 +21,8 @@ The primary risks are stored/reflected XSS, tabnabbing, unsafe media uploads, le
 ```ts
 import { sanitizeBuilderHtml, sanitizeBuilderUrl } from '@builder/security';
 
-const html = sanitizeBuilderHtml( untrustedHtml );
-const href = sanitizeBuilderUrl( untrustedUrl );
+const html = sanitizeBuilderHtml(untrustedHtml);
+const href = sanitizeBuilderUrl(untrustedUrl);
 ```
 
 The sanitizer:
@@ -37,11 +37,7 @@ The sanitizer:
 The runtime sanitizes rendered HTML, URLs, and resolved node attributes by default. `trustedHtml: true` is an explicit opt-out intended only for content that has already been sanitized or is fully controlled by the host. Do not enable it for author or AI content.
 
 ```svelte
-<BuilderRenderer
-	project={project}
-	activeDocumentId={documentId}
-	trustedHtml={false}
-/>
+<BuilderRenderer {project} activeDocumentId={documentId} trustedHtml={false} />
 ```
 
 CSS imported from HTML has `@import`, `expression(...)`, `behavior`, `-moz-binding`, and executable `url(...)` values removed. Custom CSS should still be reviewed if it can reference host-controlled selectors or assets.
@@ -51,21 +47,21 @@ CSS imported from HTML has `@import`, `expression(...)`, `behavior`, `-moz-bindi
 Editor permissions are default-deny. An omitted permission is denied, and the reason is reported back to the host:
 
 ```ts
-const editor = createBuilderEditor( project );
-editor.can( 'publish' ); // false
-editor.getPermission( 'publish' ).reason; // This host does not allow publish.
+const editor = createBuilderEditor(project);
+editor.can('publish'); // false
+editor.getPermission('publish').reason; // This host does not allow publish.
 ```
 
 Grant only the capabilities the host actually implements:
 
 ```ts
-const editor = createBuilderEditor( project, {
+const editor = createBuilderEditor(project, {
 	permissions: {
 		editProject: true,
 		publish: 'Publishing is limited to reviewers.',
 		useAi: false,
 	},
-} );
+});
 ```
 
 `{ allowAll: true }` is available for trusted demos and first-party editors. Prefer an explicit permission map in production. Permission checks happen before state mutation, so denied actions should not partially update the document.
@@ -75,7 +71,7 @@ const editor = createBuilderEditor( project, {
 The browser AI settings adapter does **not** persist API keys or secret headers by default:
 
 ```ts
-const settings = createBrowserAiSettingsAdapter( defaults );
+const settings = createBrowserAiSettingsAdapter(defaults);
 ```
 
 By default, `apiKey` is stripped and headers matching `authorization`, `api-key`, `api_key`, `token`, `secret`, or `cookie` are removed before writing to `localStorage`. Loading also ignores persisted secrets and falls back to explicitly supplied in-memory defaults.
@@ -83,9 +79,9 @@ By default, `apiKey` is stripped and headers matching `authorization`, `api-key`
 Persisting browser-side provider keys is opt-in and should be treated as a deliberate risk:
 
 ```ts
-const settings = createBrowserAiSettingsAdapter( defaults, {
+const settings = createBrowserAiSettingsAdapter(defaults, {
 	persistApiKey: true,
-} );
+});
 ```
 
 For production, prefer a server-side proxy that holds provider credentials and authenticates editor requests. Use `redactAiSettings` for logs and diagnostics.
@@ -95,18 +91,18 @@ For production, prefer a server-side proxy that holds provider credentials and a
 The browser media adapter validates file size, MIME type, and optional image dimensions before accepting an upload:
 
 ```ts
-const editor = createBuilderEditor( project, {
+const editor = createBuilderEditor(project, {
 	permissions: { uploadMedia: true },
 	media: {
 		maxUploadSize: 5 * 1024 * 1024,
-		allowedMimeTypes: [ 'image/png', 'image/jpeg', 'image/webp' ],
+		allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
 		allowSvg: false,
 		minImageWidth: 320,
 		minImageHeight: 200,
 		maxImageWidth: 6000,
 		maxImageHeight: 6000,
 	},
-} );
+});
 ```
 
 SVG is disabled by default because it can contain scripts and external references. Serve uploaded files from a separate origin or CDN, set a restrictive `Content-Type`, and use `Content-Disposition: attachment` for untrusted downloads. Do not trust client-reported MIME types as your only server-side validation.
@@ -136,6 +132,16 @@ frame-ancestors 'none';
 `BuilderRenderer` emits its generated stylesheet inside a `<style>` element only when `renderStylesheet` is true. Pass the request nonce so the generated stylesheet satisfies `style-src`. If your deployment requires a separate stylesheet, set `renderStylesheet={false}` and publish the compiled CSS from `compileDocumentAssets` through your own asset pipeline.
 
 Avoid `'unsafe-inline'` for scripts. If you must use inline styles, prefer a nonce over allowing arbitrary inline CSS.
+
+## Dependency audit and accepted risks
+
+CI runs `pnpm audit:ci`, which fails on critical vulnerabilities in production dependencies. The current high and moderate findings are reviewed as follows:
+
+- `zod` 3.x can exhaust memory while validating oversized constrained collections (`GHSA-mrhx-c7xc-m3w5`). The builder schema validates bounded document input and should not be exposed to unbounded, attacker-controlled collections. The zod 4 upgrade is tracked separately because it changes public schema types.
+- `deepmerge-ts` is pulled in by Prisma's configuration tooling (`GHSA-ggr8-5vv4-36mx`), not by request handling. It is upgraded when Prisma ships a compatible release.
+- Low and moderate transitive findings are reviewed with each Dependabot update. Any finding that becomes reachable from a published package must be fixed before release.
+
+Run `pnpm audit` locally to review the full report. Do not add `pnpm audit --fix` output or lockfile changes without validating the workspace.
 
 ## Reporting
 

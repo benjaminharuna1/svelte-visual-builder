@@ -4,8 +4,8 @@ import type { BuilderPackage } from '@builder/schema';
 export const starterProjectId = 'starter';
 export const starterDocumentId = 'home';
 
-function createPostCard( title: string, body: string ) {
-	return createNode( {
+function createPostCard(title: string, body: string) {
+	return createNode({
 		type: 'container',
 		name: title,
 		layout: { display: 'flex', direction: 'column', gap: '0.5rem' },
@@ -22,24 +22,24 @@ function createPostCard( title: string, body: string ) {
 			customCss: '',
 		},
 		children: [
-			createNode( {
+			createNode({
 				type: 'heading',
 				props: { text: title, level: 'h3', align: 'left' },
-			} ),
-			createNode( {
+			}),
+			createNode({
 				type: 'paragraph',
 				props: { text: body },
-			} ),
+			}),
 		],
-	} );
+	});
 }
 
 export function createStarterProject(): BuilderPackage {
-	const page = createDocument( 'page', 'Blog', 'home' );
+	const page = createDocument('page', 'Blog', 'home');
 	page.id = starterDocumentId;
 	page.status = 'published';
 	page.root = [
-		createNode( {
+		createNode({
 			id: 'starter-hero',
 			type: 'container',
 			name: 'Blog hero',
@@ -56,17 +56,17 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createNode( {
+				createNode({
 					type: 'heading',
 					props: { text: 'Blog', level: 'h1', align: 'left' },
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'paragraph',
 					props: { text: 'Stories, updates, and ideas from the team.' },
-				} ),
+				}),
 			],
-		} ),
-		createNode( {
+		}),
+		createNode({
 			id: 'starter-posts',
 			type: 'container',
 			name: 'Latest posts',
@@ -79,22 +79,26 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createPostCard( 'Getting started', 'Set up the builder and publish your first page.' ),
-				createPostCard( 'Design tokens', 'Keep spacing, color, and type consistent across pages.' ),
-				createPostCard( 'Ship faster', 'Reuse components and templates across your site.' ),
+				createPostCard('Getting started', 'Set up the builder and publish your first page.'),
+				createPostCard('Design tokens', 'Keep spacing, color, and type consistent across pages.'),
+				createPostCard('Ship faster', 'Reuse components and templates across your site.'),
 			],
-		} ),
+		}),
 	];
 
-	const project = createBuilderPackage( 'Svelte Builder Blog', [ page ], [
-		createThemeAssignment( {
-			documentId: page.id,
-			slot: 'page',
-			status: 'published',
-			pathname: '/published/home',
-			label: 'Blog',
-		} ),
-	] );
+	const project = createBuilderPackage(
+		'Svelte Builder Blog',
+		[page],
+		[
+			createThemeAssignment({
+				documentId: page.id,
+				slot: 'page',
+				status: 'published',
+				pathname: '/published/home',
+				label: 'Blog',
+			}),
+		],
+	);
 	project.meta = {
 		starterTemplate: 'blog',
 	};

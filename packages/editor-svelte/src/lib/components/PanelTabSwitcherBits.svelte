@@ -8,22 +8,20 @@
 	export let activeTab = '';
 	export let mode: 'compact' | 'editor' = 'compact';
 	export let stretch = true;
-	export let onChange: ( id: string ) => void = () => {};
+	export let onChange: (id: string) => void = () => {};
 
-	function activate( id: string ) {
-		if ( id === activeTab ) {
+	function activate(id: string) {
+		if (id === activeTab) {
 			return;
 		}
 
-		onChange( id );
+		onChange(id);
 	}
 
 	function getListClass() {
-		return [
-			'builder-panel-tab-switcher',
-			stretch ? 'stretch' : '',
-			mode === 'editor' ? 'editor-mode' : '',
-		].filter( Boolean ).join( ' ' );
+		return ['builder-panel-tab-switcher', stretch ? 'stretch' : '', mode === 'editor' ? 'editor-mode' : '']
+			.filter(Boolean)
+			.join(' ');
 	}
 </script>
 

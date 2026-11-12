@@ -6,7 +6,6 @@ coverage
 .svelte-kit
 playwright-report
 test-results
-pnpm-lock.yaml
 .codex-runtime
 .codex-artifacts
 *.log

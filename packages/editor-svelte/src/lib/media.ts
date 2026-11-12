@@ -1,5 +1,7 @@
 import type { BuilderPackage, JsonValue, MediaAsset } from '@builder/schema';
 
+const IMAGE_DIMENSION_TIMEOUT_MS = 2000;
+
 export type BuilderMediaAssetSource = 'upload' | 'external' | 'import' | 'manual';
 
 export interface BuilderMediaAssetMetadata {
@@ -22,11 +24,15 @@ export interface BuilderMediaUploadInput {
 }
 
 export interface BuilderMediaAdapter {
-	listAssets?: ( project: BuilderPackage ) => Promise<BuilderMediaAssetMetadata[]> | BuilderMediaAssetMetadata[];
-	uploadAsset?: ( input: BuilderMediaUploadInput ) => Promise<BuilderMediaAssetMetadata>;
-	deleteAsset?: ( assetId: string, project: BuilderPackage ) => Promise<void>;
-	updateAsset?: ( assetId: string, patch: Partial<BuilderMediaAssetMetadata>, project: BuilderPackage ) => Promise<BuilderMediaAssetMetadata>;
-	resolveAssetUrl?: ( asset: BuilderMediaAssetMetadata, project: BuilderPackage ) => string;
+	listAssets?: (project: BuilderPackage) => Promise<BuilderMediaAssetMetadata[]> | BuilderMediaAssetMetadata[];
+	uploadAsset?: (input: BuilderMediaUploadInput) => Promise<BuilderMediaAssetMetadata>;
+	deleteAsset?: (assetId: string, project: BuilderPackage) => Promise<void>;
+	updateAsset?: (
+		assetId: string,
+		patch: Partial<BuilderMediaAssetMetadata>,
+		project: BuilderPackage,
+	) => Promise<BuilderMediaAssetMetadata>;
+	resolveAssetUrl?: (asset: BuilderMediaAssetMetadata, project: BuilderPackage) => string;
 }
 
 export interface BuilderMediaOptions {
@@ -54,76 +60,93 @@ export interface BuilderMediaDiagnostic {
 }
 
 export const DEFAULT_MEDIA_MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
-export const DEFAULT_MEDIA_MIME_TYPES = [ 'image/png', 'image/jpeg', 'image/webp', 'image/gif' ];
+export const DEFAULT_MEDIA_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 export const SVG_MEDIA_MIME_TYPE = 'image/svg+xml';
 
-export function resolveAllowedMediaMimeTypes( options: BuilderMediaOptions = {} ): string[] {
+export function resolveAllowedMediaMimeTypes(options: BuilderMediaOptions = {}): string[] {
 	const base = options.allowedMimeTypes?.length ? options.allowedMimeTypes : DEFAULT_MEDIA_MIME_TYPES;
-	const next = new Set( base );
-	if ( options.allowSvg ) {
-		next.add( SVG_MEDIA_MIME_TYPE );
+	const next = new Set(base);
+	if (options.allowSvg) {
+		next.add(SVG_MEDIA_MIME_TYPE);
 	}
-	return [ ...next ];
+	return [...next];
 }
 
-export function validateMediaUpload( file: File, options: BuilderMediaOptions = {} ): void {
+export function validateMediaUpload(file: File, options: BuilderMediaOptions = {}): void {
 	const maxUploadSize = options.maxUploadSize ?? DEFAULT_MEDIA_MAX_UPLOAD_SIZE;
-	const allowedMimeTypes = resolveAllowedMediaMimeTypes( options );
-	if ( file.size > maxUploadSize ) {
-		throw new Error( `Media upload is too large. Maximum size is ${ formatBytes( maxUploadSize ) }.` );
+	const allowedMimeTypes = resolveAllowedMediaMimeTypes(options);
+	if (file.size > maxUploadSize) {
+		throw new Error(`Media upload is too large. Maximum size is ${formatBytes(maxUploadSize)}.`);
 	}
-	if ( !allowedMimeTypes.includes( file.type ) ) {
-		throw new Error( 'Unsupported media type. Upload a PNG, JPEG, WebP, GIF, or enabled SVG file.' );
-	}
-}
-
-export function validateMediaDimensions(
-	dimensions: BuilderMediaDimensions,
-	options: BuilderMediaOptions = {},
-): void {
-	if ( options.minImageWidth !== undefined && dimensions.width < options.minImageWidth ) {
-		throw new Error( `Media image is too narrow. Minimum width is ${ options.minImageWidth }px.` );
-	}
-	if ( options.minImageHeight !== undefined && dimensions.height < options.minImageHeight ) {
-		throw new Error( `Media image is too short. Minimum height is ${ options.minImageHeight }px.` );
-	}
-	if ( options.maxImageWidth !== undefined && dimensions.width > options.maxImageWidth ) {
-		throw new Error( `Media image is too wide. Maximum width is ${ options.maxImageWidth }px.` );
-	}
-	if ( options.maxImageHeight !== undefined && dimensions.height > options.maxImageHeight ) {
-		throw new Error( `Media image is too tall. Maximum height is ${ options.maxImageHeight }px.` );
+	if (!allowedMimeTypes.includes(file.type)) {
+		throw new Error('Unsupported media type. Upload a PNG, JPEG, WebP, GIF, or enabled SVG file.');
 	}
 }
 
-export async function readMediaImageDimensions( file: File ): Promise<BuilderMediaDimensions | undefined> {
-	if ( !file.type.startsWith( 'image/' ) ) {
+export function validateMediaDimensions(dimensions: BuilderMediaDimensions, options: BuilderMediaOptions = {}): void {
+	if (options.minImageWidth !== undefined && dimensions.width < options.minImageWidth) {
+		throw new Error(`Media image is too narrow. Minimum width is ${options.minImageWidth}px.`);
+	}
+	if (options.minImageHeight !== undefined && dimensions.height < options.minImageHeight) {
+		throw new Error(`Media image is too short. Minimum height is ${options.minImageHeight}px.`);
+	}
+	if (options.maxImageWidth !== undefined && dimensions.width > options.maxImageWidth) {
+		throw new Error(`Media image is too wide. Maximum width is ${options.maxImageWidth}px.`);
+	}
+	if (options.maxImageHeight !== undefined && dimensions.height > options.maxImageHeight) {
+		throw new Error(`Media image is too tall. Maximum height is ${options.maxImageHeight}px.`);
+	}
+}
+
+export async function readMediaImageDimensions(file: File): Promise<BuilderMediaDimensions | undefined> {
+	if (!file.type.startsWith('image/')) {
 		return undefined;
 	}
-	if ( typeof createImageBitmap === 'function' ) {
-		const bitmap = await createImageBitmap( file );
+	if (typeof createImageBitmap === 'function') {
+		const bitmap = await createImageBitmap(file);
 		const dimensions = { width: bitmap.width, height: bitmap.height };
 		bitmap.close();
 		return dimensions;
 	}
-	if ( typeof Image === 'undefined' || typeof URL.createObjectURL !== 'function' ) {
+	if (typeof Image === 'undefined' || typeof URL.createObjectURL !== 'function') {
 		return undefined;
 	}
-	const url = URL.createObjectURL( file );
+	const url = URL.createObjectURL(file);
 	try {
 		const image = new Image();
-		await new Promise<void>( ( resolve, reject ) => {
-			image.onload = () => resolve();
-			image.onerror = () => reject( new Error( 'Media image could not be decoded.' ) );
+		const loaded = await new Promise<boolean>((resolve) => {
+			let settled = false;
+			let timer: ReturnType<typeof setTimeout> | undefined;
+			const finish = (success: boolean) => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				if (timer) {
+					clearTimeout(timer);
+				}
+				resolve(success);
+			};
+			timer = setTimeout(() => finish(false), IMAGE_DIMENSION_TIMEOUT_MS);
+			image.onload = () => finish(true);
+			image.onerror = () => finish(false);
 			image.src = url;
-		} );
-		return { width: image.naturalWidth, height: image.naturalHeight };
+		});
+		return loaded ? { width: image.naturalWidth, height: image.naturalHeight } : undefined;
 	} finally {
-		URL.revokeObjectURL( url );
+		URL.revokeObjectURL(url);
 	}
 }
 
-export function normalizeMediaAsset( asset: Partial<BuilderMediaAssetMetadata> & Pick<BuilderMediaAssetMetadata, 'url'> ): MediaAsset {
-	const kind = asset.mimeType === SVG_MEDIA_MIME_TYPE || /\.svg($|\?)/i.test( asset.url ) ? 'svg' : asset.mimeType?.startsWith( 'image/' ) || isImageUrl( asset.url ) ? 'image' : 'file';
+export function normalizeMediaAsset(
+	asset: Partial<BuilderMediaAssetMetadata> & Pick<BuilderMediaAssetMetadata, 'url'>,
+): MediaAsset {
+	const kind =
+		asset.mimeType === SVG_MEDIA_MIME_TYPE || /\.svg($|\?)/i.test(asset.url)
+			? 'svg'
+			: asset.mimeType?.startsWith('image/') || isImageUrl(asset.url)
+				? 'image'
+				: 'file';
 	return {
 		id: asset.id || crypto.randomUUID(),
 		kind,
@@ -131,18 +154,18 @@ export function normalizeMediaAsset( asset: Partial<BuilderMediaAssetMetadata> &
 		alt: asset.alt,
 		width: asset.width,
 		height: asset.height,
-		meta: compactRecord( {
+		meta: compactRecord({
 			title: asset.title,
 			caption: asset.caption,
 			mimeType: asset.mimeType,
 			size: asset.size,
 			createdAt: asset.createdAt,
 			source: asset.source,
-		} ),
+		}),
 	};
 }
 
-export function toMediaAssetMetadata( asset: MediaAsset ): BuilderMediaAssetMetadata {
+export function toMediaAssetMetadata(asset: MediaAsset): BuilderMediaAssetMetadata {
 	return {
 		id: asset.id,
 		url: asset.url,
@@ -158,69 +181,104 @@ export function toMediaAssetMetadata( asset: MediaAsset ): BuilderMediaAssetMeta
 	};
 }
 
-export function mergeMediaCatalog( current: MediaAsset[], incoming: Array<MediaAsset | BuilderMediaAssetMetadata> ): MediaAsset[] {
+export function mergeMediaCatalog(
+	current: MediaAsset[],
+	incoming: Array<MediaAsset | BuilderMediaAssetMetadata>,
+): MediaAsset[] {
 	const byKey = new Map<string, MediaAsset>();
-	for ( const asset of current ) {
-		byKey.set( getMediaAssetKey( asset ), asset );
+	for (const asset of current) {
+		byKey.set(getMediaAssetKey(asset), asset);
 	}
-	for ( const candidate of incoming ) {
-		const normalized = isSchemaMediaAsset( candidate ) ? candidate : normalizeMediaAsset( candidate );
-		const key = getMediaAssetKey( normalized );
-		const existing = byKey.get( key );
-		byKey.set( key, existing ? mergeMediaAsset( existing, normalized ) : normalized );
+	for (const candidate of incoming) {
+		const normalized = isSchemaMediaAsset(candidate) ? candidate : normalizeMediaAsset(candidate);
+		const key = getMediaAssetKey(normalized);
+		const existing = byKey.get(key);
+		byKey.set(key, existing ? mergeMediaAsset(existing, normalized) : normalized);
 	}
-	return [ ...byKey.values() ];
+	return [...byKey.values()];
 }
 
-export function updateMediaCatalogAsset( assets: MediaAsset[], assetId: string, patch: Partial<BuilderMediaAssetMetadata> ): MediaAsset[] {
-	return assets.map( ( asset ) => asset.id === assetId
-		? normalizeMediaAsset( {
-			...toMediaAssetMetadata( asset ),
-			...patch,
-			id: asset.id,
-			url: patch.url ?? asset.url,
-		} )
-		: asset );
+export function updateMediaCatalogAsset(
+	assets: MediaAsset[],
+	assetId: string,
+	patch: Partial<BuilderMediaAssetMetadata>,
+): MediaAsset[] {
+	return assets.map((asset) =>
+		asset.id === assetId
+			? normalizeMediaAsset({
+					...toMediaAssetMetadata(asset),
+					...patch,
+					id: asset.id,
+					url: patch.url ?? asset.url,
+				})
+			: asset,
+	);
 }
 
-export function deleteMediaCatalogAsset( assets: MediaAsset[], assetId: string ): MediaAsset[] {
-	return assets.filter( ( asset ) => asset.id !== assetId );
+export function deleteMediaCatalogAsset(assets: MediaAsset[], assetId: string): MediaAsset[] {
+	return assets.filter((asset) => asset.id !== assetId);
 }
 
-export function createMediaDiagnostics( assets: MediaAsset[], allowedMimeTypes = resolveAllowedMediaMimeTypes() ): BuilderMediaDiagnostic[] {
+export function createMediaDiagnostics(
+	assets: MediaAsset[],
+	allowedMimeTypes = resolveAllowedMediaMimeTypes(),
+): BuilderMediaDiagnostic[] {
 	const diagnostics: BuilderMediaDiagnostic[] = [];
-	for ( const asset of assets ) {
-		const metadata = toMediaAssetMetadata( asset );
-		if ( !metadata.url.trim() ) {
-			diagnostics.push( { code: 'missing-url', message: 'Media asset is missing a URL.', severity: 'warning', assetId: asset.id } );
+	for (const asset of assets) {
+		const metadata = toMediaAssetMetadata(asset);
+		if (!metadata.url.trim()) {
+			diagnostics.push({
+				code: 'missing-url',
+				message: 'Media asset is missing a URL.',
+				severity: 'warning',
+				assetId: asset.id,
+			});
 		}
-		if ( metadata.mimeType && !allowedMimeTypes.includes( metadata.mimeType ) ) {
-			diagnostics.push( { code: 'unsupported-mime', message: `${ metadata.mimeType } may not be supported by this host.`, severity: 'unsupported', assetId: asset.id, url: asset.url } );
+		if (metadata.mimeType && !allowedMimeTypes.includes(metadata.mimeType)) {
+			diagnostics.push({
+				code: 'unsupported-mime',
+				message: `${metadata.mimeType} may not be supported by this host.`,
+				severity: 'unsupported',
+				assetId: asset.id,
+				url: asset.url,
+			});
 		}
-		if ( isExternalUrl( metadata.url ) ) {
-			diagnostics.push( { code: 'external-url', message: 'External media URL is referenced without being downloaded.', severity: 'info', assetId: asset.id, url: asset.url } );
+		if (isExternalUrl(metadata.url)) {
+			diagnostics.push({
+				code: 'external-url',
+				message: 'External media URL is referenced without being downloaded.',
+				severity: 'info',
+				assetId: asset.id,
+				url: asset.url,
+			});
 		}
-		if ( asset.kind === 'image' && !metadata.alt?.trim() ) {
-			diagnostics.push( { code: 'missing-alt', message: 'Image asset is missing alt text.', severity: 'warning', assetId: asset.id, url: asset.url } );
+		if (asset.kind === 'image' && !metadata.alt?.trim()) {
+			diagnostics.push({
+				code: 'missing-alt',
+				message: 'Image asset is missing alt text.',
+				severity: 'warning',
+				assetId: asset.id,
+				url: asset.url,
+			});
 		}
 	}
 	return diagnostics;
 }
 
-export function createBrowserLocalMediaAdapter( options: BuilderMediaOptions = {} ): BuilderMediaAdapter {
+export function createBrowserLocalMediaAdapter(options: BuilderMediaOptions = {}): BuilderMediaAdapter {
 	return {
-		listAssets: ( project ) => project.media.map( toMediaAssetMetadata ),
-		async uploadAsset( { file } ) {
-			validateMediaUpload( file, options );
-			const dimensions = await readMediaImageDimensions( file );
-			if ( dimensions ) {
-				validateMediaDimensions( dimensions, options );
+		listAssets: (project) => project.media.map(toMediaAssetMetadata),
+		async uploadAsset({ file }) {
+			validateMediaUpload(file, options);
+			const dimensions = await readMediaImageDimensions(file);
+			if (dimensions) {
+				validateMediaDimensions(dimensions, options);
 			}
 			return {
 				id: crypto.randomUUID(),
-				url: URL.createObjectURL( file ),
+				url: URL.createObjectURL(file),
 				title: file.name,
-				alt: file.name.replace( /\.[^.]+$/, '' ),
+				alt: file.name.replace(/\.[^.]+$/, ''),
 				mimeType: file.type,
 				size: file.size,
 				width: dimensions?.width,
@@ -229,19 +287,19 @@ export function createBrowserLocalMediaAdapter( options: BuilderMediaOptions = {
 				source: 'upload',
 			};
 		},
-		async updateAsset( assetId, patch, project ) {
-			const existing = project.media.find( ( asset ) => asset.id === assetId );
+		async updateAsset(assetId, patch, project) {
+			const existing = project.media.find((asset) => asset.id === assetId);
 			return {
-				...( existing ? toMediaAssetMetadata( existing ) : { id: assetId, url: patch.url ?? '' } ),
+				...(existing ? toMediaAssetMetadata(existing) : { id: assetId, url: patch.url ?? '' }),
 				...patch,
 				id: assetId,
 			};
 		},
-		resolveAssetUrl: ( asset ) => asset.url,
+		resolveAssetUrl: (asset) => asset.url,
 	};
 }
 
-function mergeMediaAsset( existing: MediaAsset, incoming: MediaAsset ): MediaAsset {
+function mergeMediaAsset(existing: MediaAsset, incoming: MediaAsset): MediaAsset {
 	return {
 		...existing,
 		...incoming,
@@ -254,29 +312,32 @@ function mergeMediaAsset( existing: MediaAsset, incoming: MediaAsset ): MediaAss
 	};
 }
 
-function getMediaAssetKey( asset: MediaAsset ): string {
+function getMediaAssetKey(asset: MediaAsset): string {
 	return asset.url.trim().toLowerCase() || asset.id;
 }
 
-function isImageUrl( url: string ): boolean {
-	return /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test( url );
+function isImageUrl(url: string): boolean {
+	return /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(url);
 }
 
-function isSchemaMediaAsset( asset: MediaAsset | BuilderMediaAssetMetadata ): asset is MediaAsset {
+function isSchemaMediaAsset(asset: MediaAsset | BuilderMediaAssetMetadata): asset is MediaAsset {
 	return 'kind' in asset && typeof asset.kind === 'string';
 }
 
-function isExternalUrl( url: string ): boolean {
-	return /^https?:\/\//i.test( url );
+function isExternalUrl(url: string): boolean {
+	return /^https?:\/\//i.test(url);
 }
 
-function formatBytes( value: number ): string {
-	if ( value < 1024 * 1024 ) {
-		return `${ Math.ceil( value / 1024 ) } KB`;
+function formatBytes(value: number): string {
+	if (value < 1024 * 1024) {
+		return `${Math.ceil(value / 1024)} KB`;
 	}
-	return `${ ( value / ( 1024 * 1024 ) ).toFixed( 1 ) } MB`;
+	return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function compactRecord( value: Record<string, JsonValue | undefined> ): Record<string, JsonValue> {
-	return Object.fromEntries( Object.entries( value ).filter( ( [ , entry ] ) => entry !== undefined && entry !== '' ) ) as Record<string, JsonValue>;
+function compactRecord(value: Record<string, JsonValue | undefined>): Record<string, JsonValue> {
+	return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined && entry !== '')) as Record<
+		string,
+		JsonValue
+	>;
 }

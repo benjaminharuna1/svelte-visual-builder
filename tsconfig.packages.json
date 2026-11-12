@@ -1,11 +1,7 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "include": [
-    "packages/*/src/**/*.ts",
-    "packages/*/src/**/*.svelte"
-  ]
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true
+	},
+	"include": ["packages/*/src/**/*.ts", "packages/*/src/**/*.svelte"]
 }
-

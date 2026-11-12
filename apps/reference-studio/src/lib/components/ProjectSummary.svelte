@@ -27,21 +27,21 @@
 
 	$: editorState = $editor;
 	$: project = editorState.project;
-	$: activeDocument = project.documents.find( ( document ) => document.id === editorState.activeDocumentId );
-	$: activeSession = editorState.documentSessions[ editorState.activeDocumentId ];
-	$: activePreviewPath = editorState.ui.preview.pathname || previewPresets[ 0 ]?.pathname || '/';
-	$: activePreviewQuery = editorState.ui.preview.query || previewPresets[ 0 ]?.query || '';
-	$: activeQueryParams = new URLSearchParams( activePreviewQuery );
-	$: activePreviewPanel = activeQueryParams.get( 'siteEditor' ) ?? '';
+	$: activeDocument = project.documents.find((document) => document.id === editorState.activeDocumentId);
+	$: activeSession = editorState.documentSessions[editorState.activeDocumentId];
+	$: activePreviewPath = editorState.ui.preview.pathname || previewPresets[0]?.pathname || '/';
+	$: activePreviewQuery = editorState.ui.preview.query || previewPresets[0]?.query || '';
+	$: activeQueryParams = new URLSearchParams(activePreviewQuery);
+	$: activePreviewPanel = activeQueryParams.get('siteEditor') ?? '';
 	$: activeSiteEntryId = editorState.ui.siteEditor.activeEntryId;
 	$: componentEditing = editorState.ui.componentEditing;
-	$: kindGroups = buildKindGroups( project.documents );
-	$: assignmentGroups = buildAssignmentGroups( project.themeAssignments );
-	$: activeRevisions = activeDocument ? getDocumentRevisions( project, activeDocument.id ) : [];
-	$: componentDocuments = project.documents.filter( ( document ) => document.kind === 'component' );
-	$: libraryDocuments = project.documents.filter( ( document ) => document.kind === 'library-item' );
-	$: parityGapReports = readParityGapReports( project.meta );
-	$: diagnosticGroups = buildDiagnosticGroups( importWarnings );
+	$: kindGroups = buildKindGroups(project.documents);
+	$: assignmentGroups = buildAssignmentGroups(project.themeAssignments);
+	$: activeRevisions = activeDocument ? getDocumentRevisions(project, activeDocument.id) : [];
+	$: componentDocuments = project.documents.filter((document) => document.kind === 'component');
+	$: libraryDocuments = project.documents.filter((document) => document.kind === 'library-item');
+	$: parityGapReports = readParityGapReports(project.meta);
+	$: diagnosticGroups = buildDiagnosticGroups(importWarnings);
 
 	type BrowserGroup = {
 		label: string;
@@ -54,49 +54,72 @@
 		items: ElementorImportWarning[];
 	};
 
-	function buildKindGroups( documents: BuilderDocument[] ): BrowserGroup[] {
-		const order: BuilderDocument['kind'][] = [ 'page', 'layout', 'template', 'component', 'popup', 'kit', 'library-item' ];
-		return order.map( ( kind ) => {
-			const items = documents.filter( ( document ) => document.kind === kind );
-			return {
-				label: kind,
-				description: describeKind( kind, items.length ),
-				items,
-			};
-		} ).filter( ( group ) => group.items.length );
+	function buildKindGroups(documents: BuilderDocument[]): BrowserGroup[] {
+		const order: BuilderDocument['kind'][] = [
+			'page',
+			'layout',
+			'template',
+			'component',
+			'popup',
+			'kit',
+			'library-item',
+		];
+		return order
+			.map((kind) => {
+				const items = documents.filter((document) => document.kind === kind);
+				return {
+					label: kind,
+					description: describeKind(kind, items.length),
+					items,
+				};
+			})
+			.filter((group) => group.items.length);
 	}
 
-	function buildAssignmentGroups( assignments: ThemeAssignment[] ): Array<{ slot: ThemeAssignment['slot']; items: ThemeAssignment[] }> {
-		const order: ThemeAssignment['slot'][] = [ 'page', 'header', 'footer', 'sidebar', 'popup', 'modal', 'loop-item', 'empty' ];
-		return order.map( ( slot ) => ( {
-			slot,
-			items: assignments
-				.filter( ( assignment ) => assignment.slot === slot )
-				.sort( ( left, right ) => right.priority - left.priority ),
-		} ) ).filter( ( group ) => group.items.length );
+	function buildAssignmentGroups(
+		assignments: ThemeAssignment[],
+	): Array<{ slot: ThemeAssignment['slot']; items: ThemeAssignment[] }> {
+		const order: ThemeAssignment['slot'][] = [
+			'page',
+			'header',
+			'footer',
+			'sidebar',
+			'popup',
+			'modal',
+			'loop-item',
+			'empty',
+		];
+		return order
+			.map((slot) => ({
+				slot,
+				items: assignments
+					.filter((assignment) => assignment.slot === slot)
+					.sort((left, right) => right.priority - left.priority),
+			}))
+			.filter((group) => group.items.length);
 	}
 
-	function buildDiagnosticGroups( warnings: ElementorImportWarning[] ): DiagnosticGroup[] {
+	function buildDiagnosticGroups(warnings: ElementorImportWarning[]): DiagnosticGroup[] {
 		const byCode = new Map<string, ElementorImportWarning[]>();
-		for ( const warning of warnings ) {
-			const bucket = byCode.get( warning.code ) ?? [];
-			bucket.push( warning );
-			byCode.set( warning.code, bucket );
+		for (const warning of warnings) {
+			const bucket = byCode.get(warning.code) ?? [];
+			bucket.push(warning);
+			byCode.set(warning.code, bucket);
 		}
 
-		return [ ...byCode.entries() ].map( ( [ label, items ] ) => ( { label, items } ) );
+		return [...byCode.entries()].map(([label, items]) => ({ label, items }));
 	}
 
-	function containsCompatNode( nodes: BuilderNode[] ): boolean {
-		for ( const node of nodes ) {
-			if ( node.type === 'compat-widget' || node.legacy ) {
+	function containsCompatNode(nodes: BuilderNode[]): boolean {
+		for (const node of nodes) {
+			if (node.type === 'compat-widget' || node.legacy) {
 				return true;
 			}
-			if ( containsCompatNode( node.children ) ) {
+			if (containsCompatNode(node.children)) {
 				return true;
 			}
-			for ( const slotNodes of Object.values( node.slots ) as BuilderNode[][] ) {
-				if ( containsCompatNode( slotNodes ) ) {
+			for (const slotNodes of Object.values(node.slots) as BuilderNode[][]) {
+				if (containsCompatNode(slotNodes)) {
 					return true;
 				}
 			}
@@ -105,29 +128,29 @@
 		return false;
 	}
 
-	function inferDocumentMode( document: BuilderDocument ): string {
-		if ( document.kind === 'component' ) {
+	function inferDocumentMode(document: BuilderDocument): string {
+		if (document.kind === 'component') {
 			return 'component-master';
 		}
 
-		if ( document.kind === 'kit' ) {
+		if (document.kind === 'kit') {
 			return 'site-settings';
 		}
 
-		if ( document.kind === 'library-item' ) {
+		if (document.kind === 'library-item') {
 			return 'library';
 		}
 
-		if ( containsCompatNode( document.root ) ) {
+		if (containsCompatNode(document.root)) {
 			return 'legacy-compat';
 		}
 
 		return document.kind;
 	}
 
-	function resolveOpenMode( document: BuilderDocument ): EditorMode {
-		const mode = inferDocumentMode( document );
-		switch ( mode ) {
+	function resolveOpenMode(document: BuilderDocument): EditorMode {
+		const mode = inferDocumentMode(document);
+		switch (mode) {
 			case 'layout':
 				return 'layout';
 			case 'template':
@@ -143,189 +166,196 @@
 		}
 	}
 
-	function describeKind( kind: BuilderDocument['kind'], count: number ): string {
-		switch ( kind ) {
+	function describeKind(kind: BuilderDocument['kind'], count: number): string {
+		switch (kind) {
 			case 'page':
-				return `${ count } authored page${ count === 1 ? '' : 's' }`;
+				return `${count} authored page${count === 1 ? '' : 's'}`;
 			case 'layout':
-				return `${ count } reusable layout${ count === 1 ? '' : 's' }`;
+				return `${count} reusable layout${count === 1 ? '' : 's'}`;
 			case 'template':
-				return `${ count } route template${ count === 1 ? '' : 's' }`;
+				return `${count} route template${count === 1 ? '' : 's'}`;
 			case 'component':
-				return `${ count } component master${ count === 1 ? '' : 's' }`;
+				return `${count} component master${count === 1 ? '' : 's'}`;
 			case 'popup':
-				return `${ count } popup or modal${ count === 1 ? '' : 's' }`;
+				return `${count} popup or modal${count === 1 ? '' : 's'}`;
 			case 'kit':
-				return `${ count } site kit${ count === 1 ? '' : 's' }`;
+				return `${count} site kit${count === 1 ? '' : 's'}`;
 			case 'library-item':
-				return `${ count } library item${ count === 1 ? '' : 's' }`;
+				return `${count} library item${count === 1 ? '' : 's'}`;
 		}
 	}
 
-	function readParityGapReports( meta: Record<string, unknown> ): ElementorParityGapReport[] {
+	function readParityGapReports(meta: Record<string, unknown>): ElementorParityGapReport[] {
 		const importBridge = meta.importBridge;
-		if ( !importBridge || typeof importBridge !== 'object' || Array.isArray( importBridge ) ) {
+		if (!importBridge || typeof importBridge !== 'object' || Array.isArray(importBridge)) {
 			return [];
 		}
 
-		const parityGaps = ( importBridge as Record<string, unknown> ).parityGaps;
-		if ( !parityGaps || typeof parityGaps !== 'object' || Array.isArray( parityGaps ) ) {
+		const parityGaps = (importBridge as Record<string, unknown>).parityGaps;
+		if (!parityGaps || typeof parityGaps !== 'object' || Array.isArray(parityGaps)) {
 			return [];
 		}
 
-		return Object.values( parityGaps as Record<string, ElementorParityGapReport> );
+		return Object.values(parityGaps as Record<string, ElementorParityGapReport>);
 	}
 
-	function findDocument( documentId: string ): BuilderDocument | undefined {
-		return project.documents.find( ( document ) => document.id === documentId );
+	function findDocument(documentId: string): BuilderDocument | undefined {
+		return project.documents.find((document) => document.id === documentId);
 	}
 
-	function countComponentUsage( componentId: string ): number {
-		return project.documents.reduce( ( total, document ) => total + countComponentUsageInNodes( document.root, componentId ), 0 );
+	function countComponentUsage(componentId: string): number {
+		return project.documents.reduce(
+			(total, document) => total + countComponentUsageInNodes(document.root, componentId),
+			0,
+		);
 	}
 
-	function countComponentUsageInNodes( nodes: BuilderNode[], componentId: string ): number {
+	function countComponentUsageInNodes(nodes: BuilderNode[], componentId: string): number {
 		let total = 0;
-		for ( const node of nodes ) {
-			if ( node.type === 'component-instance' && node.props.componentId === componentId ) {
+		for (const node of nodes) {
+			if (node.type === 'component-instance' && node.props.componentId === componentId) {
 				total += 1;
 			}
-			total += countComponentUsageInNodes( node.children, componentId );
-			for ( const slotNodes of Object.values( node.slots ) as BuilderNode[][] ) {
-				total += countComponentUsageInNodes( slotNodes, componentId );
+			total += countComponentUsageInNodes(node.children, componentId);
+			for (const slotNodes of Object.values(node.slots) as BuilderNode[][]) {
+				total += countComponentUsageInNodes(slotNodes, componentId);
 			}
 		}
 
 		return total;
 	}
 
-	function getComponentConsumerTitles( componentId: string ): string[] {
+	function getComponentConsumerTitles(componentId: string): string[] {
 		const consumers = project.documents
-			.filter( ( document ) => countComponentUsageInNodes( document.root, componentId ) > 0 )
-			.map( ( document ) => document.title );
-		return consumers.slice( 0, 3 );
+			.filter((document) => countComponentUsageInNodes(document.root, componentId) > 0)
+			.map((document) => document.title);
+		return consumers.slice(0, 3);
 	}
 
-	function findPreferredAssignment( documentId: string ): ThemeAssignment | undefined {
+	function findPreferredAssignment(documentId: string): ThemeAssignment | undefined {
 		return project.themeAssignments
-			.filter( ( assignment ) => assignment.documentId === documentId )
-			.sort( ( left, right ) => {
-				if ( left.status !== right.status ) {
+			.filter((assignment) => assignment.documentId === documentId)
+			.sort((left, right) => {
+				if (left.status !== right.status) {
 					return left.status === 'published' ? -1 : 1;
 				}
 				return right.priority - left.priority;
-			} )[ 0 ];
+			})[0];
 	}
 
-	function materializePreviewPath( pathname?: string ): string {
-		const fallback = previewPresets[ 0 ]?.pathname || '/marketing-landing';
-		if ( !pathname ) {
+	function materializePreviewPath(pathname?: string): string {
+		const fallback = previewPresets[0]?.pathname || '/marketing-landing';
+		if (!pathname) {
 			return fallback;
 		}
 
-		if ( pathname === '/[...all]' || pathname === '/(.*)' ) {
+		if (pathname === '/[...all]' || pathname === '/(.*)') {
 			return fallback;
 		}
 
 		return pathname
-			.replace( '[...all]', 'marketing-landing' )
-			.replace( '[...slug]', 'post-one' )
-			.replace( '[slug]', 'preview' );
+			.replace('[...all]', 'marketing-landing')
+			.replace('[...slug]', 'post-one')
+			.replace('[slug]', 'preview');
 	}
 
-	function buildPreviewQuery( slot?: ThemeAssignment['slot'], panel?: string ): string {
+	function buildPreviewQuery(slot?: ThemeAssignment['slot'], panel?: string): string {
 		const query = new URLSearchParams();
-		if ( panel ) {
-			query.set( 'siteEditor', panel );
+		if (panel) {
+			query.set('siteEditor', panel);
 		}
-		if ( slot === 'popup' ) {
-			query.set( 'preview', '1' );
+		if (slot === 'popup') {
+			query.set('preview', '1');
 		}
-		if ( slot === 'modal' ) {
-			query.set( 'modal', '1' );
+		if (slot === 'modal') {
+			query.set('modal', '1');
 		}
 		return query.toString();
 	}
 
-	function applyPreviewContext( pathname: string, query: string, context: Partial<typeof editorState.ui.preview> = {} ) {
-		editor.setPreviewContext( {
+	function applyPreviewContext(pathname: string, query: string, context: Partial<typeof editorState.ui.preview> = {}) {
+		editor.setPreviewContext({
 			pathname,
 			query,
 			...context,
-		} );
+		});
 	}
 
-	function openDocument( document: BuilderDocument ) {
-		editor.openDocument( document.id, { mode: resolveOpenMode( document ) } );
+	function openDocument(document: BuilderDocument) {
+		editor.openDocument(document.id, { mode: resolveOpenMode(document) });
 	}
 
-	function openSiteEditorEntry( entry: SiteEditorEntry ) {
-		const document = findDocument( entry.documentId );
-		if ( !document ) {
+	function openSiteEditorEntry(entry: SiteEditorEntry) {
+		const document = findDocument(entry.documentId);
+		if (!document) {
 			return;
 		}
 
-		const assignment = findPreferredAssignment( document.id );
-		editor.openDocument( document.id, {
-			mode: resolveOpenMode( document ),
-			pathname: materializePreviewPath( assignment?.pathname ),
-			query: buildPreviewQuery( assignment?.slot, entry.id ),
+		const assignment = findPreferredAssignment(document.id);
+		editor.openDocument(document.id, {
+			mode: resolveOpenMode(document),
+			pathname: materializePreviewPath(assignment?.pathname),
+			query: buildPreviewQuery(assignment?.slot, entry.id),
 			slot: assignment?.slot,
 			assignmentId: assignment?.id,
 			siteEntryId: entry.id,
 			source: 'site-entry',
-		} );
+		});
 	}
 
-	function previewSiteEditorEntry( entry: SiteEditorEntry ) {
-		const assignment = findPreferredAssignment( entry.documentId );
-		editor.setSiteEditorEntry( entry.id );
-		applyPreviewContext( materializePreviewPath( assignment?.pathname ), buildPreviewQuery( assignment?.slot, entry.id ), {
+	function previewSiteEditorEntry(entry: SiteEditorEntry) {
+		const assignment = findPreferredAssignment(entry.documentId);
+		editor.setSiteEditorEntry(entry.id);
+		applyPreviewContext(materializePreviewPath(assignment?.pathname), buildPreviewQuery(assignment?.slot, entry.id), {
 			documentId: entry.documentId,
 			slot: assignment?.slot,
 			assignmentId: assignment?.id,
 			source: 'site-entry',
-		} );
+		});
 	}
 
-	function applyPreset( preset: PreviewPreset ) {
-		applyPreviewContext( preset.pathname, preset.query, {
+	function applyPreset(preset: PreviewPreset) {
+		applyPreviewContext(preset.pathname, preset.query, {
 			source: 'manual',
-		} );
+		});
 	}
 
-	function openAssignment( assignment: ThemeAssignment ) {
-		const document = findDocument( assignment.documentId );
-		if ( !document ) {
+	function openAssignment(assignment: ThemeAssignment) {
+		const document = findDocument(assignment.documentId);
+		if (!document) {
 			return;
 		}
 
-		editor.openDocument( document.id, {
-			mode: resolveOpenMode( document ),
-			pathname: materializePreviewPath( assignment.pathname ),
-			query: buildPreviewQuery( assignment.slot, 'assignments' ),
+		editor.openDocument(document.id, {
+			mode: resolveOpenMode(document),
+			pathname: materializePreviewPath(assignment.pathname),
+			query: buildPreviewQuery(assignment.slot, 'assignments'),
 			slot: assignment.slot,
 			assignmentId: assignment.id,
 			source: 'assignment',
-		} );
+		});
 	}
 
-	function previewAssignment( assignment: ThemeAssignment ) {
-		applyPreviewContext( materializePreviewPath( assignment.pathname ), buildPreviewQuery( assignment.slot, 'assignments' ), {
-			documentId: assignment.documentId,
-			slot: assignment.slot,
-			assignmentId: assignment.id,
-			source: 'assignment',
-		} );
+	function previewAssignment(assignment: ThemeAssignment) {
+		applyPreviewContext(
+			materializePreviewPath(assignment.pathname),
+			buildPreviewQuery(assignment.slot, 'assignments'),
+			{
+				documentId: assignment.documentId,
+				slot: assignment.slot,
+				assignmentId: assignment.id,
+				source: 'assignment',
+			},
+		);
 	}
 
-	async function restoreRevision( revisionId: string ) {
-		if ( !activeDocument ) {
+	async function restoreRevision(revisionId: string) {
+		if (!activeDocument) {
 			return;
 		}
 
-		editor.openDocument( activeDocument.id, {
-			mode: resolveOpenMode( activeDocument ),
+		editor.openDocument(activeDocument.id, {
+			mode: resolveOpenMode(activeDocument),
 			pathname: activePreviewPath,
 			query: activePreviewQuery,
 			slot: editorState.ui.preview.slot,
@@ -334,33 +364,35 @@
 			source: editorState.ui.preview.source,
 			openRevisionBrowser: true,
 			selectedRevisionId: revisionId,
-		} );
-		await editor.restoreRevision( revisionId, activeDocument.id );
+		});
+		await editor.restoreRevision(revisionId, activeDocument.id);
 	}
 
-	function formatDate( value?: string ): string {
-		if ( !value ) {
+	function formatDate(value?: string): string {
+		if (!value) {
 			return 'Not yet';
 		}
 
-		return new Date( value ).toLocaleString( 'en-US', {
+		return new Date(value).toLocaleString('en-US', {
 			month: 'short',
 			day: 'numeric',
 			hour: 'numeric',
 			minute: '2-digit',
-		} );
+		});
 	}
 
-	function getRevisionLabel( revision: { label?: string; createdAt?: string } ): string {
-		return `${ revision.label ?? 'Revision' } - ${ formatDate( revision.createdAt ) }`;
+	function getRevisionLabel(revision: { label?: string; createdAt?: string }): string {
+		return `${revision.label ?? 'Revision'} - ${formatDate(revision.createdAt)}`;
 	}
 
-	function getAssignmentPath( assignment: ThemeAssignment ): string {
-		if ( assignment.pathname ) {
+	function getAssignmentPath(assignment: ThemeAssignment): string {
+		if (assignment.pathname) {
 			return assignment.pathname;
 		}
 
-		return assignment.conditionGroups.length ? `${ assignment.conditionGroups.length } condition group(s)` : 'No pathname';
+		return assignment.conditionGroups.length
+			? `${assignment.conditionGroups.length} condition group(s)`
+			: 'No pathname';
 	}
 </script>
 
@@ -369,7 +401,9 @@
 		<div>
 			<p class="summary__eyebrow">Site Editor</p>
 			<h2 id="site-editor-shell-title">Builder controls</h2>
-			<p class="summary__lede">Open documents in the right mode, switch preview context, and manage revisions without leaving the canvas.</p>
+			<p class="summary__lede">
+				Open documents in the right mode, switch preview context, and manage revisions without leaving the canvas.
+			</p>
 		</div>
 		<div class="summary__head-meta" aria-label="Editor state">
 			<span class="summary__state-pill">{editorState.ui.saveState}</span>
@@ -406,7 +440,12 @@
 		</div>
 		<div class="summary__entry-list">
 			{#each siteEditorEntries as entry}
-				<article class:summary__item--active={activeDocument?.id === entry.documentId || activeSiteEntryId === entry.id || activePreviewPanel === entry.id} class="summary__item">
+				<article
+					class:summary__item--active={activeDocument?.id === entry.documentId ||
+						activeSiteEntryId === entry.id ||
+						activePreviewPanel === entry.id}
+					class="summary__item"
+				>
 					<div class="summary__item-head">
 						<strong>{entry.label}</strong>
 						<div class="summary__tag-row">
@@ -416,8 +455,10 @@
 					</div>
 					<span class="summary__item-meta">{entry.route}</span>
 					<div class="summary__button-row">
-						<button type="button" on:click={() => openSiteEditorEntry( entry )}>Open</button>
-						<button type="button" class="summary__ghost-button" on:click={() => previewSiteEditorEntry( entry )}>Preview</button>
+						<button type="button" on:click={() => openSiteEditorEntry(entry)}>Open</button>
+						<button type="button" class="summary__ghost-button" on:click={() => previewSiteEditorEntry(entry)}
+							>Preview</button
+						>
 					</div>
 				</article>
 			{/each}
@@ -426,9 +467,10 @@
 			{#each previewPresets as preset}
 				<button
 					type="button"
-					class:summary__chip-button--active={activePreviewPath === preset.pathname && activePreviewQuery === preset.query}
+					class:summary__chip-button--active={activePreviewPath === preset.pathname &&
+						activePreviewQuery === preset.query}
 					class="summary__chip-button"
-					on:click={() => applyPreset( preset )}
+					on:click={() => applyPreset(preset)}
 				>
 					<strong>{preset.label}</strong>
 					<span>{preset.pathname}</span>
@@ -458,13 +500,17 @@
 							<div class:summary__item--active={document.id === activeDocument?.id} class="summary__item">
 								<div class="summary__item-head">
 									<strong>{document.title}</strong>
-									<span class="summary__tag summary__tag--muted">{inferDocumentMode( document )}</span>
+									<span class="summary__tag summary__tag--muted">{inferDocumentMode(document)}</span>
 								</div>
 								<span class="summary__item-meta">{document.slug}</span>
 								<div class="summary__button-row">
-									<button type="button" on:click={() => openDocument( document )}>Open</button>
-									{#if findPreferredAssignment( document.id )}
-										<button type="button" class="summary__ghost-button" on:click={() => previewAssignment( findPreferredAssignment( document.id )! )}>Preview route</button>
+									<button type="button" on:click={() => openDocument(document)}>Open</button>
+									{#if findPreferredAssignment(document.id)}
+										<button
+											type="button"
+											class="summary__ghost-button"
+											on:click={() => previewAssignment(findPreferredAssignment(document.id)!)}>Preview route</button
+										>
 									{/if}
 								</div>
 							</div>
@@ -494,14 +540,18 @@
 						{#each group.items as assignment}
 							<div class="summary__item">
 								<div class="summary__item-head">
-									<strong>{assignment.label ?? findDocument( assignment.documentId )?.title ?? assignment.documentId}</strong>
+									<strong
+										>{assignment.label ?? findDocument(assignment.documentId)?.title ?? assignment.documentId}</strong
+									>
 									<span class="summary__tag summary__tag--muted">{assignment.status}</span>
 								</div>
-								<span class="summary__item-meta">{getAssignmentPath( assignment )}</span>
+								<span class="summary__item-meta">{getAssignmentPath(assignment)}</span>
 								<span class="summary__item-meta">Priority {assignment.priority}</span>
 								<div class="summary__button-row">
-									<button type="button" on:click={() => openAssignment( assignment )}>Open</button>
-									<button type="button" class="summary__ghost-button" on:click={() => previewAssignment( assignment )}>Preview</button>
+									<button type="button" on:click={() => openAssignment(assignment)}>Open</button>
+									<button type="button" class="summary__ghost-button" on:click={() => previewAssignment(assignment)}
+										>Preview</button
+									>
 								</div>
 							</div>
 						{/each}
@@ -525,15 +575,15 @@
 				<span>Current save state</span>
 			</div>
 			<div class="summary__context-card">
-				<strong>{formatDate( activeSession?.lastDraftAt )}</strong>
+				<strong>{formatDate(activeSession?.lastDraftAt)}</strong>
 				<span>Last draft</span>
 			</div>
 			<div class="summary__context-card">
-				<strong>{formatDate( activeSession?.lastAutosaveAt )}</strong>
+				<strong>{formatDate(activeSession?.lastAutosaveAt)}</strong>
 				<span>Last autosave</span>
 			</div>
 			<div class="summary__context-card">
-				<strong>{formatDate( activeSession?.lastPublishedAt )}</strong>
+				<strong>{formatDate(activeSession?.lastPublishedAt)}</strong>
 				<span>Last publish</span>
 			</div>
 		</div>
@@ -544,9 +594,9 @@
 				type="button"
 				class="summary__ghost-button"
 				on:click={() => {
-					if ( activeDocument ) {
-						editor.openDocument( activeDocument.id, {
-							mode: resolveOpenMode( activeDocument ),
+					if (activeDocument) {
+						editor.openDocument(activeDocument.id, {
+							mode: resolveOpenMode(activeDocument),
 							pathname: activePreviewPath,
 							query: activePreviewQuery,
 							slot: editorState.ui.preview.slot,
@@ -555,7 +605,7 @@
 							source: editorState.ui.preview.source,
 							openRevisionBrowser: true,
 							selectedRevisionId: editorState.ui.revisions.selectedRevisionId,
-						} );
+						});
 					}
 				}}
 			>
@@ -566,12 +616,14 @@
 			{#each activeRevisions as revision}
 				<article class="summary__item">
 					<div class="summary__item-head">
-						<strong>{getRevisionLabel( revision )}</strong>
+						<strong>{getRevisionLabel(revision)}</strong>
 						<span class="summary__tag summary__tag--muted">{revision.kind}</span>
 					</div>
-					<span class="summary__item-meta">{findDocument( revision.documentId )?.title ?? revision.documentId}</span>
+					<span class="summary__item-meta">{findDocument(revision.documentId)?.title ?? revision.documentId}</span>
 					<div class="summary__button-row">
-						<button type="button" class="summary__ghost-button" on:click={() => void restoreRevision( revision.id )}>Restore</button>
+						<button type="button" class="summary__ghost-button" on:click={() => void restoreRevision(revision.id)}
+							>Restore</button
+						>
 					</div>
 				</article>
 			{/each}
@@ -587,7 +639,9 @@
 				<p class="summary__section-kicker">Reusable assets</p>
 				<h3 id="reusable-assets-title">Components, library, diagnostics</h3>
 			</div>
-			<span class="summary__count-badge">{componentDocuments.length + libraryDocuments.length + importWarnings.length + parityGapReports.length}</span>
+			<span class="summary__count-badge"
+				>{componentDocuments.length + libraryDocuments.length + importWarnings.length + parityGapReports.length}</span
+			>
 		</div>
 
 		<div class="summary__subsection">
@@ -597,13 +651,22 @@
 			</div>
 			<div class="summary__context-card">
 				<strong>{componentEditing.context ?? 'No component instance selected'}</strong>
-				<span>{componentEditing.componentDocumentId ? findDocument( componentEditing.componentDocumentId )?.title ?? componentEditing.componentDocumentId : 'Select a component instance or master to edit this flow.'}</span>
+				<span
+					>{componentEditing.componentDocumentId
+						? (findDocument(componentEditing.componentDocumentId)?.title ?? componentEditing.componentDocumentId)
+						: 'Select a component instance or master to edit this flow.'}</span
+				>
 				<div class="summary__button-row">
-					<button type="button" class="summary__ghost-button" on:click={() => editor.detachComponentInstance()} disabled={componentEditing.context !== 'instance'}>Detach</button>
 					<button
 						type="button"
 						class="summary__ghost-button"
-						on:click={() => editor.relinkComponentInstance( undefined, componentEditing.componentDocumentId )}
+						on:click={() => editor.detachComponentInstance()}
+						disabled={componentEditing.context !== 'instance'}>Detach</button
+					>
+					<button
+						type="button"
+						class="summary__ghost-button"
+						on:click={() => editor.relinkComponentInstance(undefined, componentEditing.componentDocumentId)}
 						disabled={!componentEditing.componentDocumentId || componentEditing.context === 'master'}
 					>
 						Relink
@@ -615,15 +678,21 @@
 					<div class="summary__item">
 						<div class="summary__item-head">
 							<strong>{document.title}</strong>
-							<span class="summary__tag summary__tag--muted">{countComponentUsage( document.id )} instance(s)</span>
+							<span class="summary__tag summary__tag--muted">{countComponentUsage(document.id)} instance(s)</span>
 						</div>
-						<span class="summary__item-meta">{document.component?.exposedProperties.length ?? 0} exposed override(s)</span>
-						{#if getComponentConsumerTitles( document.id ).length}
-							<span class="summary__item-meta">Used in {getComponentConsumerTitles( document.id ).join( ', ' )}</span>
+						<span class="summary__item-meta"
+							>{document.component?.exposedProperties.length ?? 0} exposed override(s)</span
+						>
+						{#if getComponentConsumerTitles(document.id).length}
+							<span class="summary__item-meta">Used in {getComponentConsumerTitles(document.id).join(', ')}</span>
 						{/if}
 						<div class="summary__button-row">
-							<button type="button" on:click={() => openDocument( document )}>Open master</button>
-							<button type="button" class="summary__ghost-button" on:click={() => editor.insertComponentInstance( document.id )}>Insert</button>
+							<button type="button" on:click={() => openDocument(document)}>Open master</button>
+							<button
+								type="button"
+								class="summary__ghost-button"
+								on:click={() => editor.insertComponentInstance(document.id)}>Insert</button
+							>
 						</div>
 					</div>
 				{/each}
@@ -643,8 +712,10 @@
 							<span class="summary__tag summary__tag--muted">{document.slug}</span>
 						</div>
 						<div class="summary__button-row">
-							<button type="button" on:click={() => openDocument( document )}>Open</button>
-							<button type="button" class="summary__ghost-button" on:click={() => editor.insertLibraryItem( document.id )}>Insert</button>
+							<button type="button" on:click={() => openDocument(document)}>Open</button>
+							<button type="button" class="summary__ghost-button" on:click={() => editor.insertLibraryItem(document.id)}
+								>Insert</button
+							>
 						</div>
 					</div>
 				{/each}
@@ -666,7 +737,7 @@
 							<strong>{group.label}</strong>
 							<span class="summary__tag summary__tag--muted">{group.items.length} warning(s)</span>
 						</div>
-						<span class="summary__item-meta">{group.items[ 0 ]?.message}</span>
+						<span class="summary__item-meta">{group.items[0]?.message}</span>
 					</div>
 				{/each}
 				{#each parityGapReports as report}
@@ -681,9 +752,9 @@
 								type="button"
 								class="summary__ghost-button"
 								on:click={() => {
-									const document = findDocument( report.documentId );
-									if ( document ) {
-										openDocument( document );
+									const document = findDocument(report.documentId);
+									if (document) {
+										openDocument(document);
 									}
 								}}
 							>
@@ -876,7 +947,10 @@
 		padding: 0.55rem 0.7rem;
 		font: inherit;
 		cursor: pointer;
-		transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+		transition:
+			background-color 120ms ease,
+			border-color 120ms ease,
+			color 120ms ease;
 		background: #ffffff;
 		color: #132033;
 	}

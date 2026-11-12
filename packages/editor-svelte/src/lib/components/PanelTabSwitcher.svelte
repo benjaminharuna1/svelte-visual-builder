@@ -7,17 +7,23 @@
 	export let stretch = true;
 	export let dense = true;
 	export let mode: 'compact' | 'editor' = 'compact';
-	export let onChange: ( id: string ) => void = () => {};
+	export let onChange: (id: string) => void = () => {};
 
-	function activate( id: string ) {
-		if ( id === activeTab ) {
+	function activate(id: string) {
+		if (id === activeTab) {
 			return;
 		}
 
-		onChange( id );
+		onChange(id);
 	}
 </script>
 
-<nav class:dense class:stretch class:editor-mode={mode === 'editor'} class="builder-panel-tab-switcher-shell" aria-label="Panel pages">
+<nav
+	class:dense
+	class:stretch
+	class:editor-mode={mode === 'editor'}
+	class="builder-panel-tab-switcher-shell"
+	aria-label="Panel pages"
+>
 	<PanelTabSwitcherBits {tabs} {activeTab} {mode} {stretch} onChange={activate} />
 </nav>

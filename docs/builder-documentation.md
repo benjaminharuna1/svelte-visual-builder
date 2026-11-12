@@ -166,44 +166,44 @@ Revision kinds are `draft`, `autosave`, and `published`. The core engine stores 
 
 `createDefaultBuilderRegistry()` registers the built-in element catalog.
 
-| Type | Category | Runtime family | Purpose |
-| --- | --- | --- | --- |
-| `container` | layout | container | Flex container and general section wrapper. |
-| `grid-container` | layout | container | Grid container with column controls. |
-| `heading` | content | text | H1-H6 heading with inline text editing. |
-| `paragraph` | content | text | Paragraph text. |
-| `text-editor` | content | text | Rich text content. |
-| `blockquote` | content | text | Quote/citation content. |
-| `spacer` | layout | container | Empty spacing block. |
-| `image` | media | image | Image with alt, caption, object fit, link, lazy loading. |
-| `button` | interactive | button | Link button with variants and accessibility label. |
-| `divider` | content | divider | Horizontal divider. |
-| `video` | media | video | Video/embed source. |
-| `html` | content | html | Raw/safe HTML markup node. |
-| `shortcode` | content | html | Shortcode-like HTML placeholder. |
-| `svg` | media | html | SVG markup node. |
-| `icon` | content | icon | Symbol/icon element. |
-| `icon-box` | content | icon-box | Icon plus title/text/link. |
-| `social-icons` | interactive | menu | Social links. |
-| `list` | content | list | List content. |
-| `toggle` | interactive | accordion | Toggle/accordion style content. |
-| `tabs` | interactive | tabs | Tabbed content. |
-| `accordion` | interactive | accordion | Accordion content. |
-| `menu` | interactive | menu | Navigation menu. |
-| `gallery` | media | gallery | Image gallery. |
-| `carousel` | interactive | carousel | Slides/carousel content. |
-| `form` | form | form | Form wrapper and generated fields. |
-| `form-field-text` | form | html | Text input field. |
-| `form-field-email` | form | html | Email input field. |
-| `form-field-textarea` | form | html | Textarea field. |
-| `form-field-select` | form | html | Select field. |
-| `form-field-checkbox` | form | html | Checkbox field. |
-| `form-field-radio` | form | html | Radio field. |
-| `form-field-hidden` | form | html | Hidden input field. |
-| `form-submit` | form | html | Submit button. |
-| `loop` | data | loop | Collection loop with loop-item/empty templates. |
-| `popup-root` | interactive | popup | Popup/modal document root. |
-| `compat-widget` | legacy | compat | Editable compatibility fallback for imported widgets. |
+| Type                  | Category    | Runtime family | Purpose                                                  |
+| --------------------- | ----------- | -------------- | -------------------------------------------------------- |
+| `container`           | layout      | container      | Flex container and general section wrapper.              |
+| `grid-container`      | layout      | container      | Grid container with column controls.                     |
+| `heading`             | content     | text           | H1-H6 heading with inline text editing.                  |
+| `paragraph`           | content     | text           | Paragraph text.                                          |
+| `text-editor`         | content     | text           | Rich text content.                                       |
+| `blockquote`          | content     | text           | Quote/citation content.                                  |
+| `spacer`              | layout      | container      | Empty spacing block.                                     |
+| `image`               | media       | image          | Image with alt, caption, object fit, link, lazy loading. |
+| `button`              | interactive | button         | Link button with variants and accessibility label.       |
+| `divider`             | content     | divider        | Horizontal divider.                                      |
+| `video`               | media       | video          | Video/embed source.                                      |
+| `html`                | content     | html           | Raw/safe HTML markup node.                               |
+| `shortcode`           | content     | html           | Shortcode-like HTML placeholder.                         |
+| `svg`                 | media       | html           | SVG markup node.                                         |
+| `icon`                | content     | icon           | Symbol/icon element.                                     |
+| `icon-box`            | content     | icon-box       | Icon plus title/text/link.                               |
+| `social-icons`        | interactive | menu           | Social links.                                            |
+| `list`                | content     | list           | List content.                                            |
+| `toggle`              | interactive | accordion      | Toggle/accordion style content.                          |
+| `tabs`                | interactive | tabs           | Tabbed content.                                          |
+| `accordion`           | interactive | accordion      | Accordion content.                                       |
+| `menu`                | interactive | menu           | Navigation menu.                                         |
+| `gallery`             | media       | gallery        | Image gallery.                                           |
+| `carousel`            | interactive | carousel       | Slides/carousel content.                                 |
+| `form`                | form        | form           | Form wrapper and generated fields.                       |
+| `form-field-text`     | form        | html           | Text input field.                                        |
+| `form-field-email`    | form        | html           | Email input field.                                       |
+| `form-field-textarea` | form        | html           | Textarea field.                                          |
+| `form-field-select`   | form        | html           | Select field.                                            |
+| `form-field-checkbox` | form        | html           | Checkbox field.                                          |
+| `form-field-radio`    | form        | html           | Radio field.                                             |
+| `form-field-hidden`   | form        | html           | Hidden input field.                                      |
+| `form-submit`         | form        | html           | Submit button.                                           |
+| `loop`                | data        | loop           | Collection loop with loop-item/empty templates.          |
+| `popup-root`          | interactive | popup          | Popup/modal document root.                               |
+| `compat-widget`       | legacy      | compat         | Editable compatibility fallback for imported widgets.    |
 
 Each element definition includes schemas, defaults, content/style/advanced panel sections, runtime metadata, optional legacy widget mappings, and `createDefaultNode()`.
 
@@ -351,7 +351,10 @@ interface BuilderHostMediaAdapter {
 	uploadAsset?: (file: File, options?: Record<string, JsonValue>) => Promise<BuilderMediaAssetDefinition>;
 	deleteAsset?: (assetId: string) => Promise<void>;
 	updateAsset?: (assetId: string, patch: Partial<BuilderMediaAssetDefinition>) => Promise<BuilderMediaAssetDefinition>;
-	resolveAssetUrl?: (asset: string | BuilderMediaAssetDefinition, context?: BindingProviderContext) => string | undefined;
+	resolveAssetUrl?: (
+		asset: string | BuilderMediaAssetDefinition,
+		context?: BindingProviderContext,
+	) => string | undefined;
 }
 ```
 
@@ -374,9 +377,30 @@ interface Binding {
 	id: string;
 	targetKind: 'prop' | 'attribute' | 'content' | 'style';
 	target: string;
-	source: 'route' | 'load' | 'site' | 'query' | 'request' | 'collection' | 'session' | 'component-prop' | 'document' | 'dynamic';
+	source:
+		| 'route'
+		| 'load'
+		| 'site'
+		| 'query'
+		| 'request'
+		| 'collection'
+		| 'session'
+		| 'component-prop'
+		| 'document'
+		| 'dynamic';
 	path: string;
-	category?: 'text' | 'richText' | 'url' | 'color' | 'image' | 'media' | 'gallery' | 'number' | 'boolean' | 'object' | 'postMeta';
+	category?:
+		| 'text'
+		| 'richText'
+		| 'url'
+		| 'color'
+		| 'image'
+		| 'media'
+		| 'gallery'
+		| 'number'
+		| 'boolean'
+		| 'object'
+		| 'postMeta';
 	fallback?: JsonValue;
 	before?: string;
 	after?: string;
@@ -420,7 +444,7 @@ const model = renderPublishedDocument({
 		record: { title: 'Runtime title' },
 	},
 	media: {
-		resolveAssetUrl: (asset) => typeof asset === 'string' ? asset : undefined,
+		resolveAssetUrl: (asset) => (typeof asset === 'string' ? asset : undefined),
 	},
 	cssIsolation: {
 		rootSelector: '#published-page',
@@ -624,14 +648,14 @@ Site editing uses `ThemeAssignment` records plus preview state:
 
 ## Troubleshooting
 
-| Problem | Check |
-| --- | --- |
-| Editor opens with no document | Project must contain at least one document and `activeDocumentId` must exist. |
-| Runtime route loads editor code | Published route imported from `@builder/editor-svelte`; use `@builder/runtime-svelte` only. |
-| Dynamic values are blank | Confirm binding source/path, `bindingContext`, adapter, and fallback values. |
-| Media URLs are broken | Implement `resolveAssetUrl` in editor/runtime media adapters. |
-| Publish button hidden or blocked | Check `permissions.publish` and server endpoint authorization. |
-| AI create fails | Check `useAi` permission, AI settings adapter, base URL, API key, model, and debug transcript. |
-| HTML import rejects input | It needs non-empty HTML and browser `DOMParser`. |
+| Problem                                    | Check                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Editor opens with no document              | Project must contain at least one document and `activeDocumentId` must exist.                     |
+| Runtime route loads editor code            | Published route imported from `@builder/editor-svelte`; use `@builder/runtime-svelte` only.       |
+| Dynamic values are blank                   | Confirm binding source/path, `bindingContext`, adapter, and fallback values.                      |
+| Media URLs are broken                      | Implement `resolveAssetUrl` in editor/runtime media adapters.                                     |
+| Publish button hidden or blocked           | Check `permissions.publish` and server endpoint authorization.                                    |
+| AI create fails                            | Check `useAi` permission, AI settings adapter, base URL, API key, model, and debug transcript.    |
+| HTML import rejects input                  | It needs non-empty HTML and browser `DOMParser`.                                                  |
 | Elementor import has compatibility widgets | Unsupported widgets are intentionally preserved as `compat-widget` nodes with parity diagnostics. |
-| Save conflict state appears | Use `resolveSaveConflict('reload' | 'overwrite' | 'keep-local')` based on host conflict policy. |
+| Save conflict state appears                | Use `resolveSaveConflict('reload'                                                                 | 'overwrite' | 'keep-local')` based on host conflict policy. |

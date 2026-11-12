@@ -17,7 +17,13 @@
 <header class:centered class:dense class="builder-panel-header-compact">
 	<div class="builder-panel-header-compact__edge">
 		{#if showLeading}
-			<button type="button" class="builder-panel-header-compact__icon-button" aria-label={leadingLabel} title={leadingLabel} onclick={onLeadingClick}>
+			<button
+				type="button"
+				class="builder-panel-header-compact__icon-button"
+				aria-label={leadingLabel}
+				title={leadingLabel}
+				onclick={onLeadingClick}
+			>
 				<slot name="leading-icon">
 					<span aria-hidden="true">{leadingIcon}</span>
 				</slot>
@@ -44,7 +50,13 @@
 	<div class="builder-panel-header-compact__edge builder-panel-header-compact__edge--end">
 		<slot name="actions" />
 		{#if showTrailing}
-			<button type="button" class="builder-panel-header-compact__icon-button" aria-label={trailingLabel} title={trailingLabel} onclick={onTrailingClick}>
+			<button
+				type="button"
+				class="builder-panel-header-compact__icon-button"
+				aria-label={trailingLabel}
+				title={trailingLabel}
+				onclick={onTrailingClick}
+			>
 				<slot name="trailing-icon">
 					<span aria-hidden="true">{trailingIcon}</span>
 				</slot>
@@ -143,7 +155,9 @@
 		background: transparent;
 		color: inherit;
 		font-size: 15px;
-		transition: color 0.15s ease, background-color 0.15s ease;
+		transition:
+			color 0.15s ease,
+			background-color 0.15s ease;
 	}
 
 	.builder-panel-header-compact__icon-button:hover {

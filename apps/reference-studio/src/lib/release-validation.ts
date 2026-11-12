@@ -27,14 +27,14 @@ export const releaseValidationFlowChecklist = [
 	'Inspect the perf counters before finishing the run.',
 ] as const;
 
-export function buildReleaseValidationPath( fixture: ReleaseValidationFixture ): string {
-	return `/?fixture=${ encodeURIComponent( fixture ) }`;
+export function buildReleaseValidationPath(fixture: ReleaseValidationFixture): string {
+	return `/?fixture=${encodeURIComponent(fixture)}`;
 }
 
-export function buildReleaseValidationUrl( baseUrl: string, fixture: ReleaseValidationFixture ): string {
-	return new URL( buildReleaseValidationPath( fixture ), ensureTrailingSlash( baseUrl ) ).toString();
+export function buildReleaseValidationUrl(baseUrl: string, fixture: ReleaseValidationFixture): string {
+	return new URL(buildReleaseValidationPath(fixture), ensureTrailingSlash(baseUrl)).toString();
 }
 
-function ensureTrailingSlash( value: string ): string {
-	return value.endsWith( '/' ) ? value : `${ value }/`;
+function ensureTrailingSlash(value: string): string {
+	return value.endsWith('/') ? value : `${value}/`;
 }

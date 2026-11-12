@@ -1,14 +1,7 @@
 import type { JsonValue } from '@builder/schema';
 
 export type StructuredCollectionKind =
-	| 'tabs'
-	| 'accordion'
-	| 'toggle'
-	| 'menu'
-	| 'gallery'
-	| 'carousel'
-	| 'form-fields'
-	| 'form-options';
+	'tabs' | 'accordion' | 'toggle' | 'menu' | 'gallery' | 'carousel' | 'form-fields' | 'form-options';
 
 export interface StructuredCollectionFieldSpec {
 	key: string;
@@ -30,11 +23,11 @@ export function resolveStructuredCollectionKind(
 	nodeType: string | undefined,
 	path: string,
 ): StructuredCollectionKind | undefined {
-	if ( path !== 'props.items' && path !== 'props.images' && path !== 'props.slides' && path !== 'props.fields' ) {
+	if (path !== 'props.items' && path !== 'props.images' && path !== 'props.slides' && path !== 'props.fields') {
 		return undefined;
 	}
 
-	switch ( nodeType ) {
+	switch (nodeType) {
 		case 'tabs':
 			return path === 'props.items' ? 'tabs' : undefined;
 		case 'accordion':
@@ -54,12 +47,12 @@ export function resolveStructuredCollectionKind(
 	}
 }
 
-export function isStructuredCollectionField( nodeType: string | undefined, path: string ): boolean {
-	return Boolean( resolveStructuredCollectionKind( nodeType, path ) );
+export function isStructuredCollectionField(nodeType: string | undefined, path: string): boolean {
+	return Boolean(resolveStructuredCollectionKind(nodeType, path));
 }
 
-export function getStructuredCollectionSpec( kind: StructuredCollectionKind ): StructuredCollectionSpec {
-	switch ( kind ) {
+export function getStructuredCollectionSpec(kind: StructuredCollectionKind): StructuredCollectionSpec {
+	switch (kind) {
 		case 'tabs':
 			return {
 				kind,
@@ -93,7 +86,15 @@ export function getStructuredCollectionSpec( kind: StructuredCollectionKind ): S
 				fields: [
 					{ key: 'label', label: 'Label', type: 'text', placeholder: 'Link label' },
 					{ key: 'href', label: 'Href', type: 'text', placeholder: '# or /path' },
-					{ key: 'target', label: 'Target', type: 'select', options: [ { label: 'Default', value: '' }, { label: '_blank', value: '_blank' } ] },
+					{
+						key: 'target',
+						label: 'Target',
+						type: 'select',
+						options: [
+							{ label: 'Default', value: '' },
+							{ label: '_blank', value: '_blank' },
+						],
+					},
 					{ key: 'rel', label: 'Rel', type: 'text', placeholder: 'nofollow noopener' },
 					{ key: 'icon', label: 'Icon', type: 'text', placeholder: 'Optional icon name' },
 				],
@@ -176,18 +177,18 @@ export function normalizeStructuredCollectionValue(
 	kind: StructuredCollectionKind,
 	value: JsonValue,
 ): Record<string, JsonValue>[] {
-	const items = Array.isArray( value ) ? value : [];
+	const items = Array.isArray(value) ? value : [];
 
-	return items.map( ( item, index ) => {
-		if ( !item || typeof item !== 'object' || Array.isArray( item ) ) {
-			return createStructuredCollectionItem( kind, index, item );
+	return items.map((item, index) => {
+		if (!item || typeof item !== 'object' || Array.isArray(item)) {
+			return createStructuredCollectionItem(kind, index, item);
 		}
 
 		return {
-			...createStructuredCollectionItem( kind, index ),
-			...( item as Record<string, JsonValue> ),
+			...createStructuredCollectionItem(kind, index),
+			...(item as Record<string, JsonValue>),
 		};
-	} );
+	});
 }
 
 export function createStructuredCollectionItem(
@@ -197,24 +198,24 @@ export function createStructuredCollectionItem(
 ): Record<string, JsonValue> {
 	const fallbackLabel = seed && typeof seed === 'string' ? seed : undefined;
 
-	switch ( kind ) {
+	switch (kind) {
 		case 'tabs':
 			return {
-				id: `tab-${ index + 1 }`,
-				label: fallbackLabel ?? `Tab ${ index + 1 }`,
+				id: `tab-${index + 1}`,
+				label: fallbackLabel ?? `Tab ${index + 1}`,
 				content: '',
 			};
 		case 'accordion':
 		case 'toggle':
 			return {
-				id: `item-${ index + 1 }`,
-				title: fallbackLabel ?? `Item ${ index + 1 }`,
+				id: `item-${index + 1}`,
+				title: fallbackLabel ?? `Item ${index + 1}`,
 				body: '',
 				open: false,
 			};
 		case 'menu':
 			return {
-				id: `link-${ index + 1 }`,
+				id: `link-${index + 1}`,
 				label: fallbackLabel ?? 'Link',
 				href: '#',
 				target: '',
@@ -224,7 +225,7 @@ export function createStructuredCollectionItem(
 			};
 		case 'gallery':
 			return {
-				id: `image-${ index + 1 }`,
+				id: `image-${index + 1}`,
 				src: fallbackLabel ?? '',
 				alt: '',
 				caption: '',
@@ -232,8 +233,8 @@ export function createStructuredCollectionItem(
 			};
 		case 'carousel':
 			return {
-				id: `slide-${ index + 1 }`,
-				title: fallbackLabel ?? `Slide ${ index + 1 }`,
+				id: `slide-${index + 1}`,
+				title: fallbackLabel ?? `Slide ${index + 1}`,
 				text: '',
 				src: '',
 				alt: '',
@@ -242,7 +243,7 @@ export function createStructuredCollectionItem(
 			};
 		case 'form-fields':
 			return {
-				id: `field-${ index + 1 }`,
+				id: `field-${index + 1}`,
 				kind: 'text',
 				label: fallbackLabel ?? 'Field',
 				name: '',
@@ -255,8 +256,8 @@ export function createStructuredCollectionItem(
 			};
 		case 'form-options':
 			return {
-				label: fallbackLabel ?? `Option ${ index + 1 }`,
-				value: `option-${ index + 1 }`,
+				label: fallbackLabel ?? `Option ${index + 1}`,
+				value: `option-${index + 1}`,
 			};
 	}
 }
@@ -265,5 +266,5 @@ export function createNextStructuredCollectionValue(
 	kind: StructuredCollectionKind,
 	value: JsonValue,
 ): Record<string, JsonValue>[] {
-	return normalizeStructuredCollectionValue( kind, value );
+	return normalizeStructuredCollectionValue(kind, value);
 }

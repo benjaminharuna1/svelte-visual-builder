@@ -1,6 +1,6 @@
 import { readHostProject } from '$lib/server/host-store';
 
-export function load( { params, locals } ) {
+export function load({ params, locals }) {
 	const { project } = readHostProject();
 	return {
 		documentId: params.documentId,

@@ -16,7 +16,7 @@
 	export let bodyPadding = 'var(--builder-shell-space-10)';
 	export let bodyGap = 'var(--builder-shell-space-10)';
 	export let bodyScrollable = true;
-	export let onChangeSection: ( sectionId: string ) => void = () => {};
+	export let onChangeSection: (sectionId: string) => void = () => {};
 
 	const defaultSectionList: PanelTabItem[] = [
 		{ id: 'documents', label: 'Documents', title: 'Open document browser' },
@@ -32,24 +32,26 @@
 	}
 
 	$: normalizedSections = sections.length ? sections : defaultSections();
-	$: fallbackSection = normalizedSections[ 0 ]?.id ?? 'documents';
-	$: currentSection = normalizedSections.some( ( section ) => section.id === activeSection ) ? activeSection : fallbackSection;
-	$: currentSectionLabel = normalizedSections.find( ( section ) => section.id === currentSection )?.label ?? 'Documents';
-	$: currentSectionTitle = normalizedSections.find( ( section ) => section.id === currentSection )?.title ?? '';
+	$: fallbackSection = normalizedSections[0]?.id ?? 'documents';
+	$: currentSection = normalizedSections.some((section) => section.id === activeSection)
+		? activeSection
+		: fallbackSection;
+	$: currentSectionLabel = normalizedSections.find((section) => section.id === currentSection)?.label ?? 'Documents';
+	$: currentSectionTitle = normalizedSections.find((section) => section.id === currentSection)?.title ?? '';
 
-	function selectSection( sectionId: string ) {
-		if ( sectionId === currentSection ) {
+	function selectSection(sectionId: string) {
+		if (sectionId === currentSection) {
 			return;
 		}
 
-		onChangeSection( sectionId );
+		onChangeSection(sectionId);
 	}
 </script>
 
 <EditorShellTokens>
 	<PanelShell {surface} {width} {bodyPadding} {bodyGap} {bodyScrollable}>
 		<svelte:fragment slot="header">
-			<PanelHeaderCompact title={title} subtitle={subtitle} leadingIcon="menu" leadingLabel="Menu" showLeading={false}>
+			<PanelHeaderCompact {title} {subtitle} leadingIcon="menu" leadingLabel="Menu" showLeading={false}>
 				<svelte:fragment slot="actions">
 					<span class="builder-shell-badge builder-shell-badge--neutral">{currentSectionLabel}</span>
 					{#if currentSectionTitle}
@@ -121,8 +123,7 @@
 		border: 1px solid var(--builder-shell-dark-border);
 		border-radius: var(--builder-shell-radius-lg);
 		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
-			var(--builder-shell-dark-panel-raised);
+			linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)), var(--builder-shell-dark-panel-raised);
 	}
 
 	.menu-panel__intro-heading {

@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a new capability or a change to an existing workflow.
+title: '[Feature]: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the host problem first. Feature requests that fit the host-first, embeddable model are easier to accept.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to build, and what blocks you today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API, UI, or workflow you want.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Editor
+        - Runtime renderer
+        - Schema or core
+        - Import (HTML, Elementor, templates)
+        - Persistence, media, or adapters
+        - AI
+        - Tooling, CI, or packaging
+        - Documentation
+    validations:
+      required: true

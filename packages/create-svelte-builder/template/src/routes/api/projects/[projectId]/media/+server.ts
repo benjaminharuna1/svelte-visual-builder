@@ -2,43 +2,43 @@ import { json, type RequestHandler } from '@sveltejs/kit';
 
 import { deleteHostMedia, listHostMedia, updateHostMedia, uploadHostMedia } from '$lib/server/host-store';
 
-export const GET: RequestHandler = ( { params } ) => {
-	return json( {
-		assets: listHostMedia( params.projectId ?? 'starter' ),
-	} );
+export const GET: RequestHandler = ({ params }) => {
+	return json({
+		assets: listHostMedia(params.projectId ?? 'starter'),
+	});
 };
 
-export const POST: RequestHandler = async ( { params, request } ) => {
+export const POST: RequestHandler = async ({ params, request }) => {
 	const form = await request.formData();
-	const file = form.get( 'file' );
-	if ( !( file instanceof File ) ) {
-		return json( { error: 'Upload a file.' }, { status: 400 } );
+	const file = form.get('file');
+	if (!(file instanceof File)) {
+		return json({ error: 'Upload a file.' }, { status: 400 });
 	}
-	if ( !file.type.startsWith( 'image/' ) ) {
-		return json( { error: 'Only image uploads are allowed in the starter host.' }, { status: 415 } );
+	if (!file.type.startsWith('image/')) {
+		return json({ error: 'Only image uploads are allowed in the starter host.' }, { status: 415 });
 	}
-	return json( {
-		asset: await uploadHostMedia( params.projectId ?? 'starter', file ),
-	} );
+	return json({
+		asset: await uploadHostMedia(params.projectId ?? 'starter', file),
+	});
 };
 
-export const PATCH: RequestHandler = async ( { params, request } ) => {
+export const PATCH: RequestHandler = async ({ params, request }) => {
 	const payload = await request.json();
-	if ( typeof payload.assetId !== 'string' ) {
-		return json( { error: 'assetId is required.' }, { status: 400 } );
+	if (typeof payload.assetId !== 'string') {
+		return json({ error: 'assetId is required.' }, { status: 400 });
 	}
-	const asset = updateHostMedia( params.projectId ?? 'starter', payload.assetId, payload.patch ?? {} );
-	if ( !asset ) {
-		return json( { error: 'Asset not found.' }, { status: 404 } );
+	const asset = updateHostMedia(params.projectId ?? 'starter', payload.assetId, payload.patch ?? {});
+	if (!asset) {
+		return json({ error: 'Asset not found.' }, { status: 404 });
 	}
-	return json( { asset } );
+	return json({ asset });
 };
 
-export const DELETE: RequestHandler = async ( { params, request } ) => {
+export const DELETE: RequestHandler = async ({ params, request }) => {
 	const payload = await request.json();
-	if ( typeof payload.assetId !== 'string' ) {
-		return json( { error: 'assetId is required.' }, { status: 400 } );
+	if (typeof payload.assetId !== 'string') {
+		return json({ error: 'assetId is required.' }, { status: 400 });
 	}
-	deleteHostMedia( params.projectId ?? 'starter', payload.assetId );
-	return json( { ok: true } );
+	deleteHostMedia(params.projectId ?? 'starter', payload.assetId);
+	return json({ ok: true });
 };

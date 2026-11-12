@@ -17,7 +17,7 @@ export interface BuilderAiSettings {
 
 export interface BuilderAiSettingsAdapter {
 	loadSettings: () => Promise<Partial<BuilderAiSettings> | undefined>;
-	saveSettings: ( settings: BuilderAiSettings ) => Promise<void>;
+	saveSettings: (settings: BuilderAiSettings) => Promise<void>;
 }
 
 export interface BuilderBrowserAiSettingsAdapterOptions {
@@ -82,7 +82,10 @@ export interface BuilderAiToolExecutionResult {
 	assistantMessage?: string;
 }
 
-export const builderAiProviderPresets: Record<BuilderAiProviderPreset, { label: string; baseUrl: string; model: string }> = {
+export const builderAiProviderPresets: Record<
+	BuilderAiProviderPreset,
+	{ label: string; baseUrl: string; model: string }
+> = {
 	custom: {
 		label: 'OpenAI-compatible custom',
 		baseUrl: 'https://api.openai.com/v1',
@@ -110,8 +113,8 @@ const defaultMaxToolIterations = 6;
 const minMaxToolIterations = 1;
 const maxMaxToolIterations = 20;
 
-export function createDefaultAiSettings( overrides: Partial<BuilderAiSettings> = {} ): BuilderAiSettings {
-	const preset = builderAiProviderPresets[ overrides.provider ?? 'custom' ];
+export function createDefaultAiSettings(overrides: Partial<BuilderAiSettings> = {}): BuilderAiSettings {
+	const preset = builderAiProviderPresets[overrides.provider ?? 'custom'];
 	return {
 		provider: overrides.provider ?? 'custom',
 		baseUrl: overrides.baseUrl ?? preset.baseUrl,
@@ -120,18 +123,18 @@ export function createDefaultAiSettings( overrides: Partial<BuilderAiSettings> =
 		headers: overrides.headers ?? {},
 		temperature: overrides.temperature ?? 0.4,
 		maxOutputTokens: overrides.maxOutputTokens ?? 4096,
-		maxToolIterations: normalizeMaxToolIterations( overrides.maxToolIterations ),
+		maxToolIterations: normalizeMaxToolIterations(overrides.maxToolIterations),
 		systemInstructions: overrides.systemInstructions ?? '',
 		debugMode: overrides.debugMode ?? false,
 	};
 }
 
-export function normalizeMaxToolIterations( value: unknown ): number {
-	const numeric = typeof value === 'number' ? value : typeof value === 'string' ? Number( value ) : Number.NaN;
-	if ( !Number.isFinite( numeric ) ) {
+export function normalizeMaxToolIterations(value: unknown): number {
+	const numeric = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : Number.NaN;
+	if (!Number.isFinite(numeric)) {
 		return defaultMaxToolIterations;
 	}
-	return Math.min( maxMaxToolIterations, Math.max( minMaxToolIterations, Math.trunc( numeric ) ) );
+	return Math.min(maxMaxToolIterations, Math.max(minMaxToolIterations, Math.trunc(numeric)));
 }
 
 export function createDefaultAiSessionState(): BuilderAiSessionState {
@@ -150,16 +153,16 @@ export function createBrowserAiSettingsAdapter(
 	const persistApiKey = options.persistApiKey === true;
 	return {
 		async loadSettings() {
-			if ( typeof globalThis.localStorage === 'undefined' ) {
+			if (typeof globalThis.localStorage === 'undefined') {
 				return defaults;
 			}
-			const raw = globalThis.localStorage.getItem( storageKey );
-			if ( !raw ) {
+			const raw = globalThis.localStorage.getItem(storageKey);
+			if (!raw) {
 				return defaults;
 			}
 			try {
-				const stored = JSON.parse( raw ) as Partial<BuilderAiSettings>;
-				if ( persistApiKey ) {
+				const stored = JSON.parse(raw) as Partial<BuilderAiSettings>;
+				if (persistApiKey) {
 					return { ...defaults, ...stored };
 				}
 				return {
@@ -167,48 +170,52 @@ export function createBrowserAiSettingsAdapter(
 					...stored,
 					apiKey: defaults.apiKey ?? '',
 					headers: {
-						...( defaults.headers ?? {} ),
-						...stripSecretHeaders( stored.headers ),
+						...(defaults.headers ?? {}),
+						...stripSecretHeaders(stored.headers),
 					},
 				};
 			} catch {
 				return defaults;
 			}
 		},
-		async saveSettings( settings ) {
-			if ( typeof globalThis.localStorage === 'undefined' ) {
+		async saveSettings(settings) {
+			if (typeof globalThis.localStorage === 'undefined') {
 				return;
 			}
 			globalThis.localStorage.setItem(
 				storageKey,
-				JSON.stringify( persistApiKey
-					? settings
-					: { ...settings, apiKey: '', headers: stripSecretHeaders( settings.headers ) } ),
+				JSON.stringify(
+					persistApiKey ? settings : { ...settings, apiKey: '', headers: stripSecretHeaders(settings.headers) },
+				),
 			);
 		},
 	};
 }
 
-function stripSecretHeaders( headers: Record<string, string> | undefined ): Record<string, string> {
+function stripSecretHeaders(headers: Record<string, string> | undefined): Record<string, string> {
 	return Object.fromEntries(
-		Object.entries( headers ?? {} ).filter( ( [ key ] ) => !/authorization|api[-_]?key|token|secret|cookie/i.test( key ) ),
+		Object.entries(headers ?? {}).filter(([key]) => !/authorization|api[-_]?key|token|secret|cookie/i.test(key)),
 	);
 }
 
-export function redactAiSettings( settings: Partial<BuilderAiSettings> ): Partial<BuilderAiSettings> {
+export function redactAiSettings(settings: Partial<BuilderAiSettings>): Partial<BuilderAiSettings> {
 	return {
 		...settings,
 		apiKey: settings.apiKey ? '[redacted]' : '',
 		headers: Object.fromEntries(
-			Object.entries( settings.headers ?? {} ).map( ( [ key, value ] ) => [
+			Object.entries(settings.headers ?? {}).map(([key, value]) => [
 				key,
-				/key|token|authorization/i.test( key ) || /bearer\s+/i.test( value ) ? '[redacted]' : value,
-			] ),
+				/key|token|authorization/i.test(key) || /bearer\s+/i.test(value) ? '[redacted]' : value,
+			]),
 		),
 	};
 }
 
-export function makeAiTranscriptMessage( role: BuilderAiTranscriptMessage['role'], content: string, extra: Partial<BuilderAiTranscriptMessage> = {} ): BuilderAiTranscriptMessage {
+export function makeAiTranscriptMessage(
+	role: BuilderAiTranscriptMessage['role'],
+	content: string,
+	extra: Partial<BuilderAiTranscriptMessage> = {},
+): BuilderAiTranscriptMessage {
 	return {
 		id: crypto.randomUUID(),
 		role,

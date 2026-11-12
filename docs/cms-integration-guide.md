@@ -40,7 +40,6 @@ What to try:
 
 Important demo limitation: the reference studio stores the project and media **in memory**. Restarting the dev server resets your edits and uploads. See `apps/reference-studio/src/lib/server/studio-project.ts:13` and `apps/reference-studio/src/lib/server/media-store.ts:8`.
 
-
 ### If the demo returns HTTP 500 with `Unknown file extension ".ts"`
 
 On this checkout the workspace packages are consumed as TypeScript source. Some Vite/Node combinations externalize them during SSR and Node then refuses to load `.ts`. Both demo apps now include this fix in their Vite config:
@@ -95,15 +94,15 @@ packages/
 
 The builder is **host-first**:
 
-| Builder provides | Your host app provides |
-| --- | --- |
-| Visual editor shell and canvas | Database and project storage |
-| Typed JSON project model | Autosave, draft, publish, revisions |
-| Runtime renderer for published pages | Authentication and authorization |
-| HTML/Elementor/template import | Media upload/storage/CDN URLs |
-| AI create/edit workflow | AI provider settings and API keys |
-| Dynamic binding definitions | Route/load/session/site/collection data |
-| Custom element API | Server-side permission enforcement |
+| Builder provides                     | Your host app provides                  |
+| ------------------------------------ | --------------------------------------- |
+| Visual editor shell and canvas       | Database and project storage            |
+| Typed JSON project model             | Autosave, draft, publish, revisions     |
+| Runtime renderer for published pages | Authentication and authorization        |
+| HTML/Elementor/template import       | Media upload/storage/CDN URLs           |
+| AI create/edit workflow              | AI provider settings and API keys       |
+| Dynamic binding definitions          | Route/load/session/site/collection data |
+| Custom element API                   | Server-side permission enforcement      |
 
 ### It is not on npm
 
@@ -171,14 +170,14 @@ In `apps/marketing/package.json`:
 
 ```json
 {
-  "dependencies": {
-    "@builder/adapter-sveltekit": "workspace:*",
-    "@builder/editor-svelte": "workspace:*",
-    "@builder/plugin-api": "workspace:*",
-    "@builder/runtime-svelte": "workspace:*",
-    "@builder/schema": "workspace:*",
-    "svelte": "^5.38.7"
-  }
+	"dependencies": {
+		"@builder/adapter-sveltekit": "workspace:*",
+		"@builder/editor-svelte": "workspace:*",
+		"@builder/plugin-api": "workspace:*",
+		"@builder/runtime-svelte": "workspace:*",
+		"@builder/schema": "workspace:*",
+		"svelte": "^5.38.7"
+	}
 }
 ```
 
@@ -186,10 +185,10 @@ In your Vite config:
 
 ```ts
 export default defineConfig({
-  plugins: [sveltekit()],
-  ssr: {
-    noExternal: [/^@builder\//],
-  },
+	plugins: [sveltekit()],
+	ssr: {
+		noExternal: [/^@builder\//],
+	},
 });
 ```
 
@@ -213,123 +212,123 @@ Create an admin-only route, for example `src/routes/admin/builder/+page.svelte`:
 
 ```svelte
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { BuilderPackage } from '@builder/schema';
+	import { onMount } from 'svelte';
+	import type { BuilderPackage } from '@builder/schema';
 
-  export let data: { projectId: string; project: BuilderPackage };
+	export let data: { projectId: string; project: BuilderPackage };
 
-  let canvasComponent: any;
-  let editor: any;
-  let ready = false;
+	let canvasComponent: any;
+	let editor: any;
+	let ready = false;
 
-  onMount(async () => {
-    // Defer the heavy editor bundle so public routes stay light.
-    const { BuilderCanvas, createBuilderHostSdk } = await import('@builder/editor-svelte');
-    const { createSvelteKitBuilderIntegration } = await import('@builder/adapter-sveltekit');
+	onMount(async () => {
+		// Defer the heavy editor bundle so public routes stay light.
+		const { BuilderCanvas, createBuilderHostSdk } = await import('@builder/editor-svelte');
+		const { createSvelteKitBuilderIntegration } = await import('@builder/adapter-sveltekit');
 
-    canvasComponent = BuilderCanvas;
+		canvasComponent = BuilderCanvas;
 
-    const integration = createSvelteKitBuilderIntegration({
-      previewContext: {
-        siteData: { title: 'My App' },
-        session: { role: 'admin' },
-      },
-      permissions: {
-        editProject: true,
-        publish: true,
-        uploadMedia: true,
-        deleteMedia: true,
-        useAi: false,
-        accessDynamicData: true,
-      },
-      persistence: {
-        loadProject: async () => {
-          const response = await fetch(`/api/projects/${data.projectId}`);
-          return (await response.json()).project;
-        },
-        saveAutosave: (project, context) => saveProject(project, context, 'autosave'),
-        saveDraft: (project, context) => saveProject(project, context, 'draft'),
-        publish: (project, context) => saveProject(project, context, 'publish'),
-        restoreRevision: async (revisionId) => {
-          const response = await fetch(`/api/projects/${data.projectId}`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ restoreRevisionId: revisionId }),
-          });
-          return (await response.json()).project;
-        },
-        listRevisions: async () => {
-          const response = await fetch(`/api/projects/${data.projectId}?include=revisions`);
-          return (await response.json()).revisions ?? [];
-        },
-        getSaveStatus: async () => {
-          const response = await fetch(`/api/projects/${data.projectId}`);
-          return (await response.json()).status;
-        },
-      },
-      media: {
-        listAssets: async () => {
-          const response = await fetch(`/api/projects/${data.projectId}/media`);
-          return (await response.json()).assets ?? [];
-        },
-        uploadAsset: async (file) => {
-          const form = new FormData();
-          form.set('file', file);
-          const response = await fetch(`/api/projects/${data.projectId}/media`, {
-            method: 'POST',
-            body: form,
-          });
-          return (await response.json()).asset;
-        },
-        deleteAsset: async (assetId) => {
-          await fetch(`/api/projects/${data.projectId}/media`, {
-            method: 'DELETE',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ assetId }),
-          });
-        },
-        resolveAssetUrl: (asset) => (typeof asset === 'string' ? asset : asset.url),
-      },
-    });
+		const integration = createSvelteKitBuilderIntegration({
+			previewContext: {
+				siteData: { title: 'My App' },
+				session: { role: 'admin' },
+			},
+			permissions: {
+				editProject: true,
+				publish: true,
+				uploadMedia: true,
+				deleteMedia: true,
+				useAi: false,
+				accessDynamicData: true,
+			},
+			persistence: {
+				loadProject: async () => {
+					const response = await fetch(`/api/projects/${data.projectId}`);
+					return (await response.json()).project;
+				},
+				saveAutosave: (project, context) => saveProject(project, context, 'autosave'),
+				saveDraft: (project, context) => saveProject(project, context, 'draft'),
+				publish: (project, context) => saveProject(project, context, 'publish'),
+				restoreRevision: async (revisionId) => {
+					const response = await fetch(`/api/projects/${data.projectId}`, {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ restoreRevisionId: revisionId }),
+					});
+					return (await response.json()).project;
+				},
+				listRevisions: async () => {
+					const response = await fetch(`/api/projects/${data.projectId}?include=revisions`);
+					return (await response.json()).revisions ?? [];
+				},
+				getSaveStatus: async () => {
+					const response = await fetch(`/api/projects/${data.projectId}`);
+					return (await response.json()).status;
+				},
+			},
+			media: {
+				listAssets: async () => {
+					const response = await fetch(`/api/projects/${data.projectId}/media`);
+					return (await response.json()).assets ?? [];
+				},
+				uploadAsset: async (file) => {
+					const form = new FormData();
+					form.set('file', file);
+					const response = await fetch(`/api/projects/${data.projectId}/media`, {
+						method: 'POST',
+						body: form,
+					});
+					return (await response.json()).asset;
+				},
+				deleteAsset: async (assetId) => {
+					await fetch(`/api/projects/${data.projectId}/media`, {
+						method: 'DELETE',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ assetId }),
+					});
+				},
+				resolveAssetUrl: (asset) => (typeof asset === 'string' ? asset : asset.url),
+			},
+		});
 
-    const sdk = createBuilderHostSdk({
-      adapter: integration.adapter,
-      persistence: integration.editor.persistence.host,
-      media: integration.editor.media.adapter,
-      permissions: integration.editor.permissions,
-      previewContext: integration.editor.adapter.previewContext,
-    });
+		const sdk = createBuilderHostSdk({
+			adapter: integration.adapter,
+			persistence: integration.editor.persistence.host,
+			media: integration.editor.media.adapter,
+			permissions: integration.editor.permissions,
+			previewContext: integration.editor.adapter.previewContext,
+		});
 
-    editor = sdk.createEditor(data.project, {
-      initialState: {
-        activeDocumentId: data.project.documents[0]?.id,
-      },
-    });
+		editor = sdk.createEditor(data.project, {
+			initialState: {
+				activeDocumentId: data.project.documents[0]?.id,
+			},
+		});
 
-    ready = true;
-  });
+		ready = true;
+	});
 
-  async function saveProject(project: BuilderPackage, context: any, reason: string) {
-    const response = await fetch(`/api/projects/${data.projectId}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        project,
-        reason,
-        expectedVersionToken: context?.expectedVersionToken,
-        force: context?.force === true,
-        revisionId: context?.revisionId,
-        revisionKind: context?.revisionKind,
-      }),
-    });
-    return response.json();
-  }
+	async function saveProject(project: BuilderPackage, context: any, reason: string) {
+		const response = await fetch(`/api/projects/${data.projectId}`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({
+				project,
+				reason,
+				expectedVersionToken: context?.expectedVersionToken,
+				force: context?.force === true,
+				revisionId: context?.revisionId,
+				revisionKind: context?.revisionKind,
+			}),
+		});
+		return response.json();
+	}
 </script>
 
 {#if ready}
-  <svelte:component this={canvasComponent} {editor} />
+	<svelte:component this={canvasComponent} {editor} />
 {:else}
-  <p>Loading builder…</p>
+	<p>Loading builder…</p>
 {/if}
 ```
 
@@ -346,30 +345,30 @@ import { parseBuilderPackage } from '@builder/schema';
 import { db } from '$lib/server/db';
 
 export const GET = async ({ params }) => {
-  const row = await db.project.findUnique({ where: { id: params.projectId } });
-  if (!row) return json({ error: 'Not found' }, { status: 404 });
+	const row = await db.project.findUnique({ where: { id: params.projectId } });
+	if (!row) return json({ error: 'Not found' }, { status: 404 });
 
-  return json({
-    project: parseBuilderPackage(row.projectJson),
-    status: {
-      state: 'saved',
-      versionToken: row.versionToken,
-      updatedAt: row.updatedAt,
-    },
-  });
+	return json({
+		project: parseBuilderPackage(row.projectJson),
+		status: {
+			state: 'saved',
+			versionToken: row.versionToken,
+			updatedAt: row.updatedAt,
+		},
+	});
 };
 
 export const POST = async ({ params, request, locals }) => {
-  if (!locals.user?.canEditContent) {
-    return json({ error: 'Forbidden' }, { status: 403 });
-  }
+	if (!locals.user?.canEditContent) {
+		return json({ error: 'Forbidden' }, { status: 403 });
+	}
 
-  const body = await request.json();
-  const project = parseBuilderPackage(body.project);
+	const body = await request.json();
+	const project = parseBuilderPackage(body.project);
 
-  // Compare body.expectedVersionToken with the stored token and return 409 on conflict.
-  // Save the project plus a revision row for draft/autosave/publish.
-  // Return { ok: true, versionToken, updatedAt }.
+	// Compare body.expectedVersionToken with the stored token and return 409 on conflict.
+	// Save the project plus a revision row for draft/autosave/publish.
+	// Return { ok: true, versionToken, updatedAt }.
 };
 ```
 
@@ -389,37 +388,37 @@ Published routes must import **only** `@builder/runtime-svelte`, never `@builder
 ```svelte
 <!-- src/routes/[...slug]/+page.svelte -->
 <script lang="ts">
-  import { createSvelteKitBuilderAdapter } from '@builder/adapter-sveltekit';
-  import { BuilderRenderer, renderPublishedDocument } from '@builder/runtime-svelte';
-  import type { BuilderPackage } from '@builder/schema';
+	import { createSvelteKitBuilderAdapter } from '@builder/adapter-sveltekit';
+	import { BuilderRenderer, renderPublishedDocument } from '@builder/runtime-svelte';
+	import type { BuilderPackage } from '@builder/schema';
 
-  export let data: {
-    project: BuilderPackage;
-    documentId: string;
-    bindingContext: any;
-  };
+	export let data: {
+		project: BuilderPackage;
+		documentId: string;
+		bindingContext: any;
+	};
 
-  const model = renderPublishedDocument({
-    project: data.project,
-    documentId: data.documentId,
-    adapter: createSvelteKitBuilderAdapter(),
-    dynamicContext: data.bindingContext,
-    media: {
-      resolveAssetUrl: (asset) =>
-        typeof asset === 'object' && asset && 'url' in asset ? String(asset.url) : undefined,
-    },
-    cssIsolation: { rootSelector: '.published-page' },
-  });
+	const model = renderPublishedDocument({
+		project: data.project,
+		documentId: data.documentId,
+		adapter: createSvelteKitBuilderAdapter(),
+		dynamicContext: data.bindingContext,
+		media: {
+			resolveAssetUrl: (asset) =>
+				typeof asset === 'object' && asset && 'url' in asset ? String(asset.url) : undefined,
+		},
+		cssIsolation: { rootSelector: '.published-page' },
+	});
 </script>
 
 <main class="published-page">
-  <BuilderRenderer
-    project={model.project}
-    activeDocumentId={data.documentId}
-    adapter={model.adapter}
-    bindingContext={model.bindingContext}
-    media={model.media}
-  />
+	<BuilderRenderer
+		project={model.project}
+		activeDocumentId={data.documentId}
+		adapter={model.adapter}
+		bindingContext={model.bindingContext}
+		media={model.media}
+	/>
 </main>
 ```
 
@@ -433,16 +432,16 @@ In `+page.server.ts`, load the project, resolve the published document by slug/a
 
 Create one `BuilderDocument` per editable surface:
 
-| Your page | Document kind | Suggested slug | Assignment path |
-| --- | --- | --- | --- |
-| Landing page | `page` | `home` | `/` |
-| Pricing | `page` | `pricing` | `/pricing` |
-| Documentation index | `page` | `docs` | `/docs` |
+| Your page             | Document kind        | Suggested slug         | Assignment path         |
+| --------------------- | -------------------- | ---------------------- | ----------------------- |
+| Landing page          | `page`               | `home`                 | `/`                     |
+| Pricing               | `page`               | `pricing`              | `/pricing`              |
+| Documentation index   | `page`               | `docs`                 | `/docs`                 |
 | Documentation article | `page` or `template` | `docs-getting-started` | `/docs/getting-started` |
-| Blog archive | `page` | `blog` | `/blog` |
-| Single blog post | `template` | `single-post` | `/blog/[...slug]` |
-| Header | `layout` | `global-header` | header slot, `/*` |
-| Footer | `layout` | `global-footer` | footer slot, `/*` |
+| Blog archive          | `page`               | `blog`                 | `/blog`                 |
+| Single blog post      | `template`           | `single-post`          | `/blog/[...slug]`       |
+| Header                | `layout`             | `global-header`        | header slot, `/*`       |
+| Footer                | `layout`             | `global-footer`        | footer slot, `/*`       |
 
 Assignments are stored in `project.themeAssignments` and decide which document renders for a route and slot. Slots include `page`, `header`, `footer`, `sidebar`, `popup`, `modal`, `loop-item`, and `empty`.
 
@@ -458,18 +457,18 @@ In your runtime loader, provide the data:
 
 ```ts
 return {
-  project,
-  documentId,
-  bindingContext: {
-    loadData: { post: { title, excerpt, featuredImage, metaText } },
-    record: post,
-    collections: {
-      posts: await getPublishedPosts(),
-    },
-    routeParams: { slug },
-    siteData: { title: 'My App' },
-    session: { role: 'visitor' },
-  },
+	project,
+	documentId,
+	bindingContext: {
+		loadData: { post: { title, excerpt, featuredImage, metaText } },
+		record: post,
+		collections: {
+			posts: await getPublishedPosts(),
+		},
+		routeParams: { slug },
+		siteData: { title: 'My App' },
+		session: { role: 'visitor' },
+	},
 };
 ```
 
@@ -656,20 +655,20 @@ Do not use it as-is if:
 
 ## 10. Troubleshooting
 
-| Problem | Fix |
-| --- | --- |
-| `Unknown file extension ".ts"` / HTTP 500 on SSR | Add `ssr.noExternal: [/^@builder\//]` to your Vite config. |
-| Editor opens with no document | The project must contain at least one document and `activeDocumentId` must exist. |
-| Runtime route loads editor code | The published route imported `@builder/editor-svelte`. Use `@builder/runtime-svelte` only. |
-| Dynamic values are blank | Check the binding source/path and the `bindingContext` (`loadData`, `record`, `collections`). |
-| Media URLs are broken | Implement `resolveAssetUrl` in the editor and runtime media adapters. |
-| Publish button hidden or blocked | Check `permissions.publish` and server-side authorization. |
-| AI create fails | Check `useAi`, the AI settings adapter, base URL, API key, model, and debug transcript. |
-| HTML import rejects input | It needs non-empty HTML and a browser `DOMParser`. |
-| Elementor import shows compatibility widgets | Unsupported widgets are intentionally preserved as `compat-widget` nodes with diagnostics. |
-| Save conflict | Handle the 409 and choose `reload`, `overwrite`, or `keep-local`. |
-| Demo edits disappear after restart | The demo uses in-memory storage. Implement real persistence. |
-| Playwright E2E cannot start | Run `pnpm exec playwright install`. |
+| Problem                                          | Fix                                                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `Unknown file extension ".ts"` / HTTP 500 on SSR | Add `ssr.noExternal: [/^@builder\//]` to your Vite config.                                    |
+| Editor opens with no document                    | The project must contain at least one document and `activeDocumentId` must exist.             |
+| Runtime route loads editor code                  | The published route imported `@builder/editor-svelte`. Use `@builder/runtime-svelte` only.    |
+| Dynamic values are blank                         | Check the binding source/path and the `bindingContext` (`loadData`, `record`, `collections`). |
+| Media URLs are broken                            | Implement `resolveAssetUrl` in the editor and runtime media adapters.                         |
+| Publish button hidden or blocked                 | Check `permissions.publish` and server-side authorization.                                    |
+| AI create fails                                  | Check `useAi`, the AI settings adapter, base URL, API key, model, and debug transcript.       |
+| HTML import rejects input                        | It needs non-empty HTML and a browser `DOMParser`.                                            |
+| Elementor import shows compatibility widgets     | Unsupported widgets are intentionally preserved as `compat-widget` nodes with diagnostics.    |
+| Save conflict                                    | Handle the 409 and choose `reload`, `overwrite`, or `keep-local`.                             |
+| Demo edits disappear after restart               | The demo uses in-memory storage. Implement real persistence.                                  |
+| Playwright E2E cannot start                      | Run `pnpm exec playwright install`.                                                           |
 
 ---
 

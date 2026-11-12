@@ -24,7 +24,7 @@
 	export let showTrailing = false;
 	export let trailingIcon = '+';
 	export let trailingLabel = 'Add';
-	export let onChangeTab: ( tabId: string ) => void = () => {};
+	export let onChangeTab: (tabId: string) => void = () => {};
 	export let onLeadingClick: () => void = () => {};
 	export let onTrailingClick: () => void = () => {};
 </script>
@@ -34,17 +34,17 @@
 		<svelte:fragment slot="header">
 			{#if showHeader}
 				<PanelHeaderCompact
-					title={title}
-					subtitle={subtitle}
+					{title}
+					{subtitle}
 					{titleSuffix}
-					leadingIcon={leadingIcon}
-					leadingLabel={leadingLabel}
-					showLeading={showLeading}
-					showTrailing={showTrailing}
-					trailingIcon={trailingIcon}
-					trailingLabel={trailingLabel}
-					onLeadingClick={onLeadingClick}
-					onTrailingClick={onTrailingClick}
+					{leadingIcon}
+					{leadingLabel}
+					{showLeading}
+					{showTrailing}
+					{trailingIcon}
+					{trailingLabel}
+					{onLeadingClick}
+					{onTrailingClick}
 				>
 					<svelte:fragment slot="actions">
 						<slot name="header-actions" />
@@ -55,7 +55,7 @@
 
 		<svelte:fragment slot="tabs">
 			{#if showTabs && tabs.length}
-				<PanelTabSwitcher tabs={tabs} activeTab={activeTab} mode={tabMode} onChange={onChangeTab} />
+				<PanelTabSwitcher {tabs} {activeTab} mode={tabMode} onChange={onChangeTab} />
 			{/if}
 		</svelte:fragment>
 

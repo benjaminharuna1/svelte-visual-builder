@@ -16,13 +16,13 @@
 	export let bodyPadding = 'var(--builder-shell-space-10)';
 	export let bodyGap = 'var(--builder-shell-space-10)';
 	export let bodyScrollable = true;
-	export let onChangeTab: ( tabId: string ) => void = () => {};
+	export let onChangeTab: (tabId: string) => void = () => {};
 </script>
 
 <EditorShellTokens>
 	<PanelShell {surface} {width} {bodyPadding} {bodyGap} {bodyScrollable}>
 		<svelte:fragment slot="header">
-			<PanelHeaderCompact title={title} subtitle={subtitle} leadingIcon="globals" leadingLabel="Globals" showLeading={false}>
+			<PanelHeaderCompact {title} {subtitle} leadingIcon="globals" leadingLabel="Globals" showLeading={false}>
 				<svelte:fragment slot="actions">
 					<slot name="header-actions" />
 				</svelte:fragment>
@@ -31,7 +31,7 @@
 
 		<svelte:fragment slot="tabs">
 			{#if showTabs && tabs.length}
-				<PanelTabSwitcher tabs={tabs} activeTab={activeTab} onChange={onChangeTab} />
+				<PanelTabSwitcher {tabs} {activeTab} onChange={onChangeTab} />
 			{/if}
 		</svelte:fragment>
 

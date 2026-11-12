@@ -7,8 +7,8 @@
 	type PreviewRuntimeOptions = BuilderRuntimeOptions & {
 		bridgeEvents?: boolean;
 		bridgeRenderVersion?: number;
-		onGeometrySnapshot?: ( snapshot: CanvasGeometrySnapshot ) => void;
-		onGeometryInvalidated?: ( reason: string, renderVersion: number ) => void;
+		onGeometrySnapshot?: (snapshot: CanvasGeometrySnapshot) => void;
+		onGeometryInvalidated?: (reason: string, renderVersion: number) => void;
 	};
 
 	export let options: Readable<PreviewRuntimeOptions | undefined>;

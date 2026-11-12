@@ -2,8 +2,8 @@ import { loadStudioProject, resolveStudioFixture } from '$lib/server/studio-proj
 
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ( { url } ) => {
-	return loadStudioProject( {
-		fixture: resolveStudioFixture( url.searchParams.get( 'fixture' ) ),
-	} );
+export const load: PageServerLoad = async ({ url }) => {
+	return loadStudioProject({
+		fixture: resolveStudioFixture(url.searchParams.get('fixture')),
+	});
 };

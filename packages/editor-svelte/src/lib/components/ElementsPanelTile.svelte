@@ -11,46 +11,46 @@
 	export let useDnd = false;
 	export let icon = 'elements';
 	export let toneClass = 'builder-shell-badge--neutral';
-	export let onLegacyPointerDown: ( group: PanelTileGroup, tile: PanelTileItem, event: PointerEvent ) => void = () => {};
-	export let onLegacyDragStart: ( group: PanelTileGroup, tile: PanelTileItem, event: DragEvent ) => void = () => {};
-	export let onClick: ( group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent ) => void = () => {};
-	export let onDoubleClick: ( group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent ) => void = () => {};
+	export let onLegacyPointerDown: (group: PanelTileGroup, tile: PanelTileItem, event: PointerEvent) => void = () => {};
+	export let onLegacyDragStart: (group: PanelTileGroup, tile: PanelTileItem, event: DragEvent) => void = () => {};
+	export let onClick: (group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent) => void = () => {};
+	export let onDoubleClick: (group: PanelTileGroup, tile: PanelTileItem, event: MouseEvent) => void = () => {};
 
-	const draggable = createDraggable( {
+	const draggable = createDraggable({
 		get id() {
-			return `palette:${ tile.id }`;
+			return `palette:${tile.id}`;
 		},
 		get disabled() {
-			return !useDnd || tile.draggable === false || Boolean( tile.disabled );
+			return !useDnd || tile.draggable === false || Boolean(tile.disabled);
 		},
 		get data() {
-			return createBuilderDndData( tile.label, {
+			return createBuilderDndData(tile.label, {
 				kind: 'palette-item',
 				elementType: tile.id,
 				documentId,
-			} );
+			});
 		},
-	} );
+	});
 
-	function handleDragStart( event: DragEvent ) {
-		if ( useDnd ) {
+	function handleDragStart(event: DragEvent) {
+		if (useDnd) {
 			event.preventDefault();
 			return;
 		}
 
-		onLegacyDragStart( group, tile, event );
+		onLegacyDragStart(group, tile, event);
 	}
 
-	function handlePointerDown( event: PointerEvent ) {
-		if ( useDnd ) {
+	function handlePointerDown(event: PointerEvent) {
+		if (useDnd) {
 			const button = event.currentTarget;
-			if ( button instanceof HTMLButtonElement ) {
+			if (button instanceof HTMLButtonElement) {
 				button.focus();
 			}
 			return;
 		}
 
-		onLegacyPointerDown( group, tile, event );
+		onLegacyPointerDown(group, tile, event);
 	}
 </script>
 
@@ -65,8 +65,8 @@
 	{@attach useDnd ? draggable.attach : undefined}
 	onpointerdown={handlePointerDown}
 	ondragstart={handleDragStart}
-	onclick={( event ) => onClick( group, tile, event )}
-	ondblclick={( event ) => onDoubleClick( group, tile, event )}
+	onclick={(event) => onClick(group, tile, event)}
+	ondblclick={(event) => onDoubleClick(group, tile, event)}
 >
 	<div class="elements-panel__tile-icon">
 		<EditorShellIcon name={icon} title={tile.label} />
@@ -83,7 +83,7 @@
 		{/if}
 	</div>
 	{#if tile.badge !== undefined}
-		<em class={`builder-shell-badge ${ toneClass }`}>{tile.badge}</em>
+		<em class={`builder-shell-badge ${toneClass}`}>{tile.badge}</em>
 	{/if}
 </button>
 
@@ -106,9 +106,9 @@
 		min-height: 86px;
 		padding: 12px 10px;
 		text-align: center;
-		border: 1px solid rgba( 255, 255, 255, 0.12 );
+		border: 1px solid rgba(255, 255, 255, 0.12);
 		border-radius: 4px;
-		background: rgba( 255, 255, 255, 0.02 );
+		background: rgba(255, 255, 255, 0.02);
 		box-shadow: none;
 		min-inline-size: 0;
 		overflow: hidden;
@@ -120,15 +120,15 @@
 
 	.elements-panel__tile.armed,
 	.elements-panel__tile.dragging {
-		border-color: rgba( 208, 4, 212, 0.55 );
-		background: rgba( 208, 4, 212, 0.1 );
-		box-shadow: inset 0 0 0 1px rgba( 208, 4, 212, 0.14 );
+		border-color: rgba(208, 4, 212, 0.55);
+		background: rgba(208, 4, 212, 0.1);
+		box-shadow: inset 0 0 0 1px rgba(208, 4, 212, 0.14);
 	}
 
 	.elements-panel__tile:hover:not(:disabled) {
-		border-color: rgba( 255, 255, 255, 0.2 );
-		background: rgba( 255, 255, 255, 0.06 );
-		box-shadow: inset 0 0 0 1px rgba( 255, 255, 255, 0.02 );
+		border-color: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.06);
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 	}
 
 	.elements-panel__tile:disabled {

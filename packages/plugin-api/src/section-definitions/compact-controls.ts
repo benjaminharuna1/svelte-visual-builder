@@ -10,7 +10,7 @@ export type CompactChoiceConfig = Omit<BuilderChooseControlPrimitive, 'kind' | '
 	condition?: BuilderControlFieldDefinition['condition'];
 };
 
-export function compactChoiceOption( label: string, value: string, icon?: string ): BuilderControlOption {
+export function compactChoiceOption(label: string, value: string, icon?: string): BuilderControlOption {
 	return { label, value, icon };
 }
 
@@ -25,15 +25,15 @@ export function compactChoiceField(
 		layout = 'inline',
 		iconPosition = 'start',
 		presentation = 'icon-label',
-		columns = Math.min( Math.max( options.length, 2 ), 4 ),
+		columns = Math.min(Math.max(options.length, 2), 4),
 		...rest
 	} = config;
 
-	return createChooseField( id, label, path, options, {
+	return createChooseField(id, label, path, options, {
 		layout,
 		iconPosition,
 		presentation,
 		columns,
 		...rest,
-	} ) as BuilderControlFieldDefinition;
+	}) as BuilderControlFieldDefinition;
 }

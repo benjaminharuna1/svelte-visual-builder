@@ -1,11 +1,11 @@
 {
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": false,
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true
-  }
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": false,
+		"allowImportingTsExtensions": true,
+		"rewriteRelativeImportExtensions": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true
+	}
 }

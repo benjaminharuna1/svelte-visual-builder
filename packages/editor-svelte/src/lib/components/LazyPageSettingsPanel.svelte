@@ -4,25 +4,25 @@
 	let LoadedPageSettingsPanel: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './PageSettingsPanel.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./PageSettingsPanel.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedPageSettingsPanel = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let title = 'Page Settings';
 	export let subtitle = 'Document-scoped settings, route context, and assignment metadata.';

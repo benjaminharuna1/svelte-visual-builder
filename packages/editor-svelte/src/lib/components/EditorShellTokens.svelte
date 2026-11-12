@@ -96,7 +96,8 @@
 		--builder-shell-shadow-card: 0 0 5px rgba(0, 0, 0, 0.1);
 		--builder-shell-shadow-popover: 0 14px 40px rgba(0, 0, 0, 0.34);
 		--builder-shell-shadow-panel: 0 12px 36px rgba(0, 0, 0, 0.16);
-		--builder-shell-transition-hover: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+		--builder-shell-transition-hover:
+			background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
 	}
 
 	:global(.builder-shell-tokens) {
@@ -277,7 +278,10 @@
 		background: var(--builder-shell-panel-bg);
 		color: var(--builder-shell-gray-800);
 		box-shadow: none;
-		transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+		transition:
+			border-color 0.2s ease,
+			box-shadow 0.2s ease,
+			background-color 0.2s ease;
 	}
 
 	:global(.builder-shell-input:hover),
@@ -340,7 +344,9 @@
 		background-position:
 			calc(100% - 12px) calc(50% - 1px),
 			calc(100% - 7px) calc(50% - 1px);
-		background-size: 5px 5px, 5px 5px;
+		background-size:
+			5px 5px,
+			5px 5px;
 		background-repeat: no-repeat;
 		appearance: none;
 	}

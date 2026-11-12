@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-export default defineConfig( {
+export default defineConfig({
 	testDir: './apps/reference-studio/tests',
 	testMatch: /.*\.spec\.ts/,
 	timeout: 30000,
@@ -9,7 +9,8 @@ export default defineConfig( {
 		headless: true,
 	},
 	webServer: {
-		command: 'pnpm --filter @builder/reference-studio build && pnpm --filter @builder/reference-studio preview --host 127.0.0.1 --port 4173',
+		command:
+			'pnpm --filter @builder/reference-studio build && pnpm --filter @builder/reference-studio preview --host 127.0.0.1 --port 4173',
 		env: {
 			VITE_BUILDER_DISABLE_PERSISTENCE: 'true',
 		},
@@ -17,4 +18,4 @@ export default defineConfig( {
 		reuseExistingServer: false,
 		timeout: 120000,
 	},
-} );
+});

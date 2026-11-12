@@ -7,11 +7,7 @@
 	import { createBuilderDndData, createBuilderDroppableData } from '../drag-drop';
 	import type { NavigatorNodeRow, NavigatorNodeRowActions } from '../navigator-model';
 	import EditorShellIcon from './EditorShellIcon.svelte';
-import {
-	getNavigatorNodeIndicators,
-	getNavigatorNodeLabel,
-	getNavigatorNodeSubtitle,
-} from '../navigator-model';
+	import { getNavigatorNodeIndicators, getNavigatorNodeLabel, getNavigatorNodeSubtitle } from '../navigator-model';
 
 	export let row: NavigatorNodeRow;
 	export let selectedNodeIds: string[] = [];
@@ -28,85 +24,85 @@ import {
 	let nodeIndicators: ReturnType<typeof getNavigatorNodeIndicators> = [];
 	let isSelected = false;
 
-	const draggable = createDraggable( {
+	const draggable = createDraggable({
 		get id() {
-			return `navigator:${ row.nodeId }`;
+			return `navigator:${row.nodeId}`;
 		},
 		get disabled() {
 			return false;
 		},
 		get data() {
-			return createBuilderDndData( nodeLabel || getNavigatorNodeLabel( row.node ), {
+			return createBuilderDndData(nodeLabel || getNavigatorNodeLabel(row.node), {
 				kind: 'navigator-node',
 				nodeId: row.nodeId,
 				documentId,
-			} );
+			});
 		},
-	} );
+	});
 
-	const droppable = createDroppable( {
+	const droppable = createDroppable({
 		get id() {
-			return `navigator-drop:${ row.nodeId }`;
+			return `navigator-drop:${row.nodeId}`;
 		},
 		get data() {
-			return createBuilderDroppableData( createNavigatorDropTarget(), 'container' );
+			return createBuilderDroppableData(createNavigatorDropTarget(), 'container');
 		},
-	} );
+	});
 
-	$: nodeLabel = getNavigatorNodeLabel( row.node );
-	$: nodeSubtitle = getNavigatorNodeSubtitle( row.node, componentDocumentTitle );
-	$: nodeIndicators = getNavigatorNodeIndicators( row.node );
-	$: isSelected = selectedNodeIds.includes( row.nodeId );
+	$: nodeLabel = getNavigatorNodeLabel(row.node);
+	$: nodeSubtitle = getNavigatorNodeSubtitle(row.node, componentDocumentTitle);
+	$: nodeIndicators = getNavigatorNodeIndicators(row.node);
+	$: isSelected = selectedNodeIds.includes(row.nodeId);
 
-	$: if ( rowElement && virtualizer ) {
-		virtualizer.measureElement( rowElement );
+	$: if (rowElement && virtualizer) {
+		virtualizer.measureElement(rowElement);
 	}
 
-	function measureRow( element: HTMLLIElement ) {
+	function measureRow(element: HTMLLIElement) {
 		rowElement = element;
-		virtualizer?.measureElement( element );
+		virtualizer?.measureElement(element);
 
 		return {
 			update() {
-				virtualizer?.measureElement( element );
+				virtualizer?.measureElement(element);
 			},
 			destroy() {
-				virtualizer?.measureElement( null );
+				virtualizer?.measureElement(null);
 			},
 		};
 	}
 
 	function scheduleMeasureRow() {
-		if ( !rowElement || !virtualizer ) {
+		if (!rowElement || !virtualizer) {
 			return;
 		}
 
-		requestAnimationFrame( () => {
-			if ( rowElement ) {
-				virtualizer.measureElement( rowElement );
+		requestAnimationFrame(() => {
+			if (rowElement) {
+				virtualizer.measureElement(rowElement);
 			}
-		} );
+		});
 	}
 
 	function createNavigatorDropTarget(): DropTarget {
 		const rect = rowShellElement?.getBoundingClientRect();
 		const beforeRect = rect
 			? {
-				top: rect.top,
-				left: rect.left,
-				right: rect.right,
-				bottom: rect.bottom,
-				width: rect.width,
-				height: rect.height,
-			}
+					top: rect.top,
+					left: rect.left,
+					right: rect.right,
+					bottom: rect.bottom,
+					width: rect.width,
+					height: rect.height,
+				}
 			: {
-				top: 0,
-				left: 0,
-				right: 0,
-				bottom: 0,
-				width: 0,
-				height: 0,
-			};
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					width: 0,
+					height: 0,
+				};
 		return {
 			documentId,
 			parentId: row.parentId,
@@ -118,40 +114,40 @@ import {
 		};
 	}
 
-	function handleNodeKeydown( event: KeyboardEvent, node: BuilderNode ) {
-		if ( event.altKey && !event.shiftKey && event.key === 'ArrowUp' ) {
+	function handleNodeKeydown(event: KeyboardEvent, node: BuilderNode) {
+		if (event.altKey && !event.shiftKey && event.key === 'ArrowUp') {
 			event.preventDefault();
-			actions.onMove( node, -1 );
+			actions.onMove(node, -1);
 			return;
 		}
 
-		if ( event.altKey && !event.shiftKey && event.key === 'ArrowDown' ) {
+		if (event.altKey && !event.shiftKey && event.key === 'ArrowDown') {
 			event.preventDefault();
-			actions.onMove( node, 1 );
+			actions.onMove(node, 1);
 			return;
 		}
 
-		if ( event.altKey && !event.shiftKey && event.key === 'Home' ) {
+		if (event.altKey && !event.shiftKey && event.key === 'Home') {
 			event.preventDefault();
-			actions.onMoveToBoundary( node, row.siblings, 'start' );
+			actions.onMoveToBoundary(node, row.siblings, 'start');
 			return;
 		}
 
-		if ( event.altKey && !event.shiftKey && event.key === 'End' ) {
+		if (event.altKey && !event.shiftKey && event.key === 'End') {
 			event.preventDefault();
-			actions.onMoveToBoundary( node, row.siblings, 'end' );
+			actions.onMoveToBoundary(node, row.siblings, 'end');
 			return;
 		}
 
-		if ( event.altKey && event.shiftKey && event.key === 'ArrowRight' ) {
+		if (event.altKey && event.shiftKey && event.key === 'ArrowRight') {
 			event.preventDefault();
-			actions.onIndent( node, row.siblings, row.index );
+			actions.onIndent(node, row.siblings, row.index);
 			return;
 		}
 
-		if ( event.altKey && event.shiftKey && event.key === 'ArrowLeft' ) {
+		if (event.altKey && event.shiftKey && event.key === 'ArrowLeft') {
 			event.preventDefault();
-			actions.onOutdent( node );
+			actions.onOutdent(node);
 		}
 	}
 </script>
@@ -159,7 +155,7 @@ import {
 <li
 	bind:this={rowElement}
 	class="navigator__item"
-	style={style}
+	{style}
 	style:--depth={row.depth}
 	data-index={row.rowIndex}
 	use:measureRow
@@ -178,14 +174,14 @@ import {
 		role="group"
 		aria-label={`${nodeLabel} structure row`}
 		{@attach droppable.attach}
-		oncontextmenu={( event ) => actions.onOpenContextMenu( row.node, event, row.slot )}
+		oncontextmenu={(event) => actions.onOpenContextMenu(row.node, event, row.slot)}
 	>
 		<button
 			type="button"
 			class="navigator__row"
 			class:selected={isSelected}
-			onclick={() => actions.onSelect( row.nodeId )}
-			onkeydown={( event ) => handleNodeKeydown( event, row.node )}
+			onclick={() => actions.onSelect(row.nodeId)}
+			onkeydown={(event) => handleNodeKeydown(event, row.node)}
 		>
 			<span class="navigator__row-main">
 				<span class="navigator__row-copy">
@@ -211,9 +207,9 @@ import {
 				aria-label={`Drag ${nodeLabel}`}
 				title={`Drag to move ${nodeLabel}`}
 				{@attach draggable.attachHandle}
-				onpointerdown={( event ) => {
+				onpointerdown={(event) => {
 					const handle = event.currentTarget;
-					if ( handle instanceof HTMLButtonElement ) {
+					if (handle instanceof HTMLButtonElement) {
 						handle.focus();
 					}
 				}}
@@ -221,11 +217,21 @@ import {
 				<span class="navigator__row-handle-grip" aria-hidden="true"></span>
 				<span class="navigator__action-label">Move</span>
 			</button>
-			<button type="button" aria-label={`Move ${nodeLabel} up`} title="Move up" onclick={() => actions.onMove( row.node, -1 )}>
+			<button
+				type="button"
+				aria-label={`Move ${nodeLabel} up`}
+				title="Move up"
+				onclick={() => actions.onMove(row.node, -1)}
+			>
 				<EditorShellIcon name="arrow-up" size={13} />
 				<span class="navigator__action-label">Up</span>
 			</button>
-			<button type="button" aria-label={`Move ${nodeLabel} down`} title="Move down" onclick={() => actions.onMove( row.node, 1 )}>
+			<button
+				type="button"
+				aria-label={`Move ${nodeLabel} down`}
+				title="Move down"
+				onclick={() => actions.onMove(row.node, 1)}
+			>
 				<EditorShellIcon name="arrow-down" size={13} />
 				<span class="navigator__action-label">Down</span>
 			</button>
@@ -233,7 +239,7 @@ import {
 				type="button"
 				aria-label={`Duplicate ${nodeLabel}`}
 				title="Duplicate"
-				onclick={() => actions.onDuplicate( row.node, row.parentId, row.slot )}
+				onclick={() => actions.onDuplicate(row.node, row.parentId, row.slot)}
 			>
 				<EditorShellIcon name="copy" size={13} />
 				<span class="navigator__action-label">Duplicate</span>
@@ -242,7 +248,7 @@ import {
 				type="button"
 				aria-label={`Delete ${nodeLabel}`}
 				title="Delete"
-				onclick={() => actions.onDelete( row.node )}
+				onclick={() => actions.onDelete(row.node)}
 			>
 				<EditorShellIcon name="trash" size={13} />
 				<span class="navigator__action-label">Delete</span>
@@ -252,7 +258,7 @@ import {
 
 	{#if componentDocumentTitle}
 		<div class="navigator__inline-actions">
-			<button type="button" onclick={() => actions.onOpenMaster( row.node )}>Open master</button>
+			<button type="button" onclick={() => actions.onOpenMaster(row.node)}>Open master</button>
 		</div>
 	{/if}
 
@@ -264,7 +270,7 @@ import {
 		position: relative;
 		display: grid;
 		gap: 0.15rem;
-		padding-left: calc( (var(--depth) - 1) * 0.55rem );
+		padding-left: calc((var(--depth) - 1) * 0.55rem);
 		border-bottom: 1px solid rgba(191, 202, 219, 0.28);
 	}
 
@@ -277,7 +283,7 @@ import {
 		position: absolute;
 		top: 0;
 		bottom: -0.25rem;
-		left: calc( (var(--depth) - 1) * 0.55rem + 0.2rem );
+		left: calc((var(--depth) - 1) * 0.55rem + 0.2rem);
 		width: 1px;
 		background: linear-gradient(180deg, rgba(191, 202, 219, 0.72), rgba(191, 202, 219, 0.12));
 		pointer-events: none;
@@ -319,7 +325,9 @@ import {
 		background: linear-gradient(90deg, rgba(250, 232, 255, 0.9), rgba(232, 238, 247, 0.96));
 		color: var(--builder-shell-heading);
 		border-inline-start-color: var(--builder-shell-accent);
-		box-shadow: inset 3px 0 0 var(--builder-shell-accent), 0 1px 0 rgba(255, 255, 255, 0.6);
+		box-shadow:
+			inset 3px 0 0 var(--builder-shell-accent),
+			0 1px 0 rgba(255, 255, 255, 0.6);
 	}
 
 	.navigator__row-main {

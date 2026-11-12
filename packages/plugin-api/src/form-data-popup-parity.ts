@@ -49,10 +49,10 @@ const blendModeOptions = [
 ];
 
 const responsiveVisibilityFields = [
-	createControlField( 'hideDesktop', 'Hide on Desktop', 'toggle', 'visibility.breakpointHidden.desktop' ),
-	createControlField( 'hideLaptop', 'Hide on Laptop', 'toggle', 'visibility.breakpointHidden.laptop' ),
-	createControlField( 'hideTablet', 'Hide on Tablet', 'toggle', 'visibility.breakpointHidden.tablet' ),
-	createControlField( 'hideMobile', 'Hide on Mobile', 'toggle', 'visibility.breakpointHidden.mobile' ),
+	createControlField('hideDesktop', 'Hide on Desktop', 'toggle', 'visibility.breakpointHidden.desktop'),
+	createControlField('hideLaptop', 'Hide on Laptop', 'toggle', 'visibility.breakpointHidden.laptop'),
+	createControlField('hideTablet', 'Hide on Tablet', 'toggle', 'visibility.breakpointHidden.tablet'),
+	createControlField('hideMobile', 'Hide on Mobile', 'toggle', 'visibility.breakpointHidden.mobile'),
 ];
 
 function field(
@@ -62,7 +62,7 @@ function field(
 	path: string,
 	overrides: Partial<Omit<BuilderControlFieldDefinition, 'id' | 'label' | 'type' | 'path'>> = {},
 ): BuilderControlFieldDefinition {
-	return createControlField( id, label, type, path, overrides );
+	return createControlField(id, label, type, path, overrides);
 }
 
 function section(
@@ -75,28 +75,28 @@ function section(
 	groupId: string,
 	description?: string,
 ): BuilderControlSectionDefinition {
-	return createControlSection( id, label, tab, fields, {
+	return createControlSection(id, label, tab, fields, {
 		familyId,
 		groupId,
 		order,
 		description,
 		collapsible: true,
 		defaultCollapsed: false,
-	} );
+	});
 }
 
-function sharedStyleBaselineSections( familyId: string ): BuilderControlSectionDefinition[] {
+function sharedStyleBaselineSections(familyId: string): BuilderControlSectionDefinition[] {
 	return [
 		section(
-			`${ familyId }-layout`,
+			`${familyId}-layout`,
 			'Layout',
 			'style',
 			[
-				field( 'width', 'Width', 'text', 'styles.base.width' ),
-				field( 'maxWidth', 'Max Width', 'text', 'styles.base.maxWidth' ),
-				field( 'minHeight', 'Min Height', 'text', 'styles.base.minHeight' ),
-				field( 'margin', 'Margin', 'text', 'styles.base.margin' ),
-				field( 'padding', 'Padding', 'text', 'styles.base.padding' ),
+				field('width', 'Width', 'text', 'styles.base.width'),
+				field('maxWidth', 'Max Width', 'text', 'styles.base.maxWidth'),
+				field('minHeight', 'Min Height', 'text', 'styles.base.minHeight'),
+				field('margin', 'Margin', 'text', 'styles.base.margin'),
+				field('padding', 'Padding', 'text', 'styles.base.padding'),
 			],
 			10,
 			familyId,
@@ -104,25 +104,36 @@ function sharedStyleBaselineSections( familyId: string ): BuilderControlSectionD
 			'Shared shell sizing and spacing controls.',
 		),
 		section(
-			`${ familyId }-background`,
+			`${familyId}-background`,
 			'Background',
 			'style',
 			[
-				field( 'backgroundType', 'Type', 'select', 'styles.base.background.type', { options: backgroundTypeOptions } ),
-				field( 'backgroundColor', 'Color', 'text', 'styles.base.background.color', { responsive: true, stateful: true, tokenAware: true } ),
-				field( 'backgroundImage', 'Image', 'text', 'styles.base.background.image', { responsive: true } ),
-				field( 'backgroundPosition', 'Position', 'text', 'styles.base.background.position', { responsive: true } ),
-				field( 'backgroundSize', 'Size', 'text', 'styles.base.background.size', { responsive: true } ),
-				field( 'backgroundRepeat', 'Repeat', 'select', 'styles.base.background.repeat', {
+				field('backgroundType', 'Type', 'select', 'styles.base.background.type', { options: backgroundTypeOptions }),
+				field('backgroundColor', 'Color', 'text', 'styles.base.background.color', {
+					responsive: true,
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('backgroundImage', 'Image', 'text', 'styles.base.background.image', { responsive: true }),
+				field('backgroundPosition', 'Position', 'text', 'styles.base.background.position', { responsive: true }),
+				field('backgroundSize', 'Size', 'text', 'styles.base.background.size', { responsive: true }),
+				field('backgroundRepeat', 'Repeat', 'select', 'styles.base.background.repeat', {
 					options: [
 						{ label: 'No Repeat', value: 'no-repeat' },
 						{ label: 'Repeat', value: 'repeat' },
 						{ label: 'Repeat X', value: 'repeat-x' },
 						{ label: 'Repeat Y', value: 'repeat-y' },
 					],
-				} ),
-				field( 'backgroundOverlayColor', 'Overlay', 'text', 'styles.base.background.overlayColor', { responsive: true, stateful: true, tokenAware: true } ),
-				field( 'backgroundOverlayBlendMode', 'Blend Mode', 'select', 'styles.base.background.overlayBlendMode', { options: blendModeOptions, responsive: true } ),
+				}),
+				field('backgroundOverlayColor', 'Overlay', 'text', 'styles.base.background.overlayColor', {
+					responsive: true,
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('backgroundOverlayBlendMode', 'Blend Mode', 'select', 'styles.base.background.overlayBlendMode', {
+					options: blendModeOptions,
+					responsive: true,
+				}),
 			],
 			20,
 			familyId,
@@ -130,14 +141,21 @@ function sharedStyleBaselineSections( familyId: string ): BuilderControlSectionD
 			'Background paint and overlay controls.',
 		),
 		section(
-			`${ familyId }-border`,
+			`${familyId}-border`,
 			'Border',
 			'style',
 			[
-				field( 'borderStyle', 'Style', 'select', 'styles.base.border.style', { options: borderStyleOptions, responsive: true } ),
-				field( 'borderWidth', 'Width', 'text', 'styles.base.border.width', { responsive: true } ),
-				field( 'borderColor', 'Color', 'text', 'styles.base.border.color', { responsive: true, stateful: true, tokenAware: true } ),
-				field( 'borderRadius', 'Radius', 'text', 'styles.base.border.radius', { responsive: true, tokenAware: true } ),
+				field('borderStyle', 'Style', 'select', 'styles.base.border.style', {
+					options: borderStyleOptions,
+					responsive: true,
+				}),
+				field('borderWidth', 'Width', 'text', 'styles.base.border.width', { responsive: true }),
+				field('borderColor', 'Color', 'text', 'styles.base.border.color', {
+					responsive: true,
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('borderRadius', 'Radius', 'text', 'styles.base.border.radius', { responsive: true, tokenAware: true }),
 			],
 			30,
 			familyId,
@@ -145,14 +163,25 @@ function sharedStyleBaselineSections( familyId: string ): BuilderControlSectionD
 			'Border surface and radius controls.',
 		),
 		section(
-			`${ familyId }-shadow`,
+			`${familyId}-shadow`,
 			'Shadow',
 			'style',
 			[
-				field( 'boxShadow', 'Box Shadow', 'text', 'styles.base.boxShadow', { responsive: true, stateful: true, tokenAware: true } ),
-				field( 'textShadow', 'Text Shadow', 'text', 'styles.base.textShadow', { responsive: true, stateful: true, tokenAware: true } ),
-				field( 'opacity', 'Opacity', 'number', 'styles.base.opacity', { responsive: true, stateful: true } ),
-				field( 'blendMode', 'Blend Mode', 'select', 'styles.base.blendMode', { options: blendModeOptions, responsive: true } ),
+				field('boxShadow', 'Box Shadow', 'text', 'styles.base.boxShadow', {
+					responsive: true,
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('textShadow', 'Text Shadow', 'text', 'styles.base.textShadow', {
+					responsive: true,
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('opacity', 'Opacity', 'number', 'styles.base.opacity', { responsive: true, stateful: true }),
+				field('blendMode', 'Blend Mode', 'select', 'styles.base.blendMode', {
+					options: blendModeOptions,
+					responsive: true,
+				}),
 			],
 			40,
 			familyId,
@@ -162,19 +191,19 @@ function sharedStyleBaselineSections( familyId: string ): BuilderControlSectionD
 	];
 }
 
-function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSectionDefinition[] {
+function sharedAdvancedBaselineSections(familyId: string): BuilderControlSectionDefinition[] {
 	return [
 		section(
-			`${ familyId }-layout`,
+			`${familyId}-layout`,
 			'Layout',
 			'advanced',
 			[
-				field( 'display', 'Display', 'select', 'meta.layout.display', { options: displayOptions, responsive: true } ),
-				field( 'position', 'Position', 'select', 'meta.layout.position', { options: positionOptions, responsive: true } ),
-				field( 'zIndex', 'Z-Index', 'number', 'meta.layout.zIndex', { responsive: true } ),
-				field( 'width', 'Width', 'text', 'meta.layout.width', { responsive: true } ),
-				field( 'maxWidth', 'Max Width', 'text', 'meta.layout.maxWidth', { responsive: true } ),
-				field( 'minHeight', 'Min Height', 'text', 'meta.layout.minHeight', { responsive: true } ),
+				field('display', 'Display', 'select', 'meta.layout.display', { options: displayOptions, responsive: true }),
+				field('position', 'Position', 'select', 'meta.layout.position', { options: positionOptions, responsive: true }),
+				field('zIndex', 'Z-Index', 'number', 'meta.layout.zIndex', { responsive: true }),
+				field('width', 'Width', 'text', 'meta.layout.width', { responsive: true }),
+				field('maxWidth', 'Max Width', 'text', 'meta.layout.maxWidth', { responsive: true }),
+				field('minHeight', 'Min Height', 'text', 'meta.layout.minHeight', { responsive: true }),
 			],
 			10,
 			familyId,
@@ -182,19 +211,21 @@ function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSecti
 			'Advanced layout and positioning behavior.',
 		),
 		section(
-			`${ familyId }-motion-effects`,
+			`${familyId}-motion-effects`,
 			'Motion Effects',
 			'advanced',
 			[
-				field( 'entranceAnimation', 'Entrance Animation', 'select', 'meta.motionEffects.entranceAnimation', { options: animationOptions } ),
-				field( 'animationDuration', 'Animation Duration', 'select', 'meta.motionEffects.animationDuration', {
+				field('entranceAnimation', 'Entrance Animation', 'select', 'meta.motionEffects.entranceAnimation', {
+					options: animationOptions,
+				}),
+				field('animationDuration', 'Animation Duration', 'select', 'meta.motionEffects.animationDuration', {
 					options: [
 						{ label: 'Slow', value: 'slow' },
 						{ label: 'Normal', value: 'normal' },
 						{ label: 'Fast', value: 'fast' },
 					],
-				} ),
-				field( 'animationDelay', 'Animation Delay', 'number', 'meta.motionEffects.animationDelay' ),
+				}),
+				field('animationDelay', 'Animation Delay', 'number', 'meta.motionEffects.animationDelay'),
 			],
 			20,
 			familyId,
@@ -202,15 +233,15 @@ function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSecti
 			'Entrance and transition timing controls.',
 		),
 		section(
-			`${ familyId }-transform`,
+			`${familyId}-transform`,
 			'Transform',
 			'advanced',
 			[
-				field( 'rotate', 'Rotate', 'number', 'styles.base.rotate' ),
-				field( 'scale', 'Scale', 'number', 'styles.base.scale' ),
-				field( 'translateX', 'Translate X', 'text', 'styles.base.translateX' ),
-				field( 'translateY', 'Translate Y', 'text', 'styles.base.translateY' ),
-				field( 'transformOrigin', 'Transform Origin', 'text', 'styles.base.transformOrigin' ),
+				field('rotate', 'Rotate', 'number', 'styles.base.rotate'),
+				field('scale', 'Scale', 'number', 'styles.base.scale'),
+				field('translateX', 'Translate X', 'text', 'styles.base.translateX'),
+				field('translateY', 'Translate Y', 'text', 'styles.base.translateY'),
+				field('transformOrigin', 'Transform Origin', 'text', 'styles.base.transformOrigin'),
 			],
 			30,
 			familyId,
@@ -218,7 +249,7 @@ function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSecti
 			'Transform origin and movement controls.',
 		),
 		section(
-			`${ familyId }-responsive`,
+			`${familyId}-responsive`,
 			'Responsive',
 			'advanced',
 			responsiveVisibilityFields,
@@ -228,17 +259,17 @@ function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSecti
 			'Viewport-specific visibility controls.',
 		),
 		section(
-			`${ familyId }-visibility`,
+			`${familyId}-visibility`,
 			'Visibility',
 			'advanced',
 			[
-				field( 'hidden', 'Hidden', 'toggle', 'visibility.hidden' ),
-				field( 'display', 'Display', 'select', 'visibility.display', {
+				field('hidden', 'Hidden', 'toggle', 'visibility.hidden'),
+				field('display', 'Display', 'select', 'visibility.display', {
 					options: [
 						{ label: 'Show', value: 'show' },
 						{ label: 'Hide When Matched', value: 'hide-when-matched' },
 					],
-				} ),
+				}),
 			],
 			50,
 			familyId,
@@ -246,18 +277,18 @@ function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSecti
 			'Visibility and conditional display controls.',
 		),
 		section(
-			`${ familyId }-attributes`,
+			`${familyId}-attributes`,
 			'Attributes',
 			'advanced',
 			[
-				field( 'attributes', 'HTML Attributes', 'json', 'meta.attributes', {
+				field('attributes', 'HTML Attributes', 'json', 'meta.attributes', {
 					description: 'Arbitrary HTML attributes stored with the node metadata.',
 					placeholder: '{\n  "data-id": "hero"\n}',
-				} ),
-				field( 'customCss', 'Custom CSS', 'textarea', 'meta.customCss', {
+				}),
+				field('customCss', 'Custom CSS', 'textarea', 'meta.customCss', {
 					description: 'Element-scoped CSS for advanced overrides.',
 					placeholder: '.selector {\n  /* custom css */\n}',
-				} ),
+				}),
 			],
 			60,
 			familyId,
@@ -265,16 +296,16 @@ function sharedAdvancedBaselineSections( familyId: string ): BuilderControlSecti
 			'Advanced HTML attributes and scoped CSS.',
 		),
 		section(
-			`${ familyId }-accessibility`,
+			`${familyId}-accessibility`,
 			'Accessibility',
 			'advanced',
 			[
-				field( 'role', 'Role', 'text', 'accessibility.role' ),
-				field( 'label', 'Label', 'text', 'accessibility.label' ),
-				field( 'labelledBy', 'Labelled By', 'text', 'accessibility.labelledBy' ),
-				field( 'describedBy', 'Described By', 'text', 'accessibility.describedBy' ),
-				field( 'decorative', 'Decorative', 'toggle', 'accessibility.decorative' ),
-				field( 'tabIndex', 'Tab Index', 'number', 'accessibility.tabIndex', { placeholder: '0' } ),
+				field('role', 'Role', 'text', 'accessibility.role'),
+				field('label', 'Label', 'text', 'accessibility.label'),
+				field('labelledBy', 'Labelled By', 'text', 'accessibility.labelledBy'),
+				field('describedBy', 'Described By', 'text', 'accessibility.describedBy'),
+				field('decorative', 'Decorative', 'toggle', 'accessibility.decorative'),
+				field('tabIndex', 'Tab Index', 'number', 'accessibility.tabIndex', { placeholder: '0' }),
 			],
 			70,
 			familyId,
@@ -290,21 +321,23 @@ function buildParitySectionStack(
 ): FormDataPopupParitySectionStack {
 	return {
 		styleSections,
-		advancedSections: sharedAdvancedBaselineSections( familyId ),
+		advancedSections: sharedAdvancedBaselineSections(familyId),
 	};
 }
 
 export function createFormParitySectionStack(): FormDataPopupParitySectionStack {
-	return buildParitySectionStack( 'form', [
+	return buildParitySectionStack('form', [
 		section(
 			'form-layout',
 			'Layout',
 			'style',
 			[
-				field( 'gap', 'Gap', 'text', 'styles.base.gap', { description: 'Overall spacing between the form and its fields.' } ),
-				field( 'fieldGap', 'Field Gap', 'text', 'styles.base.fieldGap' ),
-				field( 'labelSpacing', 'Label Spacing', 'text', 'styles.base.labelSpacing' ),
-				field( 'inlineLabelWidth', 'Inline Label Width', 'text', 'styles.base.inlineLabelWidth' ),
+				field('gap', 'Gap', 'text', 'styles.base.gap', {
+					description: 'Overall spacing between the form and its fields.',
+				}),
+				field('fieldGap', 'Field Gap', 'text', 'styles.base.fieldGap'),
+				field('labelSpacing', 'Label Spacing', 'text', 'styles.base.labelSpacing'),
+				field('inlineLabelWidth', 'Inline Label Width', 'text', 'styles.base.inlineLabelWidth'),
 			],
 			10,
 			'form',
@@ -316,13 +349,22 @@ export function createFormParitySectionStack(): FormDataPopupParitySectionStack 
 			'Fields',
 			'style',
 			[
-				field( 'inputPadding', 'Input Padding', 'text', 'styles.base.inputPadding' ),
-				field( 'inputBackground', 'Input Background', 'text', 'styles.base.inputBackground' ),
-				field( 'inputBorder', 'Input Border', 'text', 'styles.base.inputBorder' ),
-				field( 'inputBorderRadius', 'Input Radius', 'text', 'styles.base.inputBorderRadius' ),
-				field( 'inputTextColor', 'Input Text Color', 'text', 'styles.base.inputTextColor', { stateful: true, tokenAware: true } ),
-				field( 'inputPlaceholderColor', 'Placeholder Color', 'text', 'styles.base.inputPlaceholderColor', { stateful: true, tokenAware: true } ),
-				field( 'inputFocusColor', 'Focus Color', 'text', 'styles.base.inputFocusColor', { stateful: true, tokenAware: true } ),
+				field('inputPadding', 'Input Padding', 'text', 'styles.base.inputPadding'),
+				field('inputBackground', 'Input Background', 'text', 'styles.base.inputBackground'),
+				field('inputBorder', 'Input Border', 'text', 'styles.base.inputBorder'),
+				field('inputBorderRadius', 'Input Radius', 'text', 'styles.base.inputBorderRadius'),
+				field('inputTextColor', 'Input Text Color', 'text', 'styles.base.inputTextColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('inputPlaceholderColor', 'Placeholder Color', 'text', 'styles.base.inputPlaceholderColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('inputFocusColor', 'Focus Color', 'text', 'styles.base.inputFocusColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
 			],
 			20,
 			'form',
@@ -334,10 +376,13 @@ export function createFormParitySectionStack(): FormDataPopupParitySectionStack 
 			'Labels',
 			'style',
 			[
-				field( 'labelTypography', 'Label Typography', 'text', 'styles.base.labelTypography' ),
-				field( 'labelColor', 'Label Color', 'text', 'styles.base.labelColor', { stateful: true, tokenAware: true } ),
-				field( 'requiredColor', 'Required Mark Color', 'text', 'styles.base.requiredColor', { stateful: true, tokenAware: true } ),
-				field( 'requiredSpacing', 'Required Mark Spacing', 'text', 'styles.base.requiredSpacing' ),
+				field('labelTypography', 'Label Typography', 'text', 'styles.base.labelTypography'),
+				field('labelColor', 'Label Color', 'text', 'styles.base.labelColor', { stateful: true, tokenAware: true }),
+				field('requiredColor', 'Required Mark Color', 'text', 'styles.base.requiredColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('requiredSpacing', 'Required Mark Spacing', 'text', 'styles.base.requiredSpacing'),
 			],
 			30,
 			'form',
@@ -349,19 +394,25 @@ export function createFormParitySectionStack(): FormDataPopupParitySectionStack 
 			'Submit Button',
 			'style',
 			[
-				field( 'submitPadding', 'Submit Padding', 'text', 'styles.base.submitPadding' ),
-				field( 'submitWidth', 'Submit Width', 'text', 'styles.base.submitWidth' ),
-				field( 'submitAlignment', 'Submit Alignment', 'select', 'styles.base.submitAlignment', {
+				field('submitPadding', 'Submit Padding', 'text', 'styles.base.submitPadding'),
+				field('submitWidth', 'Submit Width', 'text', 'styles.base.submitWidth'),
+				field('submitAlignment', 'Submit Alignment', 'select', 'styles.base.submitAlignment', {
 					options: [
 						{ label: 'Start', value: 'start' },
 						{ label: 'Center', value: 'center' },
 						{ label: 'End', value: 'end' },
 						{ label: 'Stretch', value: 'stretch' },
 					],
-				} ),
-				field( 'submitBorderRadius', 'Submit Radius', 'text', 'styles.base.submitBorderRadius' ),
-				field( 'submitBackground', 'Submit Background', 'text', 'styles.base.submitBackground', { stateful: true, tokenAware: true } ),
-				field( 'submitTextColor', 'Submit Text Color', 'text', 'styles.base.submitTextColor', { stateful: true, tokenAware: true } ),
+				}),
+				field('submitBorderRadius', 'Submit Radius', 'text', 'styles.base.submitBorderRadius'),
+				field('submitBackground', 'Submit Background', 'text', 'styles.base.submitBackground', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('submitTextColor', 'Submit Text Color', 'text', 'styles.base.submitTextColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
 			],
 			40,
 			'form',
@@ -373,32 +424,44 @@ export function createFormParitySectionStack(): FormDataPopupParitySectionStack 
 			'Messages',
 			'style',
 			[
-				field( 'messageTypography', 'Message Typography', 'text', 'styles.base.messageTypography' ),
-				field( 'successTextColor', 'Success Text Color', 'text', 'styles.base.successTextColor', { stateful: true, tokenAware: true } ),
-				field( 'successBackground', 'Success Background', 'text', 'styles.base.successBackground', { stateful: true, tokenAware: true } ),
-				field( 'errorTextColor', 'Error Text Color', 'text', 'styles.base.errorTextColor', { stateful: true, tokenAware: true } ),
-				field( 'errorBackground', 'Error Background', 'text', 'styles.base.errorBackground', { stateful: true, tokenAware: true } ),
+				field('messageTypography', 'Message Typography', 'text', 'styles.base.messageTypography'),
+				field('successTextColor', 'Success Text Color', 'text', 'styles.base.successTextColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('successBackground', 'Success Background', 'text', 'styles.base.successBackground', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('errorTextColor', 'Error Text Color', 'text', 'styles.base.errorTextColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('errorBackground', 'Error Background', 'text', 'styles.base.errorBackground', {
+					stateful: true,
+					tokenAware: true,
+				}),
 			],
 			50,
 			'form',
 			'messages',
 			'Submission feedback and validation messaging.',
 		),
-		...sharedStyleBaselineSections( 'form' ).slice( 1 ),
-	] );
+		...sharedStyleBaselineSections('form').slice(1),
+	]);
 }
 
 export function createFormFieldParitySectionStack(): FormDataPopupParitySectionStack {
-	return buildParitySectionStack( 'form-field', [
+	return buildParitySectionStack('form-field', [
 		section(
 			'form-field-layout',
 			'Layout',
 			'style',
 			[
-				field( 'width', 'Width', 'text', 'styles.base.width' ),
-				field( 'maxWidth', 'Max Width', 'text', 'styles.base.maxWidth' ),
-				field( 'margin', 'Margin', 'text', 'styles.base.margin' ),
-				field( 'padding', 'Padding', 'text', 'styles.base.padding' ),
+				field('width', 'Width', 'text', 'styles.base.width'),
+				field('maxWidth', 'Max Width', 'text', 'styles.base.maxWidth'),
+				field('margin', 'Margin', 'text', 'styles.base.margin'),
+				field('padding', 'Padding', 'text', 'styles.base.padding'),
 			],
 			10,
 			'form-field',
@@ -410,13 +473,19 @@ export function createFormFieldParitySectionStack(): FormDataPopupParitySectionS
 			'Field',
 			'style',
 			[
-				field( 'inputPadding', 'Input Padding', 'text', 'styles.base.inputPadding' ),
-				field( 'inputBackground', 'Input Background', 'text', 'styles.base.inputBackground' ),
-				field( 'inputBorder', 'Input Border', 'text', 'styles.base.inputBorder' ),
-				field( 'inputBorderRadius', 'Input Radius', 'text', 'styles.base.inputBorderRadius' ),
-				field( 'inputTextColor', 'Input Text Color', 'text', 'styles.base.inputTextColor', { stateful: true, tokenAware: true } ),
-				field( 'placeholderColor', 'Placeholder Color', 'text', 'styles.base.placeholderColor', { stateful: true, tokenAware: true } ),
-				field( 'focusColor', 'Focus Color', 'text', 'styles.base.focusColor', { stateful: true, tokenAware: true } ),
+				field('inputPadding', 'Input Padding', 'text', 'styles.base.inputPadding'),
+				field('inputBackground', 'Input Background', 'text', 'styles.base.inputBackground'),
+				field('inputBorder', 'Input Border', 'text', 'styles.base.inputBorder'),
+				field('inputBorderRadius', 'Input Radius', 'text', 'styles.base.inputBorderRadius'),
+				field('inputTextColor', 'Input Text Color', 'text', 'styles.base.inputTextColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('placeholderColor', 'Placeholder Color', 'text', 'styles.base.placeholderColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('focusColor', 'Focus Color', 'text', 'styles.base.focusColor', { stateful: true, tokenAware: true }),
 			],
 			20,
 			'form-field',
@@ -428,10 +497,13 @@ export function createFormFieldParitySectionStack(): FormDataPopupParitySectionS
 			'Label',
 			'style',
 			[
-				field( 'labelTypography', 'Label Typography', 'text', 'styles.base.labelTypography' ),
-				field( 'labelColor', 'Label Color', 'text', 'styles.base.labelColor', { stateful: true, tokenAware: true } ),
-				field( 'labelSpacing', 'Label Spacing', 'text', 'styles.base.labelSpacing' ),
-				field( 'requiredColor', 'Required Mark Color', 'text', 'styles.base.requiredColor', { stateful: true, tokenAware: true } ),
+				field('labelTypography', 'Label Typography', 'text', 'styles.base.labelTypography'),
+				field('labelColor', 'Label Color', 'text', 'styles.base.labelColor', { stateful: true, tokenAware: true }),
+				field('labelSpacing', 'Label Spacing', 'text', 'styles.base.labelSpacing'),
+				field('requiredColor', 'Required Mark Color', 'text', 'styles.base.requiredColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
 			],
 			30,
 			'form-field',
@@ -443,16 +515,16 @@ export function createFormFieldParitySectionStack(): FormDataPopupParitySectionS
 			'Icon',
 			'style',
 			[
-				field( 'iconSize', 'Icon Size', 'text', 'styles.base.iconSize' ),
-				field( 'iconColor', 'Icon Color', 'text', 'styles.base.iconColor', { stateful: true, tokenAware: true } ),
-				field( 'iconSpacing', 'Icon Spacing', 'text', 'styles.base.iconSpacing' ),
-				field( 'iconPosition', 'Icon Position', 'select', 'styles.base.iconPosition', {
+				field('iconSize', 'Icon Size', 'text', 'styles.base.iconSize'),
+				field('iconColor', 'Icon Color', 'text', 'styles.base.iconColor', { stateful: true, tokenAware: true }),
+				field('iconSpacing', 'Icon Spacing', 'text', 'styles.base.iconSpacing'),
+				field('iconPosition', 'Icon Position', 'select', 'styles.base.iconPosition', {
 					options: [
 						{ label: 'Before', value: 'before' },
 						{ label: 'After', value: 'after' },
 						{ label: 'Inside', value: 'inside' },
 					],
-				} ),
+				}),
 			],
 			40,
 			'form-field',
@@ -464,39 +536,48 @@ export function createFormFieldParitySectionStack(): FormDataPopupParitySectionS
 			'State',
 			'style',
 			[
-				field( 'hoverBackground', 'Hover Background', 'text', 'styles.base.hoverBackground', { stateful: true, tokenAware: true } ),
-				field( 'hoverBorderColor', 'Hover Border Color', 'text', 'styles.base.hoverBorderColor', { stateful: true, tokenAware: true } ),
-				field( 'activeBackground', 'Active Background', 'text', 'styles.base.activeBackground', { stateful: true, tokenAware: true } ),
-				field( 'disabledOpacity', 'Disabled Opacity', 'number', 'styles.base.disabledOpacity', { stateful: true } ),
+				field('hoverBackground', 'Hover Background', 'text', 'styles.base.hoverBackground', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('hoverBorderColor', 'Hover Border Color', 'text', 'styles.base.hoverBorderColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('activeBackground', 'Active Background', 'text', 'styles.base.activeBackground', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('disabledOpacity', 'Disabled Opacity', 'number', 'styles.base.disabledOpacity', { stateful: true }),
 			],
 			50,
 			'form-field',
 			'state',
 			'Hover, active, and disabled state styling.',
 		),
-		...sharedStyleBaselineSections( 'form-field' ).slice( 1 ),
-	] );
+		...sharedStyleBaselineSections('form-field').slice(1),
+	]);
 }
 
 export function createLoopParitySectionStack(): FormDataPopupParitySectionStack {
-	return buildParitySectionStack( 'loop', [
+	return buildParitySectionStack('loop', [
 		section(
 			'loop-layout',
 			'Layout',
 			'style',
 			[
-				field( 'columns', 'Columns', 'number', 'styles.base.columns' ),
-				field( 'gap', 'Gap', 'text', 'styles.base.gap' ),
-				field( 'rowGap', 'Row Gap', 'text', 'styles.base.rowGap' ),
-				field( 'columnGap', 'Column Gap', 'text', 'styles.base.columnGap' ),
-				field( 'alignItems', 'Align Items', 'select', 'styles.base.alignItems', {
+				field('columns', 'Columns', 'number', 'styles.base.columns'),
+				field('gap', 'Gap', 'text', 'styles.base.gap'),
+				field('rowGap', 'Row Gap', 'text', 'styles.base.rowGap'),
+				field('columnGap', 'Column Gap', 'text', 'styles.base.columnGap'),
+				field('alignItems', 'Align Items', 'select', 'styles.base.alignItems', {
 					options: [
 						{ label: 'Start', value: 'start' },
 						{ label: 'Center', value: 'center' },
 						{ label: 'End', value: 'end' },
 						{ label: 'Stretch', value: 'stretch' },
 					],
-				} ),
+				}),
 			],
 			10,
 			'loop',
@@ -508,11 +589,11 @@ export function createLoopParitySectionStack(): FormDataPopupParitySectionStack 
 			'Items',
 			'style',
 			[
-				field( 'itemPadding', 'Item Padding', 'text', 'styles.base.itemPadding' ),
-				field( 'itemMinHeight', 'Item Min Height', 'text', 'styles.base.itemMinHeight' ),
-				field( 'itemBackground', 'Item Background', 'text', 'styles.base.itemBackground' ),
-				field( 'itemBorderRadius', 'Item Radius', 'text', 'styles.base.itemBorderRadius' ),
-				field( 'itemShadow', 'Item Shadow', 'text', 'styles.base.itemShadow', { stateful: true, tokenAware: true } ),
+				field('itemPadding', 'Item Padding', 'text', 'styles.base.itemPadding'),
+				field('itemMinHeight', 'Item Min Height', 'text', 'styles.base.itemMinHeight'),
+				field('itemBackground', 'Item Background', 'text', 'styles.base.itemBackground'),
+				field('itemBorderRadius', 'Item Radius', 'text', 'styles.base.itemBorderRadius'),
+				field('itemShadow', 'Item Shadow', 'text', 'styles.base.itemShadow', { stateful: true, tokenAware: true }),
 			],
 			20,
 			'loop',
@@ -524,39 +605,42 @@ export function createLoopParitySectionStack(): FormDataPopupParitySectionStack 
 			'Empty State',
 			'style',
 			[
-				field( 'emptyStatePadding', 'Empty State Padding', 'text', 'styles.base.emptyStatePadding' ),
-				field( 'emptyStateAlignment', 'Empty State Alignment', 'select', 'styles.base.emptyStateAlignment', {
+				field('emptyStatePadding', 'Empty State Padding', 'text', 'styles.base.emptyStatePadding'),
+				field('emptyStateAlignment', 'Empty State Alignment', 'select', 'styles.base.emptyStateAlignment', {
 					options: [
 						{ label: 'Start', value: 'start' },
 						{ label: 'Center', value: 'center' },
 						{ label: 'End', value: 'end' },
 						{ label: 'Stretch', value: 'stretch' },
 					],
-				} ),
-				field( 'emptyStateTypography', 'Empty Typography', 'text', 'styles.base.emptyStateTypography' ),
-				field( 'emptyStateColor', 'Empty Color', 'text', 'styles.base.emptyStateColor', { stateful: true, tokenAware: true } ),
+				}),
+				field('emptyStateTypography', 'Empty Typography', 'text', 'styles.base.emptyStateTypography'),
+				field('emptyStateColor', 'Empty Color', 'text', 'styles.base.emptyStateColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
 			],
 			30,
 			'loop',
 			'empty-state',
 			'Empty collection presentation.',
 		),
-		...sharedStyleBaselineSections( 'loop' ).slice( 1 ),
-	] );
+		...sharedStyleBaselineSections('loop').slice(1),
+	]);
 }
 
 export function createPopupRootParitySectionStack(): FormDataPopupParitySectionStack {
-	return buildParitySectionStack( 'popup-root', [
+	return buildParitySectionStack('popup-root', [
 		section(
 			'popup-layout',
 			'Popup Layout',
 			'style',
 			[
-				field( 'width', 'Width', 'text', 'styles.base.width' ),
-				field( 'maxWidth', 'Max Width', 'text', 'styles.base.maxWidth' ),
-				field( 'height', 'Height', 'text', 'styles.base.height' ),
-				field( 'minHeight', 'Min Height', 'text', 'styles.base.minHeight' ),
-				field( 'padding', 'Padding', 'text', 'styles.base.padding' ),
+				field('width', 'Width', 'text', 'styles.base.width'),
+				field('maxWidth', 'Max Width', 'text', 'styles.base.maxWidth'),
+				field('height', 'Height', 'text', 'styles.base.height'),
+				field('minHeight', 'Min Height', 'text', 'styles.base.minHeight'),
+				field('padding', 'Padding', 'text', 'styles.base.padding'),
 			],
 			10,
 			'popup-root',
@@ -568,16 +652,16 @@ export function createPopupRootParitySectionStack(): FormDataPopupParitySectionS
 			'Surface',
 			'style',
 			[
-				field( 'background', 'Background', 'text', 'styles.base.background' ),
-				field( 'borderRadius', 'Border Radius', 'text', 'styles.base.borderRadius' ),
-				field( 'boxShadow', 'Shadow', 'text', 'styles.base.boxShadow', { stateful: true, tokenAware: true } ),
-				field( 'overflow', 'Overflow', 'select', 'styles.base.overflow', {
+				field('background', 'Background', 'text', 'styles.base.background'),
+				field('borderRadius', 'Border Radius', 'text', 'styles.base.borderRadius'),
+				field('boxShadow', 'Shadow', 'text', 'styles.base.boxShadow', { stateful: true, tokenAware: true }),
+				field('overflow', 'Overflow', 'select', 'styles.base.overflow', {
 					options: [
 						{ label: 'Visible', value: 'visible' },
 						{ label: 'Hidden', value: 'hidden' },
 						{ label: 'Auto', value: 'auto' },
 					],
-				} ),
+				}),
 			],
 			20,
 			'popup-root',
@@ -589,10 +673,13 @@ export function createPopupRootParitySectionStack(): FormDataPopupParitySectionS
 			'Overlay',
 			'style',
 			[
-				field( 'overlayColor', 'Overlay Color', 'text', 'styles.base.overlayColor', { stateful: true, tokenAware: true } ),
-				field( 'overlayOpacity', 'Overlay Opacity', 'number', 'styles.base.overlayOpacity', { stateful: true } ),
-				field( 'backdropFilter', 'Backdrop Filter', 'text', 'styles.base.backdropFilter', { stateful: true } ),
-				field( 'closeOnOverlayClick', 'Close On Overlay Click', 'toggle', 'meta.overlay.closeOnOverlayClick' ),
+				field('overlayColor', 'Overlay Color', 'text', 'styles.base.overlayColor', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('overlayOpacity', 'Overlay Opacity', 'number', 'styles.base.overlayOpacity', { stateful: true }),
+				field('backdropFilter', 'Backdrop Filter', 'text', 'styles.base.backdropFilter', { stateful: true }),
+				field('closeOnOverlayClick', 'Close On Overlay Click', 'toggle', 'meta.overlay.closeOnOverlayClick'),
 			],
 			30,
 			'popup-root',
@@ -604,31 +691,36 @@ export function createPopupRootParitySectionStack(): FormDataPopupParitySectionS
 			'Close Button',
 			'style',
 			[
-				field( 'closePosition', 'Position', 'select', 'styles.base.closeButton.position', {
+				field('closePosition', 'Position', 'select', 'styles.base.closeButton.position', {
 					options: [
 						{ label: 'Top Right', value: 'top-right' },
 						{ label: 'Top Left', value: 'top-left' },
 						{ label: 'Floating', value: 'floating' },
 					],
-				} ),
-				field( 'closeSize', 'Size', 'text', 'styles.base.closeButton.size' ),
-				field( 'closeColor', 'Color', 'text', 'styles.base.closeButton.color', { stateful: true, tokenAware: true } ),
-				field( 'closeBackground', 'Background', 'text', 'styles.base.closeButton.background', { stateful: true, tokenAware: true } ),
-				field( 'closeBorderRadius', 'Border Radius', 'text', 'styles.base.closeButton.borderRadius', { tokenAware: true } ),
+				}),
+				field('closeSize', 'Size', 'text', 'styles.base.closeButton.size'),
+				field('closeColor', 'Color', 'text', 'styles.base.closeButton.color', { stateful: true, tokenAware: true }),
+				field('closeBackground', 'Background', 'text', 'styles.base.closeButton.background', {
+					stateful: true,
+					tokenAware: true,
+				}),
+				field('closeBorderRadius', 'Border Radius', 'text', 'styles.base.closeButton.borderRadius', {
+					tokenAware: true,
+				}),
 			],
 			40,
 			'popup-root',
 			'close-button',
 			'Close affordance layout and emphasis.',
 		),
-		...sharedStyleBaselineSections( 'popup-root' ).slice( 1 ),
-	] );
+		...sharedStyleBaselineSections('popup-root').slice(1),
+	]);
 }
 
 export function createCompatWidgetParitySectionStack(): FormDataPopupParitySectionStack {
 	return {
-		styleSections: sharedStyleBaselineSections( 'compat-widget' ),
-		advancedSections: sharedAdvancedBaselineSections( 'compat-widget' ),
+		styleSections: sharedStyleBaselineSections('compat-widget'),
+		advancedSections: sharedAdvancedBaselineSections('compat-widget'),
 	};
 }
 

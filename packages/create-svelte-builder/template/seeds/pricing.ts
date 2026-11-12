@@ -4,8 +4,8 @@ import type { BuilderPackage } from '@builder/schema';
 export const starterProjectId = 'starter';
 export const starterDocumentId = 'home';
 
-function createPlanCard( title: string, price: string, body: string, featured = false ) {
-	return createNode( {
+function createPlanCard(title: string, price: string, body: string, featured = false) {
+	return createNode({
 		type: 'container',
 		name: title,
 		layout: { display: 'flex', direction: 'column', gap: '0.75rem' },
@@ -23,32 +23,32 @@ function createPlanCard( title: string, price: string, body: string, featured = 
 			customCss: '',
 		},
 		children: [
-			createNode( {
+			createNode({
 				type: 'heading',
 				props: { text: title, level: 'h3', align: 'left' },
-			} ),
-			createNode( {
+			}),
+			createNode({
 				type: 'heading',
 				props: { text: price, level: 'h2', align: 'left' },
-			} ),
-			createNode( {
+			}),
+			createNode({
 				type: 'paragraph',
 				props: { text: body },
-			} ),
-			createNode( {
+			}),
+			createNode({
 				type: 'button',
 				props: { text: 'Choose plan', href: '/published/home' },
-			} ),
+			}),
 		],
-	} );
+	});
 }
 
 export function createStarterProject(): BuilderPackage {
-	const page = createDocument( 'page', 'Pricing', 'home' );
+	const page = createDocument('page', 'Pricing', 'home');
 	page.id = starterDocumentId;
 	page.status = 'published';
 	page.root = [
-		createNode( {
+		createNode({
 			id: 'starter-hero',
 			type: 'container',
 			name: 'Pricing hero',
@@ -65,17 +65,17 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createNode( {
+				createNode({
 					type: 'heading',
 					props: { text: 'Simple pricing', level: 'h1', align: 'left' },
-				} ),
-				createNode( {
+				}),
+				createNode({
 					type: 'paragraph',
 					props: { text: 'Start free, upgrade when your team is ready.' },
-				} ),
+				}),
 			],
-		} ),
-		createNode( {
+		}),
+		createNode({
 			id: 'starter-plans',
 			type: 'container',
 			name: 'Plans',
@@ -88,22 +88,26 @@ export function createStarterProject(): BuilderPackage {
 				customCss: '',
 			},
 			children: [
-				createPlanCard( 'Starter', '$0', 'For personal projects and experiments.' ),
-				createPlanCard( 'Team', '$29', 'For growing teams that ship together.', true ),
-				createPlanCard( 'Scale', '$99', 'For organizations with advanced needs.' ),
+				createPlanCard('Starter', '$0', 'For personal projects and experiments.'),
+				createPlanCard('Team', '$29', 'For growing teams that ship together.', true),
+				createPlanCard('Scale', '$99', 'For organizations with advanced needs.'),
 			],
-		} ),
+		}),
 	];
 
-	const project = createBuilderPackage( 'Svelte Builder Pricing', [ page ], [
-		createThemeAssignment( {
-			documentId: page.id,
-			slot: 'page',
-			status: 'published',
-			pathname: '/published/home',
-			label: 'Pricing',
-		} ),
-	] );
+	const project = createBuilderPackage(
+		'Svelte Builder Pricing',
+		[page],
+		[
+			createThemeAssignment({
+				documentId: page.id,
+				slot: 'page',
+				status: 'published',
+				pathname: '/published/home',
+				label: 'Pricing',
+			}),
+		],
+	);
 	project.meta = {
 		starterTemplate: 'pricing',
 	};

@@ -5,25 +5,25 @@
 	let LoadedMenuPanel: any = null;
 	let loadError: Error | null = null;
 
-	onMount( () => {
+	onMount(() => {
 		let cancelled = false;
 
-		void import( './MenuPanel.svelte' )
-			.then( ( module ) => {
-				if ( !cancelled ) {
+		void import('./MenuPanel.svelte')
+			.then((module) => {
+				if (!cancelled) {
 					LoadedMenuPanel = module.default;
 				}
-			} )
-			.catch( ( error ) => {
-				if ( !cancelled ) {
+			})
+			.catch((error) => {
+				if (!cancelled) {
 					loadError = error as Error;
 				}
-			} );
+			});
 
 		return () => {
 			cancelled = true;
 		};
-	} );
+	});
 
 	export let title = 'Menu';
 	export let subtitle = 'Documents, site editor, preview presets, assignments, components, and imports.';
@@ -35,7 +35,7 @@
 	export let bodyPadding = 'var(--builder-shell-space-12)';
 	export let bodyGap = 'var(--builder-shell-space-12)';
 	export let bodyScrollable = true;
-	export let onChangeSection: ( sectionId: string ) => void = () => {};
+	export let onChangeSection: (sectionId: string) => void = () => {};
 </script>
 
 {#if LoadedMenuPanel}

@@ -9,16 +9,16 @@ import {
 	parseBuilderPackage,
 } from '../src/index';
 
-describe( 'schema package', () => {
-	it( 'creates empty documents with component defaults', () => {
-		const document = createEmptyDocument( 'component', 'Hero' );
+describe('schema package', () => {
+	it('creates empty documents with component defaults', () => {
+		const document = createEmptyDocument('component', 'Hero');
 
-		expect( document.kind ).toBe( 'component' );
-		expect( document.component?.lockedStructure ).toBe( true );
-	} );
+		expect(document.kind).toBe('component');
+		expect(document.component?.lockedStructure).toBe(true);
+	});
 
-	it( 'normalizes legacy content trees to root nodes', () => {
-		const migrated = migrateBuilderDocument( {
+	it('normalizes legacy content trees to root nodes', () => {
+		const migrated = migrateBuilderDocument({
 			kind: 'page',
 			title: 'Legacy',
 			slug: 'legacy',
@@ -31,33 +31,33 @@ describe( 'schema package', () => {
 					elements: [],
 				},
 			],
-		} );
+		});
 
-		const parsed = BuilderPackageSchema.parse( createBuilderPackage( 'Legacy', [ migrated as never ] ) );
+		const parsed = BuilderPackageSchema.parse(createBuilderPackage('Legacy', [migrated as never]));
 
-		expect( parsed.documents[ 0 ].root[ 0 ].type ).toBe( 'heading' );
-		expect( parsed.documents[ 0 ].root[ 0 ].props.title ).toBe( 'Hello' );
-	} );
+		expect(parsed.documents[0].root[0].type).toBe('heading');
+		expect(parsed.documents[0].root[0].props.title).toBe('Hello');
+	});
 
-	it( 'parses complete packages', () => {
-		const project = parseBuilderPackage( {
+	it('parses complete packages', () => {
+		const project = parseBuilderPackage({
 			name: 'Demo',
 			documents: [
 				{
 					kind: 'page',
 					title: 'Home',
 					slug: 'home',
-					root: [ createNode( { type: 'container' } ) ],
+					root: [createNode({ type: 'container' })],
 				},
 			],
-		} );
+		});
 
-		expect( project.packageVersion ).toBeDefined();
-		expect( project.documents ).toHaveLength( 1 );
-	} );
+		expect(project.packageVersion).toBeDefined();
+		expect(project.documents).toHaveLength(1);
+	});
 
-	it( 'keeps legacy bindings compatible while accepting dynamic style metadata', () => {
-		const legacyProject = parseBuilderPackage( {
+	it('keeps legacy bindings compatible while accepting dynamic style metadata', () => {
+		const legacyProject = parseBuilderPackage({
 			name: 'Legacy bindings',
 			documents: [
 				{
@@ -65,7 +65,7 @@ describe( 'schema package', () => {
 					title: 'Home',
 					slug: 'home',
 					root: [
-						createNode( {
+						createNode({
 							type: 'heading',
 							bindings: [
 								{
@@ -76,12 +76,12 @@ describe( 'schema package', () => {
 									path: 'title',
 								},
 							],
-						} ),
+						}),
 					],
 				},
 			],
-		} );
-		const dynamicProject = parseBuilderPackage( {
+		});
+		const dynamicProject = parseBuilderPackage({
 			name: 'Dynamic styles',
 			documents: [
 				{
@@ -89,7 +89,7 @@ describe( 'schema package', () => {
 					title: 'Home',
 					slug: 'home',
 					root: [
-						createNode( {
+						createNode({
 							type: 'container',
 							bindings: [
 								{
@@ -104,17 +104,17 @@ describe( 'schema package', () => {
 									fallback: '#ff6600',
 								},
 							],
-						} ),
+						}),
 					],
 				},
 			],
-		} );
+		});
 
-		expect( legacyProject.documents[ 0 ].root[ 0 ].bindings[ 0 ].source ).toBe( 'query' );
-		expect( dynamicProject.documents[ 0 ].root[ 0 ].bindings[ 0 ] ).toMatchObject( {
+		expect(legacyProject.documents[0].root[0].bindings[0].source).toBe('query');
+		expect(dynamicProject.documents[0].root[0].bindings[0]).toMatchObject({
 			targetKind: 'style',
 			category: 'color',
 			fallback: '#ff6600',
-		} );
-	} );
-} );
+		});
+	});
+});

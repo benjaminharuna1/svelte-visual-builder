@@ -7,97 +7,100 @@
 	export let projectAssignments: ThemeAssignment[] = [];
 	export let documentsById: Map<string, BuilderDocument> = new Map();
 	export let activeEntryId: string | undefined = undefined;
-	export let onPreviewAssignment: ( assignment: ThemeAssignment ) => void = () => {};
-	export let onOpenAssignment: ( assignment: ThemeAssignment ) => void = () => {};
-	export let onCreateAssignment: ( draft: {
+	export let onPreviewAssignment: (assignment: ThemeAssignment) => void = () => {};
+	export let onOpenAssignment: (assignment: ThemeAssignment) => void = () => {};
+	export let onCreateAssignment: (draft: {
 		slot: ThemeAssignment['slot'];
 		pathname?: string;
 		priority: number;
 		status: ThemeAssignment['status'];
 		routePattern?: string;
-	} ) => void = () => {};
-	export let onUpdateAssignment: ( assignment: ThemeAssignment, patch: Partial<ThemeAssignment> ) => void = () => {};
-	export let onUpdateAssignmentRoutePattern: ( assignment: ThemeAssignment, value: string ) => void = () => {};
-	export let onDeleteAssignment: ( assignmentId: string ) => void = () => {};
+	}) => void = () => {};
+	export let onUpdateAssignment: (assignment: ThemeAssignment, patch: Partial<ThemeAssignment>) => void = () => {};
+	export let onUpdateAssignmentRoutePattern: (assignment: ThemeAssignment, value: string) => void = () => {};
+	export let onDeleteAssignment: (assignmentId: string) => void = () => {};
 
-	let draftSlot: ThemeAssignment['slot'] = inferAssignmentSlot( activeDocument );
-	let draftPathname = inferAssignmentPathname( activeDocument, draftSlot );
+	let draftSlot: ThemeAssignment['slot'] = inferAssignmentSlot(activeDocument);
+	let draftPathname = inferAssignmentPathname(activeDocument, draftSlot);
 	let draftPriority = 0;
 	let draftStatus: ThemeAssignment['status'] = activeDocument.status === 'published' ? 'published' : 'draft';
 	let draftRoutePattern = draftPathname ?? '';
 
-	$: if ( activeDocument.id ) {
-		draftSlot = inferAssignmentSlot( activeDocument );
-		draftPathname = inferAssignmentPathname( activeDocument, draftSlot );
+	$: if (activeDocument.id) {
+		draftSlot = inferAssignmentSlot(activeDocument);
+		draftPathname = inferAssignmentPathname(activeDocument, draftSlot);
 		draftStatus = activeDocument.status === 'published' ? 'published' : 'draft';
 		draftRoutePattern = draftPathname ?? '';
 	}
 
-	$: activeAssignments = projectAssignments.filter( ( assignment ) => assignment.documentId === activeDocument.id );
-	$: groupedAssignments = [ ...groupAssignments( projectAssignments ).entries() ];
+	$: activeAssignments = projectAssignments.filter((assignment) => assignment.documentId === activeDocument.id);
+	$: groupedAssignments = [...groupAssignments(projectAssignments).entries()];
 
-	function groupAssignments( assignments: ThemeAssignment[] ) {
-		return assignments.reduce( ( grouped, assignment ) => {
-			const bucket = grouped.get( assignment.slot ) ?? [];
-			bucket.push( assignment );
-			grouped.set( assignment.slot, bucket.sort( ( left, right ) => right.priority - left.priority ) );
+	function groupAssignments(assignments: ThemeAssignment[]) {
+		return assignments.reduce((grouped, assignment) => {
+			const bucket = grouped.get(assignment.slot) ?? [];
+			bucket.push(assignment);
+			grouped.set(
+				assignment.slot,
+				bucket.sort((left, right) => right.priority - left.priority),
+			);
 			return grouped;
-		}, new Map<ThemeAssignment['slot'], ThemeAssignment[]>() );
+		}, new Map<ThemeAssignment['slot'], ThemeAssignment[]>());
 	}
 
-	function inferAssignmentSlot( document: BuilderDocument ): ThemeAssignment['slot'] {
+	function inferAssignmentSlot(document: BuilderDocument): ThemeAssignment['slot'] {
 		const title = `${document.title} ${document.slug}`.toLowerCase();
-		if ( document.kind === 'popup' ) {
+		if (document.kind === 'popup') {
 			return 'popup';
 		}
-		if ( title.includes( 'footer' ) ) {
+		if (title.includes('footer')) {
 			return 'footer';
 		}
-		if ( title.includes( 'sidebar' ) ) {
+		if (title.includes('sidebar')) {
 			return 'sidebar';
 		}
-		if ( title.includes( 'modal' ) ) {
+		if (title.includes('modal')) {
 			return 'modal';
 		}
-		if ( title.includes( 'loop' ) || title.includes( 'archive item' ) ) {
+		if (title.includes('loop') || title.includes('archive item')) {
 			return 'loop-item';
 		}
-		if ( title.includes( 'empty' ) ) {
+		if (title.includes('empty')) {
 			return 'empty';
 		}
-		if ( document.kind === 'layout' ) {
+		if (document.kind === 'layout') {
 			return 'header';
 		}
 		return 'page';
 	}
 
-	function inferAssignmentPathname( document: BuilderDocument, slot: ThemeAssignment['slot'] ): string | undefined {
-		if ( slot === 'page' ) {
+	function inferAssignmentPathname(document: BuilderDocument, slot: ThemeAssignment['slot']): string | undefined {
+		if (slot === 'page') {
 			return `/${document.slug}`;
 		}
-		if ( slot === 'popup' || slot === 'modal' ) {
+		if (slot === 'popup' || slot === 'modal') {
 			return undefined;
 		}
 		return '/[...all]';
 	}
 
 	function createAssignment() {
-		onCreateAssignment( {
+		onCreateAssignment({
 			slot: draftSlot,
 			pathname: draftPathname || undefined,
 			priority: draftPriority,
 			status: draftStatus,
 			routePattern: draftRoutePattern || undefined,
-		} );
+		});
 	}
 
-	function getDocumentLabel( assignment: ThemeAssignment ) {
-		const document = documentsById.get( assignment.documentId );
+	function getDocumentLabel(assignment: ThemeAssignment) {
+		const document = documentsById.get(assignment.documentId);
 		return document ? document.title : assignment.documentId;
 	}
 
-	function getAssignmentEntryId( assignment: ThemeAssignment ) {
-		return `assignment:${ assignment.id }`;
+	function getAssignmentEntryId(assignment: ThemeAssignment) {
+		return `assignment:${assignment.id}`;
 	}
 </script>
 
@@ -156,7 +159,11 @@
 					<input class="builder-shell-input" bind:value={draftRoutePattern} placeholder="/blog/[slug]" />
 				</label>
 			</div>
-			<button class="builder-shell-button builder-shell-button--primary assignment-panel__create" type="button" onclick={createAssignment}>Create Assignment</button>
+			<button
+				class="builder-shell-button builder-shell-button--primary assignment-panel__create"
+				type="button"
+				onclick={createAssignment}>Create Assignment</button
+			>
 		</div>
 
 		{#if activeAssignments.length}
@@ -167,7 +174,10 @@
 				</div>
 				<div class="assignment-panel__list">
 					{#each activeAssignments as assignment (assignment.id)}
-						<article class:active={activeEntryId === getAssignmentEntryId( assignment )} class="assignment-panel__item builder-shell-card">
+						<article
+							class:active={activeEntryId === getAssignmentEntryId(assignment)}
+							class="assignment-panel__item builder-shell-card"
+						>
 							<div class="assignment-panel__item-meta">
 								<strong>{assignment.slot}</strong>
 								<small>{assignment.pathname ?? 'No fixed pathname'}</small>
@@ -178,13 +188,23 @@
 									<input
 										class="builder-shell-input"
 										type="number"
-										value={String( assignment.priority )}
-										oninput={(event) => onUpdateAssignment( assignment, { priority: Number( ( event.currentTarget as HTMLInputElement ).value ) || 0 } )}
+										value={String(assignment.priority)}
+										oninput={(event) =>
+											onUpdateAssignment(assignment, {
+												priority: Number((event.currentTarget as HTMLInputElement).value) || 0,
+											})}
 									/>
 								</label>
 								<label class="builder-shell-field">
 									<span>Status</span>
-									<select class="builder-shell-select" value={assignment.status} onchange={(event) => onUpdateAssignment( assignment, { status: ( event.currentTarget as HTMLSelectElement ).value as ThemeAssignment['status'] } )}>
+									<select
+										class="builder-shell-select"
+										value={assignment.status}
+										onchange={(event) =>
+											onUpdateAssignment(assignment, {
+												status: (event.currentTarget as HTMLSelectElement).value as ThemeAssignment['status'],
+											})}
+									>
 										<option value="draft">draft</option>
 										<option value="published">published</option>
 										<option value="archived">archived</option>
@@ -194,15 +214,26 @@
 									<span>Pattern</span>
 									<input
 										class="builder-shell-input"
-										value={String( assignment.conditionGroups[0]?.rules[0]?.value ?? '' )}
-										oninput={(event) => onUpdateAssignmentRoutePattern( assignment, ( event.currentTarget as HTMLInputElement ).value )}
+										value={String(assignment.conditionGroups[0]?.rules[0]?.value ?? '')}
+										oninput={(event) =>
+											onUpdateAssignmentRoutePattern(assignment, (event.currentTarget as HTMLInputElement).value)}
 									/>
 								</label>
 							</div>
 							<div class="assignment-panel__actions">
-								<button class="builder-shell-button" type="button" onclick={() => onPreviewAssignment( assignment )}>Preview</button>
-								<button class="builder-shell-button builder-shell-button--primary" type="button" onclick={() => onOpenAssignment( assignment )}>Open</button>
-								<button class="builder-shell-button builder-shell-button--danger" type="button" onclick={() => onDeleteAssignment( assignment.id )}>Delete</button>
+								<button class="builder-shell-button" type="button" onclick={() => onPreviewAssignment(assignment)}
+									>Preview</button
+								>
+								<button
+									class="builder-shell-button builder-shell-button--primary"
+									type="button"
+									onclick={() => onOpenAssignment(assignment)}>Open</button
+								>
+								<button
+									class="builder-shell-button builder-shell-button--danger"
+									type="button"
+									onclick={() => onDeleteAssignment(assignment.id)}>Delete</button
+								>
 							</div>
 						</article>
 					{/each}
@@ -211,21 +242,32 @@
 		{/if}
 
 		<div class="assignment-panel__groups">
-			{#each groupedAssignments as [ slotName, assignments ] (slotName)}
+			{#each groupedAssignments as [slotName, assignments] (slotName)}
 				<section class="assignment-panel__group builder-shell-card builder-shell-card--subtle">
 					<header>
 						<h3>{slotName}</h3>
 						<span class="builder-shell-badge builder-shell-badge--neutral">{assignments.length}</span>
 					</header>
 					{#each assignments as assignment (assignment.id)}
-						<article class:active={activeEntryId === getAssignmentEntryId( assignment )} class="assignment-panel__group-item builder-shell-card">
+						<article
+							class:active={activeEntryId === getAssignmentEntryId(assignment)}
+							class="assignment-panel__group-item builder-shell-card"
+						>
 							<div>
-								<strong>{getDocumentLabel( assignment )}</strong>
-								<small>{assignment.pathname ?? assignment.conditionGroups[0]?.rules[0]?.value ?? 'Conditional only'}</small>
+								<strong>{getDocumentLabel(assignment)}</strong>
+								<small
+									>{assignment.pathname ?? assignment.conditionGroups[0]?.rules[0]?.value ?? 'Conditional only'}</small
+								>
 							</div>
 							<div class="assignment-panel__actions">
-								<button class="builder-shell-button" type="button" onclick={() => onPreviewAssignment( assignment )}>Preview</button>
-								<button class="builder-shell-button builder-shell-button--primary" type="button" onclick={() => onOpenAssignment( assignment )}>Open</button>
+								<button class="builder-shell-button" type="button" onclick={() => onPreviewAssignment(assignment)}
+									>Preview</button
+								>
+								<button
+									class="builder-shell-button builder-shell-button--primary"
+									type="button"
+									onclick={() => onOpenAssignment(assignment)}>Open</button
+								>
 							</div>
 						</article>
 					{/each}
@@ -327,7 +369,7 @@
 	.assignment-panel__composer-grid,
 	.assignment-panel__item-edit {
 		display: grid;
-		grid-template-columns: repeat( auto-fit, minmax( min( 100%, 118px ), 1fr ) );
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 118px), 1fr));
 		gap: var(--builder-shell-space-8);
 		min-inline-size: 0;
 	}

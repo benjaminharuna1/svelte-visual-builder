@@ -7,27 +7,27 @@
 	export let open = false;
 	export let groups: BuilderContextMenuGroup[] = [];
 	export let style: string | undefined = undefined;
-	export let registerElement: ( element?: HTMLDivElement ) => void = () => {};
-	export let onAction: ( action: BuilderContextMenuAction ) => void = () => {};
-	export let onOpenChange: ( open: boolean ) => void = () => {};
+	export let registerElement: (element?: HTMLDivElement) => void = () => {};
+	export let onAction: (action: BuilderContextMenuAction) => void = () => {};
+	export let onOpenChange: (open: boolean) => void = () => {};
 
 	let contentElement: HTMLDivElement | null = null;
 
-	$: registerElement( open ? contentElement : undefined );
+	$: registerElement(open ? contentElement : undefined);
 
-	onDestroy( () => {
-		registerElement( undefined );
-	} );
+	onDestroy(() => {
+		registerElement(undefined);
+	});
 
-	function handleSelect( action: BuilderContextMenuAction ) {
-		if ( action.disabled ) {
+	function handleSelect(action: BuilderContextMenuAction) {
+		if (action.disabled) {
 			return;
 		}
 
-		onAction( action );
+		onAction(action);
 	}
 
-	function getItemClass( action: BuilderContextMenuAction ) {
+	function getItemClass(action: BuilderContextMenuAction) {
 		return action.tone === 'danger'
 			? 'builder-shell__context-menu-item builder-shell__context-menu-item--danger'
 			: 'builder-shell__context-menu-item';
@@ -35,11 +35,7 @@
 </script>
 
 {#if open}
-	<DropdownMenu.Root
-		open={open}
-		onOpenChange={onOpenChange}
-		_internal_variant="context-menu"
-	>
+	<DropdownMenu.Root {open} {onOpenChange} _internal_variant="context-menu">
 		<DropdownMenu.ContentStatic
 			bind:ref={contentElement}
 			class="builder-shell__context-menu"
@@ -52,10 +48,10 @@
 				<DropdownMenu.Group class="builder-shell__context-menu-group" aria-label={group.id}>
 					{#each group.items as action (action.id)}
 						<DropdownMenu.Item
-							class={getItemClass( action )}
+							class={getItemClass(action)}
 							disabled={action.disabled}
 							textValue={action.label}
-							onSelect={() => handleSelect( action )}
+							onSelect={() => handleSelect(action)}
 						>
 							<span>{action.label}</span>
 						</DropdownMenu.Item>

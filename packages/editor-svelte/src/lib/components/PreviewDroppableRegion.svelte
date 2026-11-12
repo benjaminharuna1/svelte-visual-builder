@@ -9,14 +9,14 @@
 	export let priority: BuilderDroppableData['priority'] = 'container';
 	export let style = '';
 
-	const droppable = createDroppable( {
+	const droppable = createDroppable({
 		get id() {
 			return id;
 		},
 		get data() {
-			return createBuilderDroppableData( target, priority );
+			return createBuilderDroppableData(target, priority);
 		},
-	} );
+	});
 </script>
 
 <div
@@ -25,6 +25,6 @@
 	data-builder-coarse-droppable={priority}
 	data-builder-coarse-drop-active={droppable.isDropTarget ? 'true' : 'false'}
 	data-drop-placement={target.placement}
-	style={style}
+	{style}
 	{@attach droppable.attach}
 ></div>

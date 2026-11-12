@@ -85,7 +85,9 @@ export interface BuilderControlFamilyDefinition {
 	sections: BuilderControlSectionDefinition[];
 }
 
-export interface BuilderControlFieldOptions extends Partial<Omit<BuilderControlFieldDefinition, 'id' | 'label' | 'type' | 'path' | 'options'>> {
+export interface BuilderControlFieldOptions extends Partial<
+	Omit<BuilderControlFieldDefinition, 'id' | 'label' | 'type' | 'path' | 'options'>
+> {
 	options?: Array<{ label: string; value: string }>;
 	primitive?: BuilderControlPrimitive;
 }
@@ -218,7 +220,7 @@ export function createControlField(
 	path: string,
 	options: BuilderControlFieldOptions = {},
 ): BuilderControlFieldDefinition {
-	const primitive = options.primitive ?? inferControlPrimitive( type, options );
+	const primitive = options.primitive ?? inferControlPrimitive(type, options);
 
 	return {
 		id,
@@ -248,10 +250,12 @@ export function createControlSection(
 		order: options.order,
 		collapsible: options.collapsible ?? true,
 		defaultCollapsed: options.defaultCollapsed ?? false,
-		primitive: options.primitive ?? createSectionPrimitive( {
-			collapsible: options.collapsible ?? true,
-			defaultCollapsed: options.defaultCollapsed ?? false,
-		} ),
+		primitive:
+			options.primitive ??
+			createSectionPrimitive({
+				collapsible: options.collapsible ?? true,
+				defaultCollapsed: options.defaultCollapsed ?? false,
+			}),
 	};
 }
 
@@ -271,41 +275,48 @@ export function createControlFamily(
 	};
 }
 
-export function toPanelSections( family: BuilderControlFamilyDefinition ): BuilderPanelSectionDefinition[] {
-	return family.sections.map( ( section ) => ( {
+export function toPanelSections(family: BuilderControlFamilyDefinition): BuilderPanelSectionDefinition[] {
+	return family.sections.map((section) => ({
 		id: section.id,
 		label: section.label,
 		description: section.description,
 		fields: section.fields,
 		tab: section.tab,
-	} ) );
+	}));
 }
 
-export function flattenControlFamilies( families: readonly BuilderControlFamilyDefinition[] ): BuilderControlSectionDefinition[] {
-	return families.flatMap( ( family ) => family.sections );
+export function flattenControlFamilies(
+	families: readonly BuilderControlFamilyDefinition[],
+): BuilderControlSectionDefinition[] {
+	return families.flatMap((family) => family.sections);
 }
 
-export function indexControlFamilies( families: readonly BuilderControlFamilyDefinition[] ): Map<string, BuilderControlFamilyDefinition> {
-	return new Map( families.map( ( family ) => [ family.id, family ] ) );
+export function indexControlFamilies(
+	families: readonly BuilderControlFamilyDefinition[],
+): Map<string, BuilderControlFamilyDefinition> {
+	return new Map(families.map((family) => [family.id, family]));
 }
 
 export function filterControlFamiliesByTab(
 	families: readonly BuilderControlFamilyDefinition[],
 	tab: BuilderControlFamilyTab,
 ): BuilderControlFamilyDefinition[] {
-	return families.filter( ( family ) => family.tab === tab );
+	return families.filter((family) => family.tab === tab);
 }
 
-export function collectControlFieldPaths( family: BuilderControlFamilyDefinition ): string[] {
-	return family.sections.flatMap( ( section ) => section.fields.map( ( field ) => field.path ) );
+export function collectControlFieldPaths(family: BuilderControlFamilyDefinition): string[] {
+	return family.sections.flatMap((section) => section.fields.map((field) => field.path));
 }
 
-function inferControlPrimitive( type: BuilderFieldType, options: BuilderControlFieldOptions ): BuilderControlPrimitive | undefined {
-	switch ( type ) {
+function inferControlPrimitive(
+	type: BuilderFieldType,
+	options: BuilderControlFieldOptions,
+): BuilderControlPrimitive | undefined {
+	switch (type) {
 		case 'select':
-			return options.options ? createSelectPrimitive( options.options, options ) : undefined;
+			return options.options ? createSelectPrimitive(options.options, options) : undefined;
 		case 'toggle':
-			return createSwitcherPrimitive( {
+			return createSwitcherPrimitive({
 				onLabel: 'On',
 				offLabel: 'Off',
 				defaultValue: false,
@@ -315,9 +326,9 @@ function inferControlPrimitive( type: BuilderFieldType, options: BuilderControlF
 				stateful: options.stateful,
 				tokenAware: options.tokenAware,
 				stateTabs: options.stateTabs,
-			} );
+			});
 		case 'image':
-			return createMediaPrimitive( {
+			return createMediaPrimitive({
 				assetType: 'image',
 				placeholder: options.placeholder,
 				description: options.description,
@@ -325,25 +336,25 @@ function inferControlPrimitive( type: BuilderFieldType, options: BuilderControlF
 				stateful: options.stateful,
 				tokenAware: options.tokenAware,
 				stateTabs: options.stateTabs,
-			} );
+			});
 		case 'url':
-			return createUrlPrimitive( {
+			return createUrlPrimitive({
 				placeholder: options.placeholder,
 				description: options.description,
 				responsive: options.responsive,
 				stateful: options.stateful,
 				tokenAware: options.tokenAware,
 				stateTabs: options.stateTabs,
-			} );
+			});
 		case 'token':
-			return createColorPrimitive( {
+			return createColorPrimitive({
 				placeholder: options.placeholder,
 				description: options.description,
 				responsive: options.responsive,
 				stateful: options.stateful,
 				tokenAware: true,
 				stateTabs: options.stateTabs,
-			} );
+			});
 		default:
 			return undefined;
 	}
