@@ -8,6 +8,7 @@ import {
 	mergeMediaCatalog,
 	normalizeMediaAsset,
 	updateMediaCatalogAsset,
+	validateMediaDimensions,
 	validateMediaUpload,
 } from '../src/lib/media';
 import { reviewHtmlImportPayload } from '../src/lib/template-import';
@@ -18,6 +19,21 @@ describe( 'media helpers', () => {
 		expect( () => validateMediaUpload( image, { maxUploadSize: 64 } ) ).not.toThrow();
 		expect( () => validateMediaUpload( image, { maxUploadSize: 2 } ) ).toThrow( /too large/i );
 		expect( () => validateMediaUpload( new File( [ 'x' ], 'hero.txt', { type: 'text/plain' } ) ) ).toThrow( /unsupported media type/i );
+	} );
+
+	it( 'validates optional image dimension limits', () => {
+		const options = {
+			minImageWidth: 320,
+			minImageHeight: 200,
+			maxImageWidth: 4000,
+			maxImageHeight: 4000,
+		};
+
+		expect( () => validateMediaDimensions( { width: 320, height: 200 }, options ) ).not.toThrow();
+		expect( () => validateMediaDimensions( { width: 319, height: 200 }, options ) ).toThrow( /too narrow/i );
+		expect( () => validateMediaDimensions( { width: 320, height: 199 }, options ) ).toThrow( /too short/i );
+		expect( () => validateMediaDimensions( { width: 4001, height: 200 }, options ) ).toThrow( /too wide/i );
+		expect( () => validateMediaDimensions( { width: 320, height: 4001 }, options ) ).toThrow( /too tall/i );
 	} );
 
 	it( 'adds updates and deletes catalog assets without duplicating URLs', () => {
@@ -63,6 +79,7 @@ describe( 'media helpers', () => {
 	it( 'lets hosts list upload update and delete media through the editor controller', async () => {
 		const project = createBuilderPackage( 'Controller media project', [ createDocument( 'page', 'Home' ) ] );
 		const editor = createBuilderEditor( project, {
+			permissions: { allowAll: true },
 			media: {
 				adapter: {
 					listAssets: ( currentProject ) => currentProject.media.map( ( asset ) => ( {

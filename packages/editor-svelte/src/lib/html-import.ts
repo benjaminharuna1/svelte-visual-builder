@@ -1,5 +1,6 @@
 import type { BuilderNode, BuilderPackage, HtmlAttribute, JsonValue, MediaAsset, StyleSet } from '@builder/schema';
 import { createBuilderPackage, createDocument, createNode, createStyleSet, slugify } from '@builder/schema';
+import { sanitizeBuilderAttributes, sanitizeBuilderCss, sanitizeBuilderHtml, sanitizeBuilderUrl } from '@builder/security';
 import type { TemplateImportDiagnostic } from './template-import.js';
 import { mergeMediaCatalog, normalizeMediaAsset } from './media.js';
 
@@ -132,7 +133,7 @@ function importElementNode( element: Element, warnings: TemplateImportDiagnostic
 			id: crypto.randomUUID(),
 			type: 'heading',
 			props: {
-				text: element.innerHTML.trim() || element.textContent?.trim() || 'Heading',
+				text: sanitizeBuilderHtml( element.innerHTML.trim() || element.textContent?.trim() || 'Heading', { profile: 'inline' } ),
 				level: tag,
 			},
 			attributes: extractAttributes( element ),
@@ -146,7 +147,7 @@ function importElementNode( element: Element, warnings: TemplateImportDiagnostic
 			id: crypto.randomUUID(),
 			type: 'paragraph',
 			props: {
-				text: element.innerHTML.trim() || element.textContent?.trim() || '',
+				text: sanitizeBuilderHtml( element.innerHTML.trim() || element.textContent?.trim() || '', { profile: 'inline' } ),
 			},
 			attributes: extractAttributes( element ),
 			styles: createImportedElementStyleSet( element, stylesheet ),
@@ -159,7 +160,7 @@ function importElementNode( element: Element, warnings: TemplateImportDiagnostic
 			id: crypto.randomUUID(),
 			type: 'image',
 			props: {
-				src: element.getAttribute( 'src' ) ?? '',
+				src: sanitizeBuilderUrl( element.getAttribute( 'src' ) ?? '' ),
 				alt: element.getAttribute( 'alt' ) ?? '',
 			},
 			attributes: extractAttributes( element, [ 'src', 'alt' ] ),
@@ -173,8 +174,8 @@ function importElementNode( element: Element, warnings: TemplateImportDiagnostic
 			id: crypto.randomUUID(),
 			type: 'button',
 			props: {
-				text: element.innerHTML.trim() || element.textContent?.trim() || 'Button',
-				href: element.getAttribute( 'href' ) ?? '#',
+				text: sanitizeBuilderHtml( element.innerHTML.trim() || element.textContent?.trim() || 'Button', { profile: 'inline' } ),
+				href: sanitizeBuilderUrl( element.getAttribute( 'href' ) ?? '#' ) || '#',
 			},
 			attributes: extractAttributes( element, [ 'href' ] ),
 			styles: createImportedElementStyleSet( element, stylesheet ),
@@ -223,7 +224,7 @@ function createHtmlFallbackNode( element: Element, tag: string, stylesheet: stri
 		id: crypto.randomUUID(),
 		type: 'html',
 		props: {
-			markup: element.outerHTML,
+			markup: sanitizeBuilderHtml( element.outerHTML ),
 		},
 		styles: createImportedElementStyleSet( element, stylesheet ),
 		attributes: extractAttributes( element ),
@@ -254,8 +255,8 @@ function createHtmlNodeMeta( tag: string, fallback = false ): Record<string, Jso
 
 function collectHtmlMediaAssets( parsed: Document, roots: BuilderNode[], css: string ): MediaAsset[] {
 	const fromNodes = collectNodeMediaAssets( roots );
-	const fromMarkup = [ ...parsed.querySelectorAll( 'img' ) ].map( ( image ) => image.getAttribute( 'src' ) ?? '' );
-	const fromCss = [ ...css.matchAll( /url\(\s*["']?([^"')]+)["']?\s*\)/gi ) ].map( ( match ) => match[ 1 ] ?? '' );
+	const fromMarkup = [ ...parsed.querySelectorAll( 'img' ) ].map( ( image ) => sanitizeBuilderUrl( image.getAttribute( 'src' ) ?? '' ) );
+	const fromCss = [ ...css.matchAll( /url\(\s*["']?([^"')]+)["']?\s*\)/gi ) ].map( ( match ) => sanitizeBuilderUrl( match[ 1 ] ?? '' ) );
 	const assets = [
 		...fromNodes,
 		...fromMarkup.filter( Boolean ).map( ( url ) => normalizeMediaAsset( { url, source: 'external' } ) ),
@@ -290,12 +291,16 @@ function isImportableMediaUrl( url: string ): boolean {
 
 function extractAttributes( element: Element, omit: string[] = [] ): HtmlAttribute[] {
 	const omitted = new Set( [ 'style', ...omit ].map( ( entry ) => entry.toLowerCase() ) );
-	return [ ...element.attributes ]
-		.filter( ( attribute ) => !omitted.has( attribute.name.toLowerCase() ) )
-		.map( ( attribute ) => ( {
+	const source: Record<string, string> = Object.fromEntries(
+		[ ...element.attributes ]
+			.filter( ( attribute ) => !omitted.has( attribute.name.toLowerCase() ) )
+			.map( ( attribute ): [ string, string ] => [ attribute.name, attribute.value ] ),
+	);
+	return Object.entries( sanitizeBuilderAttributes( source ) )
+		.map( ( [ name, value ] ) => ( {
 			id: crypto.randomUUID(),
-			name: attribute.name,
-			value: attribute.value,
+			name,
+			value,
 			kind: 'static' as const,
 		} ) );
 }
@@ -487,10 +492,11 @@ function scopeImportedCss( css: string, warnings: TemplateImportDiagnostic[], pa
 		addDiagnostic( warnings, parityGaps, 'unsupported-css-import', `Skipped external CSS import: ${ match.trim() }`, 'unsupported', '@import' );
 		return '';
 	} ).trim();
-	if ( !withoutImports ) {
+	const sanitized = sanitizeBuilderCss( withoutImports ).trim();
+	if ( !sanitized ) {
 		return '';
 	}
-	return scopeCssBlock( withoutImports, warnings, parityGaps );
+	return scopeCssBlock( sanitized, warnings, parityGaps );
 }
 
 function scopeCssBlock( css: string, warnings: TemplateImportDiagnostic[], parityGaps: TemplateImportDiagnostic[] ): string {

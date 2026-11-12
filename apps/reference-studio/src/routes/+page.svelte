@@ -40,6 +40,7 @@
 		editor = editorModule.createBuilderEditor( data.project, {
 			activeDocumentId: data.project.documents.find( ( document ) => document.slug === 'marketing-landing' )?.id ?? data.project.documents[ 0 ]?.id,
 			adapter: createSvelteKitBuilderAdapter(),
+			permissions: { allowAll: true },
 			bindingContext: data.bindingContext,
 			persistence: persistenceEnabled
 				? {

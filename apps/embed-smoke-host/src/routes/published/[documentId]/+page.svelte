@@ -7,6 +7,7 @@
 	type PageData = {
 		documentId: string;
 		project: BuilderPackage;
+		nonce: string;
 		bindingContext?: BindingProviderContext;
 	};
 
@@ -32,7 +33,15 @@
 </svelte:head>
 
 <main class="published-host" data-testid="published-runtime">
-	<BuilderRenderer project={model.project} activeDocumentId={data.documentId} adapter={model.adapter} bindingContext={model.bindingContext} media={model.media} />
+	<BuilderRenderer
+		project={model.project}
+		activeDocumentId={data.documentId}
+		adapter={model.adapter}
+		bindingContext={model.bindingContext}
+		media={model.media}
+		renderStylesheet
+		nonce={data.nonce}
+	/>
 </main>
 
 <style>

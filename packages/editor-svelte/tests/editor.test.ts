@@ -643,6 +643,7 @@ describe( 'editor-svelte', () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const saveProject = vi.fn().mockResolvedValue( undefined );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			persistence: {
 				saveProject,
 			},
@@ -695,6 +696,7 @@ describe( 'editor-svelte', () => {
 		const saveDraft = vi.fn().mockResolvedValue( { versionToken: 'draft-v1' } );
 		const publish = vi.fn().mockResolvedValue( { versionToken: 'published-v1' } );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			persistence: {
 				saveDraft,
 				publish,
@@ -715,6 +717,7 @@ describe( 'editor-svelte', () => {
 		document.root = [ createNode( { id: 'hero', type: 'heading', props: { text: 'Original' } } ) ];
 		const restoreRevision = vi.fn().mockResolvedValue( { versionToken: 'restore-v1' } );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			persistence: {
 				saveDraft: vi.fn().mockResolvedValue( { versionToken: 'draft-v1' } ),
 				restoreRevision,
@@ -743,6 +746,7 @@ describe( 'editor-svelte', () => {
 			.mockResolvedValueOnce( { conflict: true, project: remoteProject, versionToken: 'remote-v1' } )
 			.mockResolvedValueOnce( { versionToken: 'local-v2' } );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			persistence: {
 				publish,
 			},

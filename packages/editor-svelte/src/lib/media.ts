@@ -34,6 +34,15 @@ export interface BuilderMediaOptions {
 	maxUploadSize?: number;
 	allowedMimeTypes?: string[];
 	allowSvg?: boolean;
+	minImageWidth?: number;
+	minImageHeight?: number;
+	maxImageWidth?: number;
+	maxImageHeight?: number;
+}
+
+export interface BuilderMediaDimensions {
+	width: number;
+	height: number;
 }
 
 export interface BuilderMediaDiagnostic {
@@ -65,6 +74,51 @@ export function validateMediaUpload( file: File, options: BuilderMediaOptions = 
 	}
 	if ( !allowedMimeTypes.includes( file.type ) ) {
 		throw new Error( 'Unsupported media type. Upload a PNG, JPEG, WebP, GIF, or enabled SVG file.' );
+	}
+}
+
+export function validateMediaDimensions(
+	dimensions: BuilderMediaDimensions,
+	options: BuilderMediaOptions = {},
+): void {
+	if ( options.minImageWidth !== undefined && dimensions.width < options.minImageWidth ) {
+		throw new Error( `Media image is too narrow. Minimum width is ${ options.minImageWidth }px.` );
+	}
+	if ( options.minImageHeight !== undefined && dimensions.height < options.minImageHeight ) {
+		throw new Error( `Media image is too short. Minimum height is ${ options.minImageHeight }px.` );
+	}
+	if ( options.maxImageWidth !== undefined && dimensions.width > options.maxImageWidth ) {
+		throw new Error( `Media image is too wide. Maximum width is ${ options.maxImageWidth }px.` );
+	}
+	if ( options.maxImageHeight !== undefined && dimensions.height > options.maxImageHeight ) {
+		throw new Error( `Media image is too tall. Maximum height is ${ options.maxImageHeight }px.` );
+	}
+}
+
+export async function readMediaImageDimensions( file: File ): Promise<BuilderMediaDimensions | undefined> {
+	if ( !file.type.startsWith( 'image/' ) ) {
+		return undefined;
+	}
+	if ( typeof createImageBitmap === 'function' ) {
+		const bitmap = await createImageBitmap( file );
+		const dimensions = { width: bitmap.width, height: bitmap.height };
+		bitmap.close();
+		return dimensions;
+	}
+	if ( typeof Image === 'undefined' || typeof URL.createObjectURL !== 'function' ) {
+		return undefined;
+	}
+	const url = URL.createObjectURL( file );
+	try {
+		const image = new Image();
+		await new Promise<void>( ( resolve, reject ) => {
+			image.onload = () => resolve();
+			image.onerror = () => reject( new Error( 'Media image could not be decoded.' ) );
+			image.src = url;
+		} );
+		return { width: image.naturalWidth, height: image.naturalHeight };
+	} finally {
+		URL.revokeObjectURL( url );
 	}
 }
 
@@ -153,11 +207,15 @@ export function createMediaDiagnostics( assets: MediaAsset[], allowedMimeTypes =
 	return diagnostics;
 }
 
-export function createBrowserLocalMediaAdapter(): BuilderMediaAdapter {
+export function createBrowserLocalMediaAdapter( options: BuilderMediaOptions = {} ): BuilderMediaAdapter {
 	return {
 		listAssets: ( project ) => project.media.map( toMediaAssetMetadata ),
 		async uploadAsset( { file } ) {
-			validateMediaUpload( file );
+			validateMediaUpload( file, options );
+			const dimensions = await readMediaImageDimensions( file );
+			if ( dimensions ) {
+				validateMediaDimensions( dimensions, options );
+			}
 			return {
 				id: crypto.randomUUID(),
 				url: URL.createObjectURL( file ),
@@ -165,6 +223,8 @@ export function createBrowserLocalMediaAdapter(): BuilderMediaAdapter {
 				alt: file.name.replace( /\.[^.]+$/, '' ),
 				mimeType: file.type,
 				size: file.size,
+				width: dimensions?.width,
+				height: dimensions?.height,
 				createdAt: new Date().toISOString(),
 				source: 'upload',
 			};

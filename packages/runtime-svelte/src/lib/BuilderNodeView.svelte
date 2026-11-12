@@ -5,6 +5,7 @@
 	import { resolveBuilderInlineEditingMode } from '@builder/core';
 	import BuilderNodeView from './BuilderNodeView.svelte';
 	import type { BuilderNode, JsonValue } from '@builder/schema';
+	import { sanitizeBuilderHtml, sanitizeBuilderUrl } from '@builder/security';
 	import type {
 		BuilderRenderModel,
 		RuntimeAccordionItem,
@@ -198,6 +199,24 @@
 		return typeof value === 'string' ? value : String( value ?? '' );
 	}
 
+	function renderHtml( value: JsonValue | undefined, profile: 'inline' | 'rich' = 'rich' ): string {
+		return sanitizeBuilderHtml( renderPlainText( value ), {
+			profile,
+			trusted: model.trustedHtml,
+		} );
+	}
+
+	function renderUrl( value: JsonValue | undefined ): string {
+		return sanitizeBuilderUrl( renderPlainText( value ) );
+	}
+
+	function renderLinkRel( rel: string | undefined, target: string | undefined ): string | undefined {
+		if ( target !== '_blank' ) {
+			return rel;
+		}
+		return [ ...new Set( [ ...( rel ?? '' ).split( /\s+/ ), 'noopener', 'noreferrer' ].filter( Boolean ) ) ].join( ' ' );
+	}
+
 	function toggleAccordionIndex( nextIndex: number ) {
 		if ( node.type === 'toggle' ) {
 			openAccordionIndexes = openAccordionIndexes.includes( nextIndex )
@@ -388,7 +407,7 @@
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderPlainText( resolvedProps.text )}</svelte:element>
+		>{@html renderHtml( resolvedProps.text, 'inline' )}</svelte:element>
 	{:else if node.type === 'paragraph'}
 		<p
 			{...getAttributeBag( { 'data-builder-inline-content': inlineEditable ? 'true' : undefined } )}
@@ -396,7 +415,7 @@
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderPlainText( resolvedProps.text )}</p>
+		>{@html renderHtml( resolvedProps.text, 'inline' )}</p>
 	{:else if node.type === 'text-editor'}
 		<div
 			{...getAttributeBag( { 'data-builder-inline-content': inlineEditable ? 'true' : undefined } )}
@@ -404,7 +423,7 @@
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderPlainText( resolvedProps.text )}</div>
+		>{@html renderHtml( resolvedProps.text, 'inline' )}</div>
 	{:else if node.type === 'blockquote'}
 		<blockquote
 			{...getAttributeBag()}
@@ -415,7 +434,7 @@
 		>
 			<p
 				data-builder-inline-content={inlineEditable ? 'true' : undefined}
-			>{@html renderPlainText( resolvedProps.text )}</p>
+			>{@html renderHtml( resolvedProps.text, 'inline' )}</p>
 			{#if renderPlainText( resolvedProps.cite )}
 				<cite>{renderPlainText( resolvedProps.cite )}</cite>
 			{/if}
@@ -424,7 +443,7 @@
 		<img
 			{...getAttributeBag()}
 			use:bindNodeGeometry={nodeGeometry}
-			src={renderPlainText( resolvedProps.src )}
+			src={renderUrl( resolvedProps.src )}
 			alt={renderPlainText( resolvedProps.alt )}
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
@@ -434,7 +453,7 @@
 		<a
 			{...getAttributeBag()}
 			use:bindNodeGeometry={nodeGeometry}
-			href={renderPlainText( resolvedProps.href ) || '#'}
+			href={renderUrl( resolvedProps.href ) || '#'}
 			role="button"
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
@@ -456,7 +475,7 @@
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
 		>
-			<video controls src={renderPlainText( resolvedProps.src )}>
+			<video controls src={renderUrl( resolvedProps.src )}>
 				<track kind="captions" />
 			</video>
 		</div>
@@ -467,7 +486,7 @@
 			onclick={handleSelect}
 			onpointerenter={handleHoverEnter}
 			onpointerleave={handleHoverLeave}
-		>{@html renderPlainText( resolvedProps.markup )}</div>
+		>{@html renderHtml( resolvedProps.markup )}</div>
 	{:else if node.type === 'icon'}
 		<div
 			{...getAttributeBag()}
@@ -489,7 +508,7 @@
 			<div class="builder-icon-box__icon">{renderPlainText( resolvedProps.symbol ) || 'spark'}</div>
 			<div class="builder-icon-box__copy">
 				<strong>{renderPlainText( resolvedProps.title )}</strong>
-				<p>{@html renderPlainText( resolvedProps.text )}</p>
+				<p>{@html renderHtml( resolvedProps.text, 'inline' )}</p>
 			</div>
 		</article>
 	{:else if node.type === 'list'}
@@ -572,7 +591,7 @@
 								/>
 							{/each}
 						{:else if item.content}
-							<div class="builder-tabs__panel-copy">{@html item.content}</div>
+							<div class="builder-tabs__panel-copy">{@html renderHtml( item.content )}</div>
 						{:else if model.authoringMode}
 							<div class="builder-empty-view builder-empty-view--slot" aria-hidden="true">
 								<span class="builder-empty-view__label">+ Drop Items</span>
@@ -598,7 +617,7 @@
 						<span>{isAccordionItemOpen( itemIndex ) ? '−' : '+'}</span>
 					</button>
 					{#if isAccordionItemOpen( itemIndex )}
-						<div class="builder-accordion__body">{@html item.body}</div>
+						<div class="builder-accordion__body">{@html renderHtml( item.body )}</div>
 					{/if}
 				</article>
 			{/each}
@@ -614,11 +633,11 @@
 			<ul class="builder-menu__list">
 				{#each menuItems as item (item.id)}
 					<li>
-						<a href={item.href} target={item.target} rel={item.rel}>{item.label}</a>
+						<a href={renderUrl( item.href )} target={item.target} rel={renderLinkRel( item.rel, item.target )}>{item.label}</a>
 						{#if item.children.length}
 							<ul>
 								{#each item.children as child (child.id)}
-									<li><a href={child.href} target={child.target} rel={child.rel}>{child.label}</a></li>
+									<li><a href={renderUrl( child.href )} target={child.target} rel={renderLinkRel( child.rel, child.target )}>{child.label}</a></li>
 								{/each}
 							</ul>
 						{/if}
@@ -637,7 +656,7 @@
 			<div class="builder-gallery">
 				{#each galleryImages as image (image.id)}
 					<figure>
-						<img src={image.src} alt={image.alt} />
+						<img src={renderUrl( image.src )} alt={image.alt} />
 						{#if image.caption}
 							<figcaption>{image.caption}</figcaption>
 						{/if}
@@ -659,7 +678,7 @@
 					{#each carouselSlides as slide, slideIndex (slide.id)}
 						<article class:hidden={slideIndex !== carouselIndex} class="builder-carousel__slide">
 							{#if slide.src}
-								<img src={slide.src} alt={slide.alt ?? slide.title} />
+								<img src={renderUrl( slide.src )} alt={slide.alt ?? slide.title} />
 							{/if}
 							<div class="builder-carousel__copy">
 								<strong>{slide.title}</strong>
@@ -667,7 +686,7 @@
 									<p>{slide.text}</p>
 								{/if}
 								{#if slide.ctaHref && slide.ctaLabel}
-									<a href={slide.ctaHref}>{slide.ctaLabel}</a>
+									<a href={renderUrl( slide.ctaHref )}>{slide.ctaLabel}</a>
 								{/if}
 							</div>
 						</article>

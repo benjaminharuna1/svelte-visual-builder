@@ -31,6 +31,7 @@
     "@builder/core": "workspace:*",
     "@builder/plugin-api": "workspace:*",
     "@builder/schema": "workspace:*",
+    "@builder/security": "workspace:*",
     "svelte": "^5.38.7"
   }
 }

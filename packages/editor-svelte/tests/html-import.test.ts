@@ -192,6 +192,32 @@ describe( 'HTML importer', () => {
 		expect( result.project.documents[ 0 ].title ).toBe( 'Tappy.Link - Tap into something better' );
 		expect( allNodes.some( ( node ) => node.type === 'container' && node.attributes.some( ( attribute ) => attribute.name === 'class' && attribute.value === 'container header-wrap' ) ) ).toBe( true );
 	} );
+
+	it( 'sanitizes imported markup, URLs, and attributes', () => {
+		const result = importHtmlPackage( {
+			sourceName: 'unsafe.html',
+			html: `
+				<main>
+					<h1 onclick="alert(1)">Safe <img src="x" onerror="alert(1)"></h1>
+					<a class="button" href="javascript:alert(1)">Bad</a>
+					<img src="javascript:alert(1)" alt="Bad image">
+					<iframe srcdoc="<script>alert(1)</script>" src="https://example.com/embed"></iframe>
+					<div class="tabs" onclick="alert(1)"><button>Tab</button><script>alert(1)</script></div>
+					<details class="accordion" ontoggle="alert(1)"><summary>Accordion</summary><p>Copy</p></details>
+					<my-widget onclick="alert(1)"><script>alert(1)</script>Safe</my-widget>
+				</main>
+			`,
+		} );
+
+		const allNodes = collectNodes( result.project.documents[ 0 ].root );
+		const serialized = JSON.stringify( result.project );
+		const button = allNodes.find( ( node ) => node.type === 'button' );
+		const image = allNodes.find( ( node ) => node.type === 'image' );
+
+		expect( serialized ).not.toMatch( /javascript:|onclick|onerror|ontoggle|srcdoc|<script/i );
+		expect( button?.props.href ).toBe( '#' );
+		expect( image?.props.src ).toBe( '' );
+	} );
 } );
 
 function collectNodes( nodes: ReturnType<typeof importHtmlPackage>[ 'project' ][ 'documents' ][ number ][ 'root' ] ) {

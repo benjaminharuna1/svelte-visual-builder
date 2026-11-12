@@ -26,6 +26,7 @@ import {
 	resolveInitialTabIndex,
 	resolveMenuItems,
 	resolvePopupBehavior,
+	resolveNodeAttributes,
 	resolveNodeProps,
 	resolveTabItems,
 	renderPublishedDocument,
@@ -63,6 +64,36 @@ describe( 'runtime-svelte', () => {
 		const model = renderDocument( { project, activeDocumentId: document.id } );
 		expect( compileDocumentAssets( model ).stylesheet ).toContain( '--builder-var-brand-color' );
 		expect( compileDocumentAssets( model ).stylesheet ).toContain( '.builder-class-class-1' );
+	} );
+
+	it( 'sanitizes resolved node attributes and carries render security options', () => {
+		const document = createEmptyDocument( 'page', 'Home', 'home' );
+		const node = createNode( {
+			id: 'link-node',
+			type: 'button',
+			attributes: [
+				{ id: 'href-attr', name: 'href', value: 'javascript:alert(1)', kind: 'static' },
+				{ id: 'onclick-attr', name: 'onclick', value: 'alert(1)', kind: 'static' },
+				{ id: 'target-attr', name: 'target', value: '_blank', kind: 'static' },
+			],
+		} );
+		document.root = [ node ];
+		const project = createBuilderPackage( 'Demo', [ document ] );
+		const model = renderDocument( {
+			project,
+			activeDocumentId: document.id,
+			trustedHtml: true,
+			renderStylesheet: false,
+			nonce: 'nonce-value',
+		} );
+
+		expect( resolveNodeAttributes( node, model ) ).toEqual( {
+			target: '_blank',
+			rel: 'noopener noreferrer',
+		} );
+		expect( model.trustedHtml ).toBe( true );
+		expect( model.renderStylesheet ).toBe( false );
+		expect( model.nonce ).toBe( 'nonce-value' );
 	} );
 
 	it( 'scopes border-box sizing to builder-rendered runtime content', () => {

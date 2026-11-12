@@ -139,6 +139,18 @@ describe( 'editor public SDK', () => {
 		expect( editor.getPermission( 'publish' ).reason ).toBe( 'Publishing is controlled by the extension.' );
 	} );
 
+	it( 'denies omitted permissions by default and supports explicit allowAll', () => {
+		const document = createEmptyDocument( 'page', 'Home', 'home' );
+		const project = createBuilderPackage( 'Demo', [ document ] );
+		const restricted = createBuilderEditor( project );
+		const trusted = createBuilderEditor( project, { permissions: { allowAll: true } } );
+
+		expect( restricted.can( 'publish' ) ).toBe( false );
+		expect( restricted.getPermission( 'publish' ).reason ).toBe( 'This host does not allow publish.' );
+		expect( trusted.can( 'publish' ) ).toBe( true );
+		expect( trusted.getPermission( 'useAi' ).allowed ).toBe( true );
+	} );
+
 	it( 'blocks restricted host actions without mutating state', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const project = createBuilderPackage( 'Demo', [ document ] );

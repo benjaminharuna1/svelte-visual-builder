@@ -21,6 +21,7 @@ import type {
 import type { Component, Snippet } from 'svelte';
 import { createDefaultBuilderRegistry } from '@builder/plugin-api';
 import { createStyleSet } from '@builder/schema';
+import { sanitizeBuilderAttributes } from '@builder/security';
 import { BUILDER_RUNTIME_BASE_STYLES } from './runtime-base-styles.js';
 
 export interface BuilderRuntimeOptions {
@@ -41,6 +42,9 @@ export interface BuilderRuntimeOptions {
 	media?: BuilderRuntimeMediaAdapter;
 	cssIsolation?: BuilderRuntimeCssIsolationOptions;
 	runtimeComponents?: BuilderRuntimeComponentMap;
+	trustedHtml?: boolean;
+	renderStylesheet?: boolean;
+	nonce?: string;
 }
 
 export interface BuilderRuntimeMediaAdapter {
@@ -101,6 +105,9 @@ export interface BuilderRenderModel {
 	media?: BuilderRuntimeMediaAdapter;
 	cssIsolation?: BuilderRuntimeCssIsolationOptions;
 	runtimeComponents: BuilderRuntimeComponentMap;
+	trustedHtml: boolean;
+	renderStylesheet: boolean;
+	nonce?: string;
 	composition: BuilderComposition;
 	componentsById: Map<string, BuilderDocument>;
 	stylesheet: string;
@@ -245,6 +252,9 @@ export function renderResolvedDocument( options: BuilderRuntimeOptions ): Builde
 		media: options.media,
 		cssIsolation: options.cssIsolation,
 		runtimeComponents,
+		trustedHtml: options.trustedHtml ?? false,
+		renderStylesheet: options.renderStylesheet ?? true,
+		nonce: options.nonce,
 		composition,
 		componentsById,
 		stylesheet: compileDocumentAssets( {
@@ -260,6 +270,9 @@ export function renderResolvedDocument( options: BuilderRuntimeOptions ): Builde
 			media: options.media,
 			cssIsolation: options.cssIsolation,
 			runtimeComponents,
+			trustedHtml: options.trustedHtml ?? false,
+			renderStylesheet: options.renderStylesheet ?? true,
+			nonce: options.nonce,
 			composition,
 			componentsById,
 			stylesheet: '',
@@ -546,10 +559,10 @@ export function resolveNodeAttributes( node: BuilderNode, model: BuilderRenderMo
 	}
 
 	const interactionAttributes = playInteractions( node, model );
-	return {
+	return sanitizeBuilderAttributes( {
 		...attributes,
 		...interactionAttributes,
-	};
+	} );
 }
 
 function resolveMediaProps( node: BuilderNode, props: Record<string, JsonValue>, model: BuilderRenderModel ): Record<string, JsonValue> {

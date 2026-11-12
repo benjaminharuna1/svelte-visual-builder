@@ -11,7 +11,7 @@
     "build:packages": "pnpm -r --filter \"./packages/*\" run build",
     "clean:packages": "pnpm -r --filter \"./packages/*\" run clean",
     "lint:packages": "pnpm -r --filter \"./packages/*\" exec publint --strict",
-    "types:packages": "pnpm exec attw --pack packages/schema --profile esm-only && pnpm exec attw --pack packages/core --profile esm-only && pnpm exec attw --pack packages/plugin-api --profile esm-only && pnpm exec attw --pack packages/elementor-import --profile esm-only && pnpm exec attw --pack packages/adapter-sveltekit --profile esm-only",
+    "types:packages": "pnpm exec attw --pack packages/schema --profile esm-only && pnpm exec attw --pack packages/core --profile esm-only && pnpm exec attw --pack packages/plugin-api --profile esm-only && pnpm exec attw --pack packages/elementor-import --profile esm-only && pnpm exec attw --pack packages/adapter-sveltekit --profile esm-only && pnpm exec attw --pack packages/security --profile esm-only",
     "check:packages": "pnpm build:packages && pnpm lint:packages && pnpm types:packages",
     "smoke:packages": "tsx scripts/package-smoke.ts",
     "precheck": "pnpm build:packages",

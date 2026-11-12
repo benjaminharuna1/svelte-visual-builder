@@ -65,10 +65,12 @@ import {
 	createBrowserLocalMediaAdapter,
 	createMediaDiagnostics,
 	deleteMediaCatalogAsset,
+	readMediaImageDimensions,
 	mergeMediaCatalog,
 	normalizeMediaAsset,
 	toMediaAssetMetadata,
 	updateMediaCatalogAsset,
+	validateMediaDimensions,
 	validateMediaUpload,
 	type BuilderMediaAdapter,
 	type BuilderMediaAssetMetadata,
@@ -257,6 +259,7 @@ export interface BuilderEditorDynamicOptions {
 export interface BuilderEditorAiOptions {
 	settings?: BuilderAiSettingsAdapter;
 	defaultSettings?: Partial<BuilderAiSettings>;
+	persistApiKey?: boolean;
 	enabled?: boolean;
 }
 
@@ -267,6 +270,10 @@ export interface BuilderEditorMediaOptions {
 	maxUploadSize?: number;
 	allowedMimeTypes?: string[];
 	allowSvg?: boolean;
+	minImageWidth?: number;
+	minImageHeight?: number;
+	maxImageWidth?: number;
+	maxImageHeight?: number;
 }
 
 export interface BuilderEditorInitialStateOptions {
@@ -405,7 +412,10 @@ export function createBuilderEditor( project: BuilderPackage, options: CreateBui
 	let aiSessionState = createDefaultAiSessionState();
 	let activeAiAbortController: AbortController | undefined;
 	const extensionAiSettings = extension?.aiSettings as BuilderAiSettingsAdapter | undefined;
-	const aiSettingsAdapter = options.ai?.settings ?? extensionAiSettings ?? createBrowserAiSettingsAdapter( options.ai?.defaultSettings );
+	const aiSettingsAdapter = options.ai?.settings ?? extensionAiSettings ?? createBrowserAiSettingsAdapter(
+		options.ai?.defaultSettings,
+		{ persistApiKey: options.ai?.persistApiKey },
+	);
 	const aiEnabled = options.ai?.enabled ?? true;
 	const permissions = Object.freeze( resolveEditorPermissions( options.permissions ?? extension?.permissions ) );
 	const mediaOptions = options.media ?? ( extension?.media ? { adapter: extension.media } : {} );
@@ -413,8 +423,12 @@ export function createBuilderEditor( project: BuilderPackage, options: CreateBui
 		maxUploadSize: mediaOptions.maxUploadSize,
 		allowedMimeTypes: mediaOptions.allowedMimeTypes,
 		allowSvg: mediaOptions.allowSvg,
+		minImageWidth: mediaOptions.minImageWidth,
+		minImageHeight: mediaOptions.minImageHeight,
+		maxImageWidth: mediaOptions.maxImageWidth,
+		maxImageHeight: mediaOptions.maxImageHeight,
 	};
-	const mediaAdapter = resolveMediaAdapter( mediaOptions.adapter ) ?? createBrowserLocalMediaAdapter();
+	const mediaAdapter = resolveMediaAdapter( mediaOptions.adapter ) ?? createBrowserLocalMediaAdapter( mediaValidationOptions );
 	let transientDragState = EMPTY_TRANSIENT_DRAG_STATE;
 	let pendingTransientDragState: { pointer?: BuilderTransientDragPointer; dropTarget?: DropTarget } | undefined;
 	let transientDragFrame = 0;
@@ -1432,6 +1446,10 @@ export function createBuilderEditor( project: BuilderPackage, options: CreateBui
 	async function uploadMediaAsset( file: File ): Promise<BuilderMediaAssetMetadata> {
 		assertPermission( permissions, 'uploadMedia' );
 		validateMediaUpload( file, mediaValidationOptions );
+		const dimensions = await readMediaImageDimensions( file );
+		if ( dimensions ) {
+			validateMediaDimensions( dimensions, mediaValidationOptions );
+		}
 		const latestProject = engine.getState().project;
 		const uploaded = await mediaAdapter.uploadAsset?.( { file, project: latestProject } );
 		if ( !uploaded ) {
@@ -2265,14 +2283,25 @@ const defaultPermissionKeys: BuilderHostPermissionKey[] = [
 ];
 
 function resolveEditorPermissions( adapter: BuilderEditorPermissionsOptions | undefined ): Record<BuilderHostPermissionKey, BuilderHostPermissionResult> {
+	if ( adapter && typeof adapter !== 'function' && adapter.allowAll === true ) {
+		return Object.fromEntries(
+			defaultPermissionKeys.map( ( permission ) => [ permission, { allowed: true } ] ),
+		) as Record<BuilderHostPermissionKey, BuilderHostPermissionResult>;
+	}
 	return Object.fromEntries( defaultPermissionKeys.map( ( permission ) => {
 		const raw = typeof adapter === 'function' ? adapter( permission ) : adapter?.[ permission ];
-		return [ permission, normalizePermissionValue( raw ) ];
+		return [ permission, normalizePermissionValue( permission, raw ) ];
 	} ) ) as Record<BuilderHostPermissionKey, BuilderHostPermissionResult>;
 }
 
-function normalizePermissionValue( value: ReturnType<Extract<BuilderEditorPermissionsOptions, ( permission: BuilderHostPermissionKey ) => unknown>> | undefined ): BuilderHostPermissionResult {
-	if ( value === undefined || value === true ) {
+function normalizePermissionValue(
+	permission: BuilderHostPermissionKey,
+	value: ReturnType<Extract<BuilderEditorPermissionsOptions, ( permission: BuilderHostPermissionKey ) => unknown>> | undefined,
+): BuilderHostPermissionResult {
+	if ( value === undefined ) {
+		return { allowed: false, reason: `This host does not allow ${ permission }.` };
+	}
+	if ( value === true ) {
 		return { allowed: true };
 	}
 	if ( value === false ) {

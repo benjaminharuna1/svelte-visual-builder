@@ -136,22 +136,22 @@ For one developer, Phases 0–4 are roughly 4–6 weeks. A small team can compre
 
 ### Tasks
 
-- [ ] Add a shared sanitizer (`isomorphic-dompurify` or `sanitize-html`) with a documented configuration.
-- [ ] Sanitize on import in `packages/editor-svelte/src/lib/html-import.ts`.
-- [ ] Sanitize on render in `packages/runtime-svelte/src/lib/BuilderNodeView.svelte`.
-- [ ] Add an explicit `trustedHtml` opt-out for trusted content.
-- [ ] Strip `on*` attributes, `javascript:` and unsafe `data:` URLs, `srcdoc`, and `formaction`.
-- [ ] Add `rel="noopener noreferrer"` for links with `target="_blank"`.
-- [ ] Add XSS fixture tests for headings, paragraphs, tabs, accordions, HTML fallback nodes, and imported attributes.
-- [ ] Change permissions to default-deny in `packages/editor-svelte/src/lib/editor.ts`.
-- [ ] Add an explicit `allowAll` escape hatch for demos and trusted internal tools.
-- [ ] Update demos and docs to pass explicit permissions.
+- [x] Add a shared sanitizer (`isomorphic-dompurify` or `sanitize-html`) with a documented configuration.
+- [x] Sanitize on import in `packages/editor-svelte/src/lib/html-import.ts`.
+- [x] Sanitize on render in `packages/runtime-svelte/src/lib/BuilderNodeView.svelte`.
+- [x] Add an explicit `trustedHtml` opt-out for trusted content.
+- [x] Strip `on*` attributes, `javascript:` and unsafe `data:` URLs, `srcdoc`, and `formaction`.
+- [x] Add `rel="noopener noreferrer"` for links with `target="_blank"`.
+- [x] Add XSS fixture tests for headings, paragraphs, tabs, accordions, HTML fallback nodes, and imported attributes.
+- [x] Change permissions to default-deny in `packages/editor-svelte/src/lib/editor.ts`.
+- [x] Add an explicit `allowAll` escape hatch for demos and trusted internal tools.
+- [x] Update demos and docs to pass explicit permissions.
 - [ ] Document and demonstrate server-side permission enforcement.
-- [ ] Make browser `localStorage` AI keys opt-in in `packages/editor-svelte/src/lib/ai-core.ts`.
+- [x] Make browser `localStorage` AI keys opt-in in `packages/editor-svelte/src/lib/ai-core.ts`.
 - [ ] Add a server-side AI proxy example and document key handling.
-- [ ] Add secure media defaults: MIME allowlist, size limits, SVG reject or sanitize, dimension validation.
-- [ ] Add a `renderStylesheet`/`nonce` option so published pages can avoid inline `<style>`.
-- [ ] Expand `SECURITY.md` with a threat model and deployment guidance.
+- [x] Add secure media defaults: MIME allowlist, size limits, SVG reject or sanitize, dimension validation.
+- [x] Add a `renderStylesheet`/`nonce` option so published pages can avoid inline `<style>`.
+- [x] Expand `SECURITY.md` with a threat model and deployment guidance.
 
 ### Deliverables
 
@@ -390,3 +390,4 @@ Recommended execution order:
 - Label issues with `phase-0` through `phase-6`, plus `security`, `packaging`, `cms`, `performance`, and `testing`.
 - Every PR must include tests, documentation updates, and a changeset when behavior changes.
 - Review progress weekly and update this document when scope changes.
+

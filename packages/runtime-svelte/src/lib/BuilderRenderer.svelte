@@ -22,6 +22,9 @@
 		showPopups = false,
 		authoringMode = false,
 		runtimeComponents,
+		trustedHtml = false,
+		renderStylesheet = true,
+		nonce,
 		bridgeEvents = false,
 		bridgeRenderVersion = 0,
 		onGeometrySnapshot,
@@ -48,6 +51,9 @@
 		showPopups,
 		authoringMode,
 		runtimeComponents,
+		trustedHtml,
+		renderStylesheet,
+		nonce,
 	} ) );
 
 	const renderableRoots = $derived( getRenderableRoots( model ) );
@@ -132,7 +138,9 @@
 	} );
 </script>
 
-<svelte:element this={'style'}>{model.stylesheet}</svelte:element>
+{#if renderStylesheet}
+	<svelte:element this={'style'} {nonce}>{model.stylesheet}</svelte:element>
+{/if}
 
 <div bind:this={runtimeRoot} class="builder-runtime" data-builder-path={model.conditionContext.pathname}>
 	{#each renderableRoots as rendered (rendered.document.id + rendered.slot)}

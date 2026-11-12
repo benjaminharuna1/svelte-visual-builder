@@ -12,6 +12,7 @@ const packageDirectories = [
 	'plugin-api',
 	'elementor-import',
 	'adapter-sveltekit',
+	'security',
 	'runtime-svelte',
 	'editor-svelte',
 ].map( ( name ) => path.join( repoRoot, 'packages', name ) );

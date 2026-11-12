@@ -20,6 +20,11 @@ export interface BuilderAiSettingsAdapter {
 	saveSettings: ( settings: BuilderAiSettings ) => Promise<void>;
 }
 
+export interface BuilderBrowserAiSettingsAdapterOptions {
+	persistApiKey?: boolean;
+	storageKey?: string;
+}
+
 export interface BuilderAiRequestOptions {
 	settings: BuilderAiSettings;
 	messages: BuilderAiApiMessage[];
@@ -163,18 +168,35 @@ export function createDefaultAiSessionState(): BuilderAiSessionState {
 	};
 }
 
-export function createBrowserAiSettingsAdapter( defaults: Partial<BuilderAiSettings> = {} ): BuilderAiSettingsAdapter {
+export function createBrowserAiSettingsAdapter(
+	defaults: Partial<BuilderAiSettings> = {},
+	options: BuilderBrowserAiSettingsAdapterOptions = {},
+): BuilderAiSettingsAdapter {
+	const storageKey = options.storageKey ?? aiSettingsStorageKey;
+	const persistApiKey = options.persistApiKey === true;
 	return {
 		async loadSettings() {
 			if ( typeof globalThis.localStorage === 'undefined' ) {
 				return defaults;
 			}
-			const raw = globalThis.localStorage.getItem( aiSettingsStorageKey );
+			const raw = globalThis.localStorage.getItem( storageKey );
 			if ( !raw ) {
 				return defaults;
 			}
 			try {
-				return { ...defaults, ...JSON.parse( raw ) as Partial<BuilderAiSettings> };
+				const stored = JSON.parse( raw ) as Partial<BuilderAiSettings>;
+				if ( persistApiKey ) {
+					return { ...defaults, ...stored };
+				}
+				return {
+					...defaults,
+					...stored,
+					apiKey: defaults.apiKey ?? '',
+					headers: {
+						...( defaults.headers ?? {} ),
+						...stripSecretHeaders( stored.headers ),
+					},
+				};
 			} catch {
 				return defaults;
 			}
@@ -183,9 +205,20 @@ export function createBrowserAiSettingsAdapter( defaults: Partial<BuilderAiSetti
 			if ( typeof globalThis.localStorage === 'undefined' ) {
 				return;
 			}
-			globalThis.localStorage.setItem( aiSettingsStorageKey, JSON.stringify( settings ) );
+			globalThis.localStorage.setItem(
+				storageKey,
+				JSON.stringify( persistApiKey
+					? settings
+					: { ...settings, apiKey: '', headers: stripSecretHeaders( settings.headers ) } ),
+			);
 		},
 	};
+}
+
+function stripSecretHeaders( headers: Record<string, string> | undefined ): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries( headers ?? {} ).filter( ( [ key ] ) => !/authorization|api[-_]?key|token|secret|cookie/i.test( key ) ),
+	);
 }
 
 export function redactAiSettings( settings: Partial<BuilderAiSettings> ): Partial<BuilderAiSettings> {

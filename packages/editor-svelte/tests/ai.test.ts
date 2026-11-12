@@ -39,7 +39,8 @@ describe( 'AI builder assistant', () => {
 
 		await expect( adapter.loadSettings() ).resolves.toMatchObject( {
 			provider: 'openrouter',
-			apiKey: 'secret-key',
+			apiKey: '',
+			headers: { 'X-App': 'Builder' },
 			maxToolIterations: 9,
 		} );
 		expect( redactAiSettings( settings ) ).toMatchObject( {
@@ -48,6 +49,29 @@ describe( 'AI builder assistant', () => {
 				Authorization: '[redacted]',
 				'X-App': 'Builder',
 			},
+		} );
+	} );
+
+	it( 'persists browser AI secrets only when explicitly enabled', async () => {
+		const store = new Map<string, string>();
+		Object.defineProperty( globalThis, 'localStorage', {
+			value: {
+				getItem: ( key: string ) => store.get( key ) ?? null,
+				setItem: ( key: string, value: string ) => store.set( key, value ),
+			},
+			configurable: true,
+		} );
+		const adapter = createBrowserAiSettingsAdapter( {}, { persistApiKey: true } );
+		const settings = createDefaultAiSettings( {
+			apiKey: 'persisted-key',
+			headers: { Authorization: 'Bearer hidden' },
+		} );
+
+		await adapter.saveSettings( settings );
+
+		await expect( adapter.loadSettings() ).resolves.toMatchObject( {
+			apiKey: 'persisted-key',
+			headers: { Authorization: 'Bearer hidden' },
 		} );
 	} );
 
@@ -227,6 +251,7 @@ describe( 'AI builder assistant', () => {
 	it( 'startAiCreate streams HTML into editable Builder nodes', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -283,6 +308,7 @@ describe( 'AI builder assistant', () => {
 	it( 'edit mode can create a full section when an empty page request explicitly asks to add content', async () => {
 		const document = createEmptyDocument( 'page', 'Empty Page', 'empty-page' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -311,6 +337,7 @@ describe( 'AI builder assistant', () => {
 	it( 'edit mode rejects add_section_from_html for broad improvement requests', async () => {
 		const document = createEmptyDocument( 'page', 'Empty Page', 'empty-page' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -337,6 +364,7 @@ describe( 'AI builder assistant', () => {
 	it( 'debug mode records sent prompts, returned tool args, and parsed HTML nodes', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -381,6 +409,7 @@ describe( 'AI builder assistant', () => {
 			],
 		} ) ];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -424,6 +453,7 @@ describe( 'AI builder assistant', () => {
 			],
 		} ) ];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -464,6 +494,7 @@ describe( 'AI builder assistant', () => {
 		} ) ];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ activeDocument, visibleDocument ] ), {
 			activeDocumentId: activeDocument.id,
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -496,6 +527,7 @@ describe( 'AI builder assistant', () => {
 			createNode( { id: 'target', type: 'button', props: { text: 'Target' } } ),
 		];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -527,6 +559,7 @@ describe( 'AI builder assistant', () => {
 	it( 'semantic tools reject missing targets without mutating', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -553,6 +586,7 @@ describe( 'AI builder assistant', () => {
 	it( 'sparse AI create output returns a repairable diagnostic and does not mutate', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -579,6 +613,7 @@ describe( 'AI builder assistant', () => {
 	it( 'normalizes numeric heading levels in direct Builder node tool calls', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -606,6 +641,7 @@ describe( 'AI builder assistant', () => {
 	it( 'rejects invalid AI node props without mutating state', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -633,6 +669,7 @@ describe( 'AI builder assistant', () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		document.root = [ createNode( { id: 'hero', type: 'container', styles: { base: { padding: '20px' }, states: {}, breakpoints: {}, stateBreakpoints: {}, customCss: '' } } ) ];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -681,6 +718,7 @@ describe( 'AI builder assistant', () => {
 			} ),
 		];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -710,6 +748,7 @@ describe( 'AI builder assistant', () => {
 		const previewDocument = createEmptyDocument( 'layout', 'Global Header', 'global-header' );
 		previewDocument.root = [ createNode( { id: 'preview-hero', type: 'container', styles: { base: { padding: '20px' }, states: {}, breakpoints: {}, stateBreakpoints: {}, customCss: '' } } ) ];
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ activeDocument, previewDocument ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -755,6 +794,7 @@ describe( 'AI builder assistant', () => {
 		} );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ activeDocument, assignedTemplate ], [ assignment ] ), {
 			activeDocumentId: activeDocument.id,
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {
@@ -786,6 +826,7 @@ describe( 'AI builder assistant', () => {
 	it( 'reports provider errors without mutating the document', async () => {
 		const document = createEmptyDocument( 'page', 'Home', 'home' );
 		const editor = createBuilderEditor( createBuilderPackage( 'Demo', [ document ] ), {
+			permissions: { allowAll: true },
 			ai: {
 				settings: {
 					loadSettings: async () => createDefaultAiSettings( {

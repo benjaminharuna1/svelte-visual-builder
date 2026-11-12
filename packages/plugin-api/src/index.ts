@@ -383,8 +383,12 @@ export interface BuilderHostPermissionResult {
 
 export type BuilderHostPermissionValue = boolean | string | BuilderHostPermissionResult;
 
-export type BuilderHostPermissionAdapter =
+export type BuilderHostPermissionMap =
 	Partial<Record<BuilderHostPermissionKey, BuilderHostPermissionValue>>
+	& { allowAll?: boolean };
+
+export type BuilderHostPermissionAdapter =
+	BuilderHostPermissionMap
 	| ( ( permission: BuilderHostPermissionKey ) => BuilderHostPermissionValue | undefined );
 
 export interface BuilderRoutePreviewContextAdapter {
