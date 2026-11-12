@@ -116,18 +116,15 @@ export async function readMediaImageDimensions(file: File): Promise<BuilderMedia
 		const image = new Image();
 		const loaded = await new Promise<boolean>((resolve) => {
 			let settled = false;
-			let timer: ReturnType<typeof setTimeout> | undefined;
 			const finish = (success: boolean) => {
 				if (settled) {
 					return;
 				}
 				settled = true;
-				if (timer) {
-					clearTimeout(timer);
-				}
+				clearTimeout(timer);
 				resolve(success);
 			};
-			timer = setTimeout(() => finish(false), IMAGE_DIMENSION_TIMEOUT_MS);
+			const timer = setTimeout(() => finish(false), IMAGE_DIMENSION_TIMEOUT_MS);
 			image.onload = () => finish(true);
 			image.onerror = () => finish(false);
 			image.src = url;

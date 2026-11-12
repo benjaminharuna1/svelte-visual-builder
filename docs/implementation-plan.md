@@ -28,10 +28,10 @@ The target end state:
 
 - Stack: Svelte 5, SvelteKit, pnpm workspace, Node 20 or 22.
 - Work happens in this fork, with upstream kept mergeable.
-- Until Phase 1, workspace packages export TypeScript source and require `ssr.noExternal: [/^@builder\//]`.
+- Phase 1 packages export built JavaScript and declarations; the `development` condition still points at TypeScript source.
 - Until Phase 3, demo persistence and media are in-memory and reset on restart.
-- Until Phase 2, rendered HTML and imported attributes are trusted-author content.
-- `pnpm-lock.yaml` is currently ignored and must be committed in Phase 0.
+- Phase 2 sanitizes rendered HTML and imported attributes by default; `trustedHtml` is an explicit opt-out.
+- `pnpm-lock.yaml` is tracked from Phase 0; use `pnpm install --frozen-lockfile` in CI.
 - The project is pre-1.0, so minor releases may include breaking changes if documented.
 
 ## 4. Phase overview
@@ -56,17 +56,20 @@ For one developer, Phases 0–4 are roughly 4–6 weeks. A small team can compre
 
 ### Tasks
 
-- [ ] Remove `pnpm-lock.yaml` from `.gitignore` and commit the lockfile.
-- [ ] Use `pnpm install --frozen-lockfile` in CI and document it.
-- [ ] Add `.nvmrc` (Node 22) and `engines` to the root `package.json`.
-- [ ] Add root scripts: `check:all`, `build:packages`, `lint`, `format:check`, `audit:ci`.
-- [ ] Add ESLint flat config with `eslint-plugin-svelte` and `eslint-plugin-security`.
-- [ ] Add a Prettier check script and CI step.
-- [ ] Add `.github/workflows/ci.yml` with a Node 20/22 matrix: install, `check:all`, test, build, audit.
-- [ ] Add Dependabot or Renovate for dependency updates.
-- [ ] Add Changesets (`.changeset/config.json`) and a release workflow.
-- [ ] Add `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, and `CODEOWNERS`.
-- [ ] Add `pnpm -r check` and fix any existing failures.
+- [x] Remove `pnpm-lock.yaml` from `.gitignore`.
+- [x] Commit the lockfile.
+- [x] Use `pnpm install --frozen-lockfile` in CI and document it.
+- [x] Add `.nvmrc` (Node 22) and `engines` to the root `package.json`.
+- [x] Add root scripts: `check:all`, `build:packages`, `lint`, `format:check`, `audit:ci`.
+- [x] Add ESLint flat config with `eslint-plugin-svelte` and `eslint-plugin-security`.
+- [x] Add a Prettier check script and CI step.
+- [x] Add `.github/workflows/ci.yml` with a Node 20/22 matrix: install, `check:all`, test, build, audit.
+- [x] Add Dependabot for dependency updates.
+- [x] Add Changesets (`.changeset/config.json`) and a release workflow.
+- [x] Add `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue/PR templates, and `CODEOWNERS`.
+- [x] Add `pnpm -r check` and fix any existing failures.
+
+> **Phase 0 status:** complete. Tooling, CI, dependency automation, release configuration, governance files, and the lockfile are committed. `pnpm lint`, `pnpm format:check`, `pnpm check:all`, `pnpm test`, `pnpm build:packages`, `pnpm check:packages`, `pnpm smoke:packages`, `pnpm -r check`, and `pnpm audit:ci` pass locally. `pnpm audit:ci` reports 6 non-critical production advisories (4 low, 2 high), documented in `SECURITY.md`.
 
 ### Deliverables
 
